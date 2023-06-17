@@ -103,11 +103,18 @@ def plot_power_usage(Power_df_vor, Power_df_nach, color_FFE):
     num_of_erzeuger = len(color_FFE)
 
     for i in range(num_of_erzeuger):
+        # Check if all entries in the respective columns are zero
+        if (
+            Power_df_vor[f"Erzeuger_{i+1}_vor"].sum() == 0
+            and Power_df_nach[f"Erzeuger_{i+1}_nach"].sum() == 0
+        ):
+            continue
+
         plt.figure(figsize=(12, 6))
 
         plt.plot(
             Power_df_vor.index,
-            Power_df_vor[f"Erzeuger_{i+1}_nach"],
+            Power_df_vor[f"Erzeuger_{i+1}_vor"],
             color=color_FFE[i],
             label="vor",
         )
@@ -127,7 +134,9 @@ def plot_power_usage(Power_df_vor, Power_df_nach, color_FFE):
         st.pyplot(plt.gcf())
 
 
-def plot_total_change(df1, df2, label1, label2, column_name, title, x_label, y_label):
+def plot_total_change(
+    df1, df2, color_FFE, label1, label2, column_name, title, x_label, y_label
+):
     df1_sum = pd.DataFrame(df1.sum(), columns=["Value"])
     df1_sum["Status"] = label1
     df1_sum[column_name] = df1_sum.index.str.replace("_" + label1.lower(), "")
@@ -138,6 +147,11 @@ def plot_total_change(df1, df2, label1, label2, column_name, title, x_label, y_l
 
     # Concatenate the two DataFrames
     sum_df = pd.concat([df1_sum, df2_sum])
+
+    # Remove rows with value 0
+    sum_df = sum_df[sum_df["Value"] != 0]
+    # Sort the DataFrame
+    sum_df.sort_values(by=[column_name, "Status"], inplace=True)
 
     # Reset index
     sum_df.reset_index(drop=True, inplace=True)
@@ -188,30 +202,40 @@ def plot_total_emissions(
 
     # Convert power usage to CO2 emissions
     for erzeuger in erzeugerpark:
-        df1_sum.loc[
-            df1_sum[column_name] == erzeuger.__class__.__name__, "Value"
-        ] *= erzeuger.co2_emission_factor
-        df2_sum.loc[
-            df2_sum[column_name] == erzeuger.__class__.__name__, "Value"
-        ] *= erzeuger.co2_emission_factor
+        if hasattr(erzeuger, "co2_emission_factor") and erzeuger.co2_emission_factor:
+            df1_sum.loc[
+                df1_sum[column_name] == erzeuger.__class__.__name__, "Value"
+            ] *= erzeuger.co2_emission_factor
+            df2_sum.loc[
+                df2_sum[column_name] == erzeuger.__class__.__name__, "Value"
+            ] *= erzeuger.co2_emission_factor
 
+    # Concatenate the two DataFrames
     sum_df = pd.concat([df1_sum, df2_sum])
+
+    # Remove rows where Value equals to 0
+    sum_df = sum_df[sum_df["Value"] != 0]
+
+    # Combine 'Erzeuger' and 'Status' into one column
+    sum_df["combined"] = sum_df[column_name] + " " + sum_df["Status"]
+
+    # Calculate the total sum for each dataframe
     total_df1 = df1_sum["Value"].sum()
     total_df2 = df2_sum["Value"].sum()
 
-    palette = {df1_status: "#E6E6E6", df2_status: "#0033A0"}
-
-    plt.figure(figsize=(10, 6))
-    bar_plot = sns.barplot(
-        x=column_name, y="Value", hue="Status", data=sum_df, palette=palette
+    # Define color palette for combined column
+    palette = {
+        f"{name} {df1_status}": "#E6E6E6" for name in sum_df[column_name].unique()
+    }
+    palette.update(
+        {f"{name} {df2_status}": "#0033A0" for name in sum_df[column_name].unique()}
     )
 
+    plt.figure(figsize=(10, 6))
+    bar_plot = sns.barplot(x="combined", y="Value", data=sum_df, palette=palette)
+
     for p in bar_plot.patches:
-        total = (
-            total_df1
-            if p.get_facecolor()[:3] == mcolors.to_rgb("#E6E6E6")
-            else total_df2
-        )
+        total = total_df1 if df1_status in p.get_label() else total_df2
         percentage = "{:.1f}%".format(100 * p.get_height() / total)
         bar_plot.text(
             p.get_x() + p.get_width() / 2.0,

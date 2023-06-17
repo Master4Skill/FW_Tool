@@ -133,33 +133,57 @@ result = calc_verlust(T_vl_example, T_b_example)
 print(f"The calculated Netzverluste is: {result}")
 """
 
-    with st.container():
-        st.header("Erzeugungsgang")
-        st.subheader("vor")
-        sorted_df_vor = plot_actual_production(
-            df_input, actual_production_df_vor, color_FFE, "Erzeugungsgang vor"
-        )
-        st.subheader("nach")
-        sorted_df_nach = plot_actual_production(
-            df_input, actual_production_df_nach, color_FFE, "Erzeugungsgang nach"
+
+def plot_total_change(
+    df1, df2, erzeugerpark, label1, label2, column_name, title, x_label, y_label
+):
+    df1_sum = pd.DataFrame(df1.sum(), columns=["Value"])
+    df1_sum["Status"] = label1
+    df1_sum[column_name] = df1_sum.index.str.replace("_" + label1.lower(), "")
+
+    df2_sum = pd.DataFrame(df2.sum(), columns=["Value"])
+    df2_sum["Status"] = label2
+    df2_sum[column_name] = df2_sum.index.str.replace("_" + label2.lower(), "")
+
+    # Concatenate the two DataFrames
+    sum_df = pd.concat([df1_sum, df2_sum])
+
+    # Reset index
+    sum_df.reset_index(drop=True, inplace=True)
+
+    # Calculate the total production for each status
+    total_1 = sum_df[sum_df["Status"] == label1]["Value"].sum()
+    total_2 = sum_df[sum_df["Status"] == label2]["Value"].sum()
+
+    # Define color palette
+    palette = {}
+    for erzeuger in erzeugerpark:
+        palette[erzeuger.__class__.__name__] = erzeuger.color
+        palette[erzeuger.__class__.__name__ + " " + label2] = lighten_color(
+            erzeuger.color, 1.2
+        )  # Adjust color for 'Nach' status
+
+    # Plotting with seaborn
+    plt.figure(figsize=(10, 6))
+    bar_plot = sns.barplot(
+        x=column_name, y="Value", hue="Status", data=sum_df, palette=palette
+    )
+
+    # Loop over the bars, and adjust the height to add the text label
+    for p in bar_plot.patches:
+        total = total_1 if label1 in p.get_label() else total_2
+        percentage = "{:.1f}%".format(100 * p.get_height() / total)
+        bar_plot.text(
+            p.get_x() + p.get_width() / 2.0,
+            p.get_height(),
+            percentage,
+            ha="center",
+            va="bottom",
         )
 
-    # Create the second container
-    with st.container():
-        st.header("Jahresdauerlinie")
-        st.subheader("vor")
-        plot_df_vor = plot_sorted_production(
-            df_input,
-            sorted_df_vor,
-            actual_production_df_vor,
-            color_FFE,
-            "Jahresdauerlinie vor",
-        )
-        st.subheader("nach")
-        plot_df_nach = plot_sorted_production(
-            df_input,
-            sorted_df_nach,
-            actual_production_df_nach,
-            color_FFE,
-            "Jahresdauerlinie nach",
-        )
+    plt.title(title)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+
+    # Display the plot in Streamlit
+    st.pyplot(plt.gcf())

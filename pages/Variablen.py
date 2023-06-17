@@ -41,9 +41,11 @@ with expander:
     input_data["cp_water"] = st.number_input(
         "Spezifische Wärmekapazität von Wasser (Wh/kg·K)", value=1.162
     )
-    input_data["ηWüHüs"] = st.number_input("Wirkungsgrad WÜ HÜS (%)", value=0.95)
+    input_data["ηWüHüs"] = st.number_input(
+        "Wirkungsgrad Wärmetauscher Hausübergabestation (%)", value=0.95
+    )
     input_data["ηWüE"] = st.number_input(
-        "Wirkungsgrad WÜ Erzeugungsanlage-Netz (%)", value=0.95
+        "Wirkungsgrad Wärmtauscher Erzeugungsanlage-Netz (%)", value=0.95
     )
     input_data["ηVerdichter"] = st.number_input(
         "Wirkungsgrad Verdichter Wärmepumpen (%)", value=0.85

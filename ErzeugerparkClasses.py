@@ -33,7 +33,7 @@ Trl_nach = input_data["Trl_nach"]
 
 
 class Erzeuger:
-    def __init__(self, color, co2_emission_factor):
+    def __init__(self, color):
         self.color = color
 
     def calc_output_vor(self, hour):
@@ -42,11 +42,48 @@ class Erzeuger:
     def calc_output_nach(self, hour):
         pass
 
-    def calc_Poweruse(self, hour, Tvl):
+    def calc_Poweruse(self, hour, Tvl, Trl, current_last):
         pass
 
     def calc_co2_emissions(self, power_usage):
         return self.co2_emission_factor * power_usage
+
+
+class Abwärme(Erzeuger):
+    def __init__(
+        self,
+        Volumenstrom_quelle,
+        Abwärmetemperatur,
+        color="#639729",
+        co2_emission_factor=0,
+    ):  # Color for Waermepumpe1
+        super().__init__(color)
+        self.Volumenstrom_quelle = Volumenstrom_quelle
+        self.Abwärmetemperatur = Abwärmetemperatur
+        self.co2_emission_factor = co2_emission_factor
+
+    def calc_output_vor(self, hour):
+        return (
+            ηWüE
+            * self.Volumenstrom_quelle
+            * ρ_water
+            * cp_water
+            * (self.Abwärmetemperatur - (Trl_vor + 2))
+        )
+
+    def calc_output_nach(self, hour):
+        # I'm not sure what the exact calculation would be,
+        # so here's a placeholder:
+        return (
+            ηWüE
+            * self.Volumenstrom_quelle
+            * ρ_water
+            * cp_water
+            * (self.Abwärmetemperatur - Trl_nach + 2)
+        )
+
+    def calc_Poweruse(self, hour, Tvl, Trl, current_last):
+        return 0
 
 
 class Waermepumpe1(Erzeuger):
@@ -58,7 +95,7 @@ class Waermepumpe1(Erzeuger):
         color="#1F4E79",
         co2_emission_factor=468,
     ):  # Color for Waermepumpe1
-        super().__init__(color, co2_emission_factor)
+        super().__init__(color)
         self.Volumenstrom_quelle = Volumenstrom_quelle
         self.Quelltemperatur = Quelltemperatur
         self.Gütegrad = Gütegrad
@@ -83,18 +120,17 @@ class Waermepumpe1(Erzeuger):
         )
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
-        Leistung_q = self.Volumenstrom_quelle * ρ_water * cp_water
-
-        return current_last / (
-            self.Gütegrad * (Tvl + 273.15) / (Tvl - self.Quelltemperatur)
-        )
+        # Placeholder calculation:
+        ε = self.Gütegrad * (Tvl + 273.15) / (Tvl - self.T_q)
+        P = current_last / ε * 1 / (ηVerdichter * p_WP_loss)
+        return P
 
 
 class Waermepumpe2(Erzeuger):
     def __init__(
         self, Leistung_max, T_q, Gütegrad, color="#F7D507", co2_emission_factor=468
     ):  # Color for Waermepumpe2
-        super().__init__(color, co2_emission_factor)
+        super().__init__(color)
         self.Leistung_max = Leistung_max
         self.T_q = T_q
         self.Gütegrad = Gütegrad
@@ -123,7 +159,7 @@ class Geothermie(Erzeuger):
         color="#DD2525",
         co2_emission_factor=468,
     ):  # Color for Geothermie
-        super().__init__(color, co2_emission_factor)
+        super().__init__(color)
         self.Leistung_max = Leistung_max
         self.Tgeo = Tgeo
         self.h_förder = h_förder
@@ -145,9 +181,8 @@ class Geothermie(Erzeuger):
 
 class Solarthermie(Erzeuger):
     def __init__(self, Sun_in, color="#92D050"):  # Color for Solarthermie
-        super().__init__(color, co2_emission_factor)
+        super().__init__(color)
         self.Sun_in = Sun_in
-        self.co2_emission_factor = co2_emission_factor
 
     def calc_output_vor(self, hour):
         return self.Sun_in * 0.2  # assuming a 20% efficiency
@@ -164,7 +199,7 @@ class Spitzenlastkessel(Erzeuger):
     def __init__(
         self, Leistung_max, color="#EC9302", co2_emission_factor=201
     ):  # Color for Spitzenlastkessel
-        super().__init__(color, co2_emission_factor)
+        super().__init__(color)
         self.Leistung_max = Leistung_max
         self.co2_emission_factor = co2_emission_factor
 
@@ -183,7 +218,7 @@ class BHKW(Erzeuger):
     def __init__(
         self, Leistung_max, color="#639729", co2_emission_factor=201
     ):  # Color for BHKW
-        super().__init__(color, co2_emission_factor)
+        super().__init__(color)
         self.Leistung_max = Leistung_max
         self.co2_emission_factor = co2_emission_factor
 
