@@ -15,11 +15,11 @@ from plotting_functions import (
 )
 
 
-with open("data.json", "r") as f:
+with open("results/data.json", "r") as f:
     input_data = json.load(f)
 
 
-df_results = pd.read_json("df_results.json")
+df_results = pd.read_json("results/df_results.json")
 
 
 λD = input_data["λD"]
@@ -133,7 +133,7 @@ for i in range(anzahl_erzeuger):
             value=10,
             key=f"Volumenstrom_quelle{i}",
         )
-        Quelltemperatur = st.number_input(
+        T_q = st.number_input(
             "Bitte Quelltemperatur eingeben (°C)", value=57, key=f"Quelltemperatur{i}"
         )
         Gütegrad = st.number_input(
@@ -142,7 +142,7 @@ for i in range(anzahl_erzeuger):
         # Leistung_max = st.number_input("Bitte maximale Leistung eingeben (kW)", key=f"Leistung_max{i}")
         erzeuger = ep.Waermepumpe1(
             Volumenstrom_quelle,
-            Quelltemperatur,
+            T_q,
             Gütegrad,
             color=erzeuger_color,
             co2_emission_factor=468,
@@ -211,6 +211,8 @@ for i in range(anzahl_erzeuger):
         st.write("Bitte wählen Sie einen gültigen Erzeugertyp aus")
 
     erzeugerpark.append(erzeuger)
+
+st.info("Bitte zuerst die Verteilnertzsimulation laufen lassen")
 
 if st.button("Calculate"):
     # Zeige den Erzeugerpark
@@ -290,9 +292,6 @@ if st.button("Calculate"):
 
     actual_production_df_nach = pd.DataFrame(actual_production_data_nach)
 
-    st.dataframe(actual_production_df_vor)
-    st.dataframe(actual_production_df_nach)
-
     # create df of the Powerusage
     Power_df_vor = pd.DataFrame(index=df_input.index)
     Power_df_nach = pd.DataFrame(index=df_input.index)
@@ -323,9 +322,6 @@ if st.button("Calculate"):
         ]
         Power_df_nach[f"Erzeuger_{i+1}_nach"] = Powerusage_nach
 
-    st.dataframe(Power_df_vor)
-    st.dataframe(Power_df_nach)
-
     # create df of the CO2 Emissions
     CO2_df_vor = pd.DataFrame(index=df_input.index)
     CO2_df_nach = pd.DataFrame(index=df_input.index)
@@ -333,12 +329,8 @@ if st.button("Calculate"):
     CO2_df_vor.index = df_input.index
     for i, erzeuger in enumerate(erzeugerpark):
         CO2_vor = [
-            erzeuger.co2_emission_factor
-            * erzeuger.calc_Poweruse(
-                hour,
-                df_results.loc[hour, "T_vl_vor"],
-                Trl_vor,
-                actual_production_df_vor.loc[hour, f"Erzeuger_{i+1}_vor"],
+            erzeuger.calc_co2_emissions(
+                actual_production_df_vor.loc[hour, f"Erzeuger_{i+1}_vor"]
             )
             for hour in df_input.index
         ]
@@ -358,11 +350,54 @@ if st.button("Calculate"):
         ]
         CO2_df_nach[f"Erzeuger_{i+1}_nach"] = CO2_nach
 
-    st.dataframe(Power_df_vor)
-    st.dataframe(Power_df_nach)
+    actual_production_df_vor.to_json(
+        "results/actual_production_df_vor.json", orient="columns"
+    )
+    actual_production_df_nach.to_json(
+        "results/actual_production_df_nach.json", orient="columns"
+    )
+
+    Power_df_vor.to_json("results/Power_df_vor.json", orient="columns")
+    Power_df_nach.to_json("results/Power_df_nach.json", orient="columns")
+
+    CO2_df_vor.to_json("results/CO2_df_vor.json", orient="columns")
+    CO2_df_nach.to_json("results/CO2_df_nach.json", orient="columns")
+
+    st.subheader("Numerische Ergebnisse")
+    total_sum = round(actual_production_df_vor.sum().sum() / 1000)
+    total_sum2 = round(actual_production_df_nach.sum().sum() / 1000)
+    st.write(f"Die gesamte Wärme Produktion:{total_sum} MWh")
+
+    total_sum_power = round(Power_df_vor.sum().sum() / 1000)
+    total_sum_power2 = round(Power_df_nach.sum().sum() / 1000)
+    st.write(f"Die gesamte Strom Nutzung vor T-Absenkung:     {total_sum_power} MWh")
+    st.write(f"Die gesamte Strom Nutzung nach T-Absenkung:    {total_sum_power2} MWh")
+
+    total_sum_co2 = round(CO2_df_vor.sum().sum() / 1000)
+    total_sum_co22 = round(CO2_df_nach.sum().sum() / 1000)
+    st.write(f"Die gesamte CO2 Emission vor T-Absenkung:     {total_sum_co2} kg")
+    st.write(f"Die gesamte CO2 Emission nach T-Absenkung:    {total_sum_co22} kg")
+
+    # Export a DataFrame with the COP of the Heat Pumps as json, in oder to use FlixOpt for Storageoptimization
+    COP_df = pd.DataFrame(index=df_input.index)
+    COP_df.index = df_input.index
+    for i, erzeuger in enumerate(erzeugerpark):
+        COP = [
+            erzeuger.calc_COP(
+                df_results.loc[hour, "T_vl_vor"],
+            )
+            for hour in df_input.index
+        ]
+        COP_df[f"Erzeuger_{i+1}_vor"] = COP
+
+    COP_df.to_json("results/COP__vor_df.json", orient="columns")
 
     # Define color list
     color_FFE = [erzeuger.color for erzeuger in erzeugerpark]
+
+    # Save color_FFE as a JSON
+    with open("results/color_FFE.json", "w") as f:
+        json.dump(color_FFE, f)
 
     # Create and sort sorted_df before plotting it
     sorted_df = actual_production_df_vor.copy()
@@ -406,8 +441,8 @@ if st.button("Calculate"):
         actual_production_df_vor,
         actual_production_df_nach,
         color_FFE,
-        "Vor",
-        "Nach",
+        "vor",
+        "nach",
         "Erzeuger",
         "Change in Production",
         "Erzeuger",
@@ -418,8 +453,8 @@ if st.button("Calculate"):
         Power_df_vor,
         Power_df_nach,
         color_FFE,
-        "Vor",
-        "Nach",
+        "vor",
+        "nach",
         "Erzeuger",
         "Change in Power Usage",
         "Erzeuger",
@@ -430,8 +465,8 @@ if st.button("Calculate"):
         CO2_df_vor,
         CO2_df_nach,
         color_FFE,
-        "Vor",
-        "Nach",
+        "vor",
+        "nach",
         "Erzeuger",
         "Change in CO2 Emissions",
         "Erzeuger",

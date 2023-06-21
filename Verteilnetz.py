@@ -9,7 +9,7 @@ import sys
 import json
 
 # Load the data from the json file
-with open("data.json", "r") as f:
+with open("results/data.json", "r") as f:
     input_data = json.load(f)
 
 st.set_page_config(page_title="Verteilnetz", page_icon=":house:")
@@ -51,6 +51,8 @@ df_input["Lastgang"] = (
 # Sort DataFrame by 'Zeit'
 df_input = df_input.sort_values(by="Zeit")
 
+df_input.to_json("results/Input_Netz.json", orient="columns")
+
 # get user Input
 input_data["Tvl_max_vor"] = st.number_input(
     "maximale Vorlauftemperatur vor Temperaturabsenkung", value=95
@@ -71,11 +73,11 @@ input_data["Trl_nach"] = st.number_input(
     "Rücklauftemperatur nach Temperautrabsenkung", value=40
 )
 
-with open("data.json", "w") as f:
+with open("results/data.json", "w") as f:
     json.dump(input_data, f)
 
 if st.button("Speichern"):
-    with open("data.json", "w") as f:
+    with open("results/data.json", "w") as f:
         json.dump(input_data, f)
     st.sidebar.success("Data saved successfully.")
 
@@ -270,7 +272,7 @@ else:
 
     # display the result dataframe (for development puposes)
     # st.dataframe(df_results)
-    df_results.to_json("df_results.json")
+    df_results.to_json("results/df_results.json")
 
     # Create the plot of the different Temperatures
     plt.figure(figsize=(12, 6))

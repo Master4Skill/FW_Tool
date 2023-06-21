@@ -1,6 +1,6 @@
 import json
 
-with open("data.json", "r") as f:
+with open("results/data.json", "r") as f:
     input_data = json.load(f)
 
 
@@ -46,7 +46,7 @@ class Erzeuger:
         pass
 
     def calc_co2_emissions(self, power_usage):
-        return self.co2_emission_factor * power_usage
+        return (self.co2_emission_factor * power_usage) / 1000
 
 
 class Abwärme(Erzeuger):
@@ -90,34 +90,30 @@ class Waermepumpe1(Erzeuger):
     def __init__(
         self,
         Volumenstrom_quelle,
-        Quelltemperatur,
+        T_q,
         Gütegrad,
         color="#1F4E79",
         co2_emission_factor=468,
     ):  # Color for Waermepumpe1
         super().__init__(color)
         self.Volumenstrom_quelle = Volumenstrom_quelle
-        self.Quelltemperatur = Quelltemperatur
+        self.T_q = T_q
         self.Gütegrad = Gütegrad
         self.co2_emission_factor = co2_emission_factor
 
     def calc_output_vor(self, hour):
         return (
-            self.Volumenstrom_quelle
-            * ρ_water
-            * cp_water
-            * (self.Quelltemperatur - (Trl_vor + 2))
+            self.Volumenstrom_quelle * ρ_water * cp_water * (self.T_q - (Trl_vor + 2))
         )
 
     def calc_output_nach(self, hour):
         # I'm not sure what the exact calculation would be,
         # so here's a placeholder:
-        return (
-            self.Volumenstrom_quelle
-            * ρ_water
-            * cp_water
-            * (self.Quelltemperatur - Trl_nach + 2)
-        )
+        return self.Volumenstrom_quelle * ρ_water * cp_water * (self.T_q - Trl_nach + 2)
+
+    def calc_COP(self, Tvl):
+        ε = self.Gütegrad * (Tvl + 273.15) / (Tvl - self.T_q)
+        return ε
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
         # Placeholder calculation:
@@ -141,6 +137,10 @@ class Waermepumpe2(Erzeuger):
 
     def calc_output_nach(self, hour):
         return self.Leistung_max
+
+    def calc_COP(self, Tvl):
+        ε = self.Gütegrad * (Tvl + 273.15) / (Tvl - self.T_q)
+        return ε
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
         # Placeholder calculation:
@@ -232,3 +232,43 @@ class BHKW(Erzeuger):
         # Placeholder calculation:
         gas_verbraucht = current_last / ηBHKW_therm
         return 0 - gas_verbraucht * ηBHKW_el
+
+
+class Storage:
+    def __init__(
+        self,
+        max_capacity,
+        init_charge,
+        charge_efficiency,
+        discharge_efficiency,
+        max_charge_rate,
+        max_discharge_rate,
+    ):
+        self.max_capacity = max_capacity
+        self.current_charge = init_charge
+        self.charge_efficiency = charge_efficiency
+        self.discharge_efficiency = discharge_efficiency
+        self.max_charge_rate = max_charge_rate
+        self.max_discharge_rate = max_discharge_rate
+
+    def charge(self, amount):
+        actual_charge = min(
+            amount * self.charge_efficiency,
+            self.max_capacity - self.current_charge,
+            self.max_charge_rate,
+        )
+        self.current_charge += actual_charge
+        return (
+            actual_charge / self.charge_efficiency
+        )  # return the amount of energy used for charging
+
+    def discharge(self, amount):
+        actual_discharge = min(
+            amount / self.discharge_efficiency,
+            self.current_charge,
+            self.max_discharge_rate,
+        )
+        self.current_charge -= actual_discharge
+        return (
+            actual_discharge * self.discharge_efficiency
+        )  # return the amount of energy produced by discharging

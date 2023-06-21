@@ -15,7 +15,7 @@ st.sidebar.info("Passen Sie die Simulationsparameter an")
 
 st.markdown("# Parameter")
 
-with open("data.json", "r") as f:
+with open("results/data.json", "r") as f:
     input_data = json.load(f)
 
 # Using Streamlit's number_input function to let user input the constants
@@ -64,10 +64,10 @@ with expander:
     )
 
 # Saving the input data to a json file
-with open("data.json", "w") as f:
+with open("results/data.json", "w") as f:
     json.dump(input_data, f)
 
 if st.button("Speichern"):
-    with open("data.json", "w") as f:
+    with open("results/data.json", "w") as f:
         json.dump(input_data, f)
     st.sidebar.success("Data saved successfully.")
