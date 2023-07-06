@@ -130,11 +130,11 @@ for i in range(anzahl_erzeuger):
     elif "Wärmepumpe1" in erzeuger_type:
         Volumenstrom_quelle = st.number_input(
             "Bitte Volumenstrom_quelle eingeben (m³/h)",
-            value=10,
+            value=100,
             key=f"Volumenstrom_quelle{i}",
         )
         T_q = st.number_input(
-            "Bitte Quelltemperatur eingeben (°C)", value=57, key=f"Quelltemperatur{i}"
+            "Bitte Quelltemperatur eingeben (°C)", value=25, key=f"Quelltemperatur{i}"
         )
         Gütegrad = st.number_input(
             "Bitte Gütegrad Wasser-Wasser angeben", value=0.45, key=f"Gütegrad{i}"
@@ -145,7 +145,7 @@ for i in range(anzahl_erzeuger):
             T_q,
             Gütegrad,
             color=erzeuger_color,
-            co2_emission_factor=468,
+            co2_emission_factor=0.468,
         )
 
     elif "Wärmepumpe2" in erzeuger_type:
@@ -159,7 +159,7 @@ for i in range(anzahl_erzeuger):
             "Bitte Gütegrad Wasser-Wasser angeben", value=0.45, key=f"Gütegrad{i}"
         )
         erzeuger = ep.Waermepumpe2(
-            Leistung_max, T_q, Gütegrad, color=erzeuger_color, co2_emission_factor=468
+            Leistung_max, T_q, Gütegrad, color=erzeuger_color, co2_emission_factor=0.468
         )
 
     elif "Geothermie" in erzeuger_type:
@@ -183,7 +183,7 @@ for i in range(anzahl_erzeuger):
             h_förder,
             η_geo,
             color=erzeuger_color,
-            co2_emission_factor=468,
+            co2_emission_factor=0.468,
         )
 
     elif "Solarthermie" in erzeuger_type:
@@ -197,7 +197,7 @@ for i in range(anzahl_erzeuger):
             "Bitte maximale Leistung eingeben (kW)", value=10000, key=f"Leistung_max{i}"
         )
         erzeuger = ep.Spitzenlastkessel(
-            Leistung_max, color=erzeuger_color, co2_emission_factor=201
+            Leistung_max, color=erzeuger_color, co2_emission_factor=0.201
         )
 
     elif "BHKW" in erzeuger_type:
@@ -206,19 +206,20 @@ for i in range(anzahl_erzeuger):
             value=5000,
             key=f"Leistung_max{i}",
         )
-        erzeuger = ep.BHKW(Leistung_max, color=erzeuger_color, co2_emission_factor=201)
+        erzeuger = ep.BHKW(
+            Leistung_max, color=erzeuger_color, co2_emission_factor=0.201
+        )
     else:
         st.write("Bitte wählen Sie einen gültigen Erzeugertyp aus")
 
     erzeugerpark.append(erzeuger)
 
-st.info("Bitte zuerst die Verteilnertzsimulation laufen lassen")
 
 if st.button("Calculate"):
     # Zeige den Erzeugerpark
     # df_erzeuger = pd.DataFrame([vars(erzeuger) for erzeuger in erzeugerpark])
     # st.dataframe(df_erzeuger)
-
+    st.write(erzeugerpark)
     df_input = df_input.iloc[:-2]
 
     erzeuger_df_vor = pd.DataFrame(index=df_input.index)
@@ -229,16 +230,20 @@ if st.button("Calculate"):
 
     for i, erzeuger in enumerate(erzeugerpark):
         # Calculate Wärmeleistung for each hour
-        waermeleistung_vor = [erzeuger.calc_output_vor(hour) for hour in df_input.index]
+        waermeleistung_vor = [
+            erzeuger.calc_output(hour, df_results.loc[hour, "T_vl_vor"], Trl_vor)
+            for hour in df_input.index
+        ]
         waermeleistung_nach = [
-            erzeuger.calc_output_nach(hour) for hour in df_input.index
+            erzeuger.calc_output(hour, df_results.loc[hour, "T_vl_nach"], Trl_nach)
+            for hour in df_input.index
         ]
         # Add a column to the dataframe with Wärmeleistung for each hour
         erzeuger_df_vor[f"Erzeuger_{i+1}_vor"] = waermeleistung_vor
         erzeuger_df_nach[f"Erzeuger_{i+1}_nach"] = waermeleistung_nach
 
-    # st.dataframe(erzeuger_df_vor)
-    # st.dataframe(erzeuger_df_nach)
+    st.dataframe(erzeuger_df_vor)
+    st.dataframe(erzeuger_df_nach)
 
     actual_production_data_vor = []
     actual_production_data_nach = []
@@ -322,6 +327,9 @@ if st.button("Calculate"):
         ]
         Power_df_nach[f"Erzeuger_{i+1}_nach"] = Powerusage_nach
 
+    print(Power_df_vor)
+    print(Power_df_nach)
+
     # create df of the CO2 Emissions
     CO2_df_vor = pd.DataFrame(index=df_input.index)
     CO2_df_nach = pd.DataFrame(index=df_input.index)
@@ -330,7 +338,7 @@ if st.button("Calculate"):
     for i, erzeuger in enumerate(erzeugerpark):
         CO2_vor = [
             erzeuger.calc_co2_emissions(
-                actual_production_df_vor.loc[hour, f"Erzeuger_{i+1}_vor"]
+                Power_df_vor.loc[hour, f"Erzeuger_{i+1}_vor"],
             )
             for hour in df_input.index
         ]
@@ -339,12 +347,8 @@ if st.button("Calculate"):
     CO2_df_nach.index = df_input.index
     for i, erzeuger in enumerate(erzeugerpark):
         CO2_nach = [
-            erzeuger.co2_emission_factor
-            * erzeuger.calc_Poweruse(
-                hour,
-                df_results.loc[hour, "T_vl_nach"],
-                Trl_nach,
-                actual_production_df_nach.loc[hour, f"Erzeuger_{i+1}_nach"],
+            erzeuger.calc_co2_emissions(
+                Power_df_nach.loc[hour, f"Erzeuger_{i+1}_nach"],
             )
             for hour in df_input.index
         ]
@@ -354,7 +358,7 @@ if st.button("Calculate"):
         "results/actual_production_df_vor.json", orient="columns"
     )
     actual_production_df_nach.to_json(
-        "results/actual_production_df_nach.json", orient="columns"
+        "results/actual_production_df_ncoach.json", orient="columns"
     )
 
     Power_df_vor.to_json("results/Power_df_vor.json", orient="columns")
@@ -382,15 +386,17 @@ if st.button("Calculate"):
     COP_df = pd.DataFrame(index=df_input.index)
     COP_df.index = df_input.index
     for i, erzeuger in enumerate(erzeugerpark):
-        COP = [
-            erzeuger.calc_COP(
-                df_results.loc[hour, "T_vl_vor"],
-            )
-            for hour in df_input.index
-        ]
-        COP_df[f"Erzeuger_{i+1}_vor"] = COP
+        # Check the type of the 'erzeuger'
+        if isinstance(erzeuger, (ep.Waermepumpe1, ep.Waermepumpe2)):
+            COP = [
+                erzeuger.calc_COP(
+                    df_results.loc[hour, "T_vl_vor"],
+                )
+                for hour in df_input.index
+            ]
+            COP_df[f"Erzeuger_{i+1}_vor"] = COP
 
-    COP_df.to_json("results/COP__vor_df.json", orient="columns")
+    COP_df.to_json("results/COP_vor_df.json", orient="columns")
 
     # Define color list
     color_FFE = [erzeuger.color for erzeuger in erzeugerpark]
@@ -450,18 +456,6 @@ if st.button("Calculate"):
     )
 
     plot_total_change(
-        Power_df_vor,
-        Power_df_nach,
-        color_FFE,
-        "vor",
-        "nach",
-        "Erzeuger",
-        "Change in Power Usage",
-        "Erzeuger",
-        "Total Usage [kWh]",
-    )
-
-    plot_total_change(
         CO2_df_vor,
         CO2_df_nach,
         color_FFE,
@@ -471,6 +465,18 @@ if st.button("Calculate"):
         "Change in CO2 Emissions",
         "Erzeuger",
         "Total Emissions [kg CO2]",
+    )
+
+    plot_total_change(
+        Power_df_vor,
+        Power_df_nach,
+        color_FFE,
+        "vor",
+        "nach",
+        "Erzeuger",
+        "Change in Power Usage",
+        "Erzeuger",
+        "Total Usage [kWh]",
     )
 
     st.sidebar.success("Simulation erfolgreich")

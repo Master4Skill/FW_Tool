@@ -19,6 +19,7 @@ cp_water = input_data["cp_water"]
 ηWüE = input_data["ηWüE"]
 ηVerdichter = input_data["ηVerdichter"]
 p_WP_loss = input_data["p_WP_loss"]
+T_q_diffmax = input_data["T_q_diffmax"]
 ηSpitzenkessel = input_data["ηSpitzenkessel"]
 ηBHKW_el = input_data["ηBHKW_el"]
 ηBHKW_therm = input_data["ηBHKW_therm"]
@@ -36,17 +37,14 @@ class Erzeuger:
     def __init__(self, color):
         self.color = color
 
-    def calc_output_vor(self, hour):
-        pass
-
-    def calc_output_nach(self, hour):
+    def calc_output(self, hour, Tvl, Trl):
         pass
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
         pass
 
     def calc_co2_emissions(self, power_usage):
-        return (self.co2_emission_factor * power_usage) / 1000
+        return self.co2_emission_factor * power_usage
 
 
 class Abwärme(Erzeuger):
@@ -62,24 +60,13 @@ class Abwärme(Erzeuger):
         self.Abwärmetemperatur = Abwärmetemperatur
         self.co2_emission_factor = co2_emission_factor
 
-    def calc_output_vor(self, hour):
+    def calc_output(self, hour, Tvl, Trl):
         return (
             ηWüE
             * self.Volumenstrom_quelle
             * ρ_water
             * cp_water
-            * (self.Abwärmetemperatur - (Trl_vor + 2))
-        )
-
-    def calc_output_nach(self, hour):
-        # I'm not sure what the exact calculation would be,
-        # so here's a placeholder:
-        return (
-            ηWüE
-            * self.Volumenstrom_quelle
-            * ρ_water
-            * cp_water
-            * (self.Abwärmetemperatur - Trl_nach + 2)
+            * (self.Abwärmetemperatur - Trl + 2)
         )
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
@@ -93,7 +80,7 @@ class Waermepumpe1(Erzeuger):
         T_q,
         Gütegrad,
         color="#1F4E79",
-        co2_emission_factor=468,
+        co2_emission_factor=0.468,
     ):  # Color for Waermepumpe1
         super().__init__(color)
         self.Volumenstrom_quelle = Volumenstrom_quelle
@@ -101,15 +88,13 @@ class Waermepumpe1(Erzeuger):
         self.Gütegrad = Gütegrad
         self.co2_emission_factor = co2_emission_factor
 
-    def calc_output_vor(self, hour):
-        return (
-            self.Volumenstrom_quelle * ρ_water * cp_water * (self.T_q - (Trl_vor + 2))
-        )
-
-    def calc_output_nach(self, hour):
-        # I'm not sure what the exact calculation would be,
-        # so here's a placeholder:
-        return self.Volumenstrom_quelle * ρ_water * cp_water * (self.T_q - Trl_nach + 2)
+    def calc_output(self, hour, Tvl, Trl):
+        Q_wp_q = (
+            self.Volumenstrom_quelle * ρ_water * cp_water * T_q_diffmax
+        )  # Wärme aus Quelle
+        ε = self.Gütegrad * (Tvl + 273.15) / (Tvl - self.T_q)
+        Q_wp_el = Q_wp_q / (ε - 1)  # Wärme aus Quelle
+        return Q_wp_q + Q_wp_el
 
     def calc_COP(self, Tvl):
         ε = self.Gütegrad * (Tvl + 273.15) / (Tvl - self.T_q)
@@ -117,14 +102,14 @@ class Waermepumpe1(Erzeuger):
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
         # Placeholder calculation:
-        ε = self.Gütegrad * (Tvl + 273.15) / (Tvl - self.T_q)
+        ε = self.Gütegrad * (Tvl + 273.15) / (Tvl - self.T_q + 1e-10)
         P = current_last / ε * 1 / (ηVerdichter * p_WP_loss)
         return P
 
 
 class Waermepumpe2(Erzeuger):
     def __init__(
-        self, Leistung_max, T_q, Gütegrad, color="#F7D507", co2_emission_factor=468
+        self, Leistung_max, T_q, Gütegrad, color="#F7D507", co2_emission_factor=0.468
     ):  # Color for Waermepumpe2
         super().__init__(color)
         self.Leistung_max = Leistung_max
@@ -132,10 +117,7 @@ class Waermepumpe2(Erzeuger):
         self.Gütegrad = Gütegrad
         self.co2_emission_factor = co2_emission_factor
 
-    def calc_output_vor(self, hour):
-        return self.Leistung_max
-
-    def calc_output_nach(self, hour):
+    def calc_output(self, hour, Tvl, Trl):
         return self.Leistung_max
 
     def calc_COP(self, Tvl):
@@ -157,7 +139,7 @@ class Geothermie(Erzeuger):
         h_förder,
         η_geo,
         color="#DD2525",
-        co2_emission_factor=468,
+        co2_emission_factor=0.468,
     ):  # Color for Geothermie
         super().__init__(color)
         self.Leistung_max = Leistung_max
@@ -166,10 +148,7 @@ class Geothermie(Erzeuger):
         self.η_geo = η_geo
         self.co2_emission_factor = co2_emission_factor
 
-    def calc_output_vor(self, hour):
-        return self.Leistung_max
-
-    def calc_output_nach(self, hour):
+    def calc_output(self, hour, Tvl, Trl):
         return self.Leistung_max
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
@@ -184,10 +163,7 @@ class Solarthermie(Erzeuger):
         super().__init__(color)
         self.Sun_in = Sun_in
 
-    def calc_output_vor(self, hour):
-        return self.Sun_in * 0.2  # assuming a 20% efficiency
-
-    def calc_output_nach(self, hour):
+    def calc_output(self, hour, Tvl, Trl):
         return self.Sun_in * 0.2  # assuming a 20% efficiency
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
@@ -197,16 +173,13 @@ class Solarthermie(Erzeuger):
 
 class Spitzenlastkessel(Erzeuger):
     def __init__(
-        self, Leistung_max, color="#EC9302", co2_emission_factor=201
+        self, Leistung_max, color="#EC9302", co2_emission_factor=0.201
     ):  # Color for Spitzenlastkessel
         super().__init__(color)
         self.Leistung_max = Leistung_max
         self.co2_emission_factor = co2_emission_factor
 
-    def calc_output_vor(self, hour):
-        return self.Leistung_max
-
-    def calc_output_nach(self, hour):
+    def calc_output(self, hour, Tvl, Trl):
         return self.Leistung_max
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
@@ -216,16 +189,13 @@ class Spitzenlastkessel(Erzeuger):
 
 class BHKW(Erzeuger):
     def __init__(
-        self, Leistung_max, color="#639729", co2_emission_factor=201
+        self, Leistung_max, color="#639729", co2_emission_factor=0.201
     ):  # Color for BHKW
         super().__init__(color)
         self.Leistung_max = Leistung_max
         self.co2_emission_factor = co2_emission_factor
 
-    def calc_output_vor(self, hour):
-        return self.Leistung_max
-
-    def calc_output_nach(self, hour):
+    def calc_output(self, hour, Tvl, Trl):
         return self.Leistung_max
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):

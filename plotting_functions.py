@@ -33,7 +33,7 @@ def plot_actual_production(df_input, actual_production_df, color_FFE, title):
     ax.legend(handles=handles, labels=labels)
 
     plt.xlabel("hours")
-    plt.ylabel("Erzeugung")
+    plt.ylabel("Erzeugung pro Stunde [kWh]")
     plt.title(title)
     plt.grid(True)
 
@@ -127,190 +127,11 @@ def plot_power_usage(Power_df_vor, Power_df_nach, color_FFE):
 
         plt.title(f"Erzeuger {i+1} Power Usage")
         plt.xlabel("Time")
-        plt.ylabel("Power Usage")
+        plt.ylabel("Power Usage [kW/h]")
         plt.grid(True)
         plt.legend()
 
         st.pyplot(plt.gcf())
-
-
-def plot_total_change_matplotlib(
-    df1, df2, color_FFE, label1, label2, column_name, title, x_label, y_label
-):
-    df1_sum = pd.DataFrame(df1.sum(), columns=["Value"])
-    df1_sum["Status"] = label1
-    df1_sum[column_name] = df1_sum.index.str.replace("_" + label1.lower(), "")
-
-    df2_sum = pd.DataFrame(df2.sum(), columns=["Value"])
-    df2_sum["Status"] = label2
-    df2_sum[column_name] = df2_sum.index.str.replace("_" + label2.lower(), "")
-
-    sum_df = pd.concat([df1_sum, df2_sum])
-    st.dataframe(sum_df)
-    sum_df = sum_df[sum_df["Value"] != 0]
-    sum_df.sort_values(by=[column_name, "Status"], inplace=True)
-
-    sum_df.reset_index(drop=True, inplace=True)
-
-    total_1 = sum_df[sum_df["Status"] == label1]["Value"].sum()
-    total_2 = sum_df[sum_df["Status"] == label2]["Value"].sum()
-
-    palette = {label1: "#E6E6E6", label2: "#0033A0"}
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-    bars = []
-
-    for status in sum_df["Status"].unique():
-        df_status = sum_df[sum_df["Status"] == status]
-        bar = ax.bar(df_status[column_name], df_status["Value"], color=palette[status])
-        bars.append(bar)
-
-    for bars_group in bars:
-        for bar in bars_group:
-            yval = bar.get_height()
-            total = (
-                total_1 if bars_group[0].get_facecolor() == palette[label1] else total_2
-            )
-            percentage = "{:.1f}%".format(100 * yval / total)
-            plt.text(
-                bar.get_x() + bar.get_width() / 2,
-                yval,
-                percentage,
-                ha="center",
-                va="bottom",
-            )
-
-    plt.title(title)
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-
-    st.pyplot(fig)
-
-
-def plot_total_change1(
-    df1, df2, color_FFE, label1, label2, column_name, title, x_label, y_label
-):
-    df1_sum = pd.DataFrame(df1.sum(), columns=["Value"])
-    df1_sum["Status"] = label1
-    df1_sum[column_name] = df1_sum.index.str.replace("_" + label1.lower(), "")
-
-    df2_sum = pd.DataFrame(df2.sum(), columns=["Value"])
-    df2_sum["Status"] = label2
-    df2_sum[column_name] = df2_sum.index.str.replace("_" + label2.lower(), "")
-
-    # Concatenate the two DataFrames
-    sum_df = pd.concat([df1_sum, df2_sum])
-    st.dataframe(sum_df)
-    # Remove rows with value 0
-    sum_df = sum_df[sum_df["Value"] != 0]
-    # Sort the DataFrame
-    sum_df.sort_values(by=[column_name, "Status"], inplace=True)
-
-    # Reset index
-    sum_df.reset_index(drop=True, inplace=True)
-
-    # Define color palette
-    palette = {label1: "#E6E6E6", label2: "#0033A0"}
-
-    # Create a dictionary with total values for each category for both statuses
-    total_values = sum_df.groupby([column_name, "Status"])["Value"].sum().to_dict()
-
-    # Define your hue_order to match the labels
-    hue_order = [label1, label2]
-
-    # Plotting with seaborn
-    plt.figure(figsize=(10, 6))
-    bar_plot = sns.barplot(
-        x=column_name,
-        y="Value",
-        hue="Status",
-        data=sum_df,
-        palette=palette,
-        hue_order=hue_order,
-    )
-
-    # Create a dictionary with the totals for each status
-    totals = {
-        label: sum_df[sum_df["Status"] == label]["Value"].sum() for label in hue_order
-    }
-
-    # Loop over the bars, and adjust the height to add the text label
-    for i, p in enumerate(bar_plot.patches):
-        # The status associated with the patch is found using modular arithmetic
-        current_status = hue_order[i % len(hue_order)]
-        total = totals[current_status]
-        percentage = "{:.1f}%".format(100 * p.get_height() / total)
-        bar_plot.text(
-            p.get_x() + p.get_width() / 2.0,
-            p.get_height(),
-            percentage,
-            ha="center",
-            va="bottom",
-        )
-
-    plt.title(title)
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-
-    # Display the plot in Streamlit
-    st.pyplot(plt.gcf())
-
-
-def plot_total_change3(
-    df1, df2, color_FFE, label1, label2, column_name, title, x_label, y_label
-):
-    df1_sum = pd.DataFrame(df1.sum(), columns=["Value"])
-    df1_sum["Status"] = label1
-    df1_sum[column_name] = df1_sum.index.str.replace("_" + label1.lower(), "")
-
-    df2_sum = pd.DataFrame(df2.sum(), columns=["Value"])
-    df2_sum["Status"] = label2
-    df2_sum[column_name] = df2_sum.index.str.replace("_" + label2.lower(), "")
-
-    # Concatenate the two DataFrames
-    sum_df = pd.concat([df1_sum, df2_sum])
-    st.dataframe(sum_df)
-    # Remove rows with value 0
-    sum_df = sum_df[sum_df["Value"] != 0]
-    # Sort the DataFrame
-    sum_df.sort_values(by=[column_name, "Status"], inplace=True)
-
-    # Reset index
-    sum_df.reset_index(drop=True, inplace=True)
-
-    # Calculate the total for each status
-    total_1 = sum_df[sum_df["Status"] == label1]["Value"].sum()
-    total_2 = sum_df[sum_df["Status"] == label2]["Value"].sum()
-
-    # Define color palette
-    palette = {label1: "#E6E6E6", label2: "#0033A0"}
-
-    # palette = {label1: color_FFE[0], label2: color_FFE[1]}
-
-    # Plotting with seaborn
-    plt.figure(figsize=(10, 6))
-    bar_plot = sns.barplot(
-        x=column_name, y="Value", hue="Status", data=sum_df, palette=palette
-    )
-
-    # Loop over the bars, and adjust the height to add the text label
-    for p in bar_plot.patches:
-        total = total_1 if label1 in p.get_label() else total_2
-        percentage = "{:.1f}%".format(100 * p.get_height() / total)
-        bar_plot.text(
-            p.get_x() + p.get_width() / 2.0,
-            p.get_height(),
-            percentage,
-            ha="center",
-            va="bottom",
-        )
-
-    plt.title(title)
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-
-    # Display the plot in Streamlit
-    st.pyplot(plt.gcf())
 
 
 def plot_total_change(
@@ -326,7 +147,7 @@ def plot_total_change(
 
     # Concatenate the two DataFrames
     sum_df = pd.concat([df1_sum, df2_sum])
-    # st.dataframe(sum_df)
+    st.dataframe(sum_df)
     # Remove rows with value 0
     sum_df = sum_df[sum_df["Value"] != 0]
     # Sort the DataFrame

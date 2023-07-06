@@ -25,7 +25,7 @@ st.info("  Please run the simulations first", icon="⚠️")
 
 if st.button("Show the Results"):
     # Load the data from the json file
-    with open("data.json", "r") as f:
+    with open("results/data.json", "r") as f:
         input_data = json.load(f)
 
     # Assuming these constants already exist, can easily become Userinputs
@@ -68,7 +68,7 @@ if st.button("Show the Results"):
     df_input = df_input.sort_values(by="Zeit")
 
     # Load the JSON data
-    df_results = pd.read_json("df_results.json")
+    df_results = pd.read_json("results/df_results.json")
 
     st.header("Verteilnetz Simulation")
 
@@ -304,19 +304,19 @@ if st.button("Show the Results"):
     ################# Ergebnisse Erzeugerpark######################
 
     # Load the data from the json file
-    actual_production_df_vor = pd.read_json("actual_production_df_vor.json")
-    actual_production_df_nach = pd.read_json("actual_production_df_nach.json")
+    actual_production_df_vor = pd.read_json("results/actual_production_df_vor.json")
+    actual_production_df_nach = pd.read_json("results/actual_production_df_nach.json")
 
-    Power_df_vor = pd.read_json("Power_df_vor.json")
-    Power_df_nach = pd.read_json("Power_df_nach.json")
+    Power_df_vor = pd.read_json("results/Power_df_vor.json")
+    Power_df_nach = pd.read_json("results/Power_df_nach.json")
 
-    CO2_df_vor = pd.read_json("CO2_df_vor.json")
-    CO2_df_nach = pd.read_json("CO2_df_nach.json")
+    CO2_df_vor = pd.read_json("results/CO2_df_vor.json")
+    CO2_df_nach = pd.read_json("results/CO2_df_nach.json")
 
     st.header("Ergebnisse Erzeugerpark")
 
     # Define color list
-    with open("color_FFE.json", "r") as f:
+    with open("results/color_FFE.json", "r") as f:
         color_FFE = json.load(f)
 
     # Create and sort sorted_df before plotting it

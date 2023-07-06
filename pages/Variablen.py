@@ -50,6 +50,10 @@ with expander:
     input_data["ηVerdichter"] = st.number_input(
         "Wirkungsgrad Verdichter Wärmepumpen (%)", value=0.85
     )
+    input_data["T_q_diffmax"] = st.number_input(
+        "maximale Temperaturdifferenz Wärmequelle (°K)", value=5
+    )
+
     input_data["p_WP_loss"] = st.number_input(
         "Druckverluste Wärmepumpe (%)", value=0.95
     )
