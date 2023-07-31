@@ -149,6 +149,8 @@ class Geothermie(Erzeuger):
         self.co2_emission_factor = co2_emission_factor
 
     def calc_output(self, hour, Tvl, Trl):
+        # Hier Formel einfügen
+
         return self.Leistung_max
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):

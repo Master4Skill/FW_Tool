@@ -8,6 +8,7 @@ from PIL import Image
 import sys
 import json
 
+
 # Load the data from the json file
 with open("results/data.json", "r") as f:
     input_data = json.load(f)

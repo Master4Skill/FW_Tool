@@ -74,9 +74,17 @@ I = list(range(len(P_to_dem)))
 
 m = gp.Model("Winco Page 232 Winston")
 
-x = m.addVars(I, vtype=gp.GRB.CONTINUOUS, name="x")
-y = m.addVars(I, vtype=gp.GRB.CONTINUOUS, name="y")
-z = m.addVars(I, vtype=gp.GRB.CONTINUOUS, name="z")
+a = m.addVars(I, vtype=gp.GRB.CONTINUOUS, name="imported flow")
+b = m.addVars(I, vtype=gp.GRB.CONTINUOUS, name="exported flow")
+c = m.addVars(I, vtype=gp.GRB.CONTINUOUS, name="process flow")
+d = m.addVars(I, vtype=gp.GRB.CONTINUOUS, name="storage flow in")
+e = m.addVars(I, vtype=gp.GRB.CONTINUOUS, name="storage flow out")
+f = m.addVars(I, vtype=gp.GRB.CONTINUOUS, name="process power consumed")
+g = m.addVars(I, vtype=gp.GRB.CONTINUOUS, name="process power produced")
+
+x = m.addVars(I, vtype=gp.GRB.BINARY, name="process ON/OFF")
+y = m.addVars(I, vtype=gp.GRB.BINARY, name="storage IN/OUT")
+
 f = m.addVar(name="f")
 X = m.addVar(name="X")
 E_stored = m.addVars(I, vtype=gp.GRB.CONTINUOUS, name="E_stored")

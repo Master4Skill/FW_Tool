@@ -214,6 +214,9 @@ for i in range(anzahl_erzeuger):
 
     erzeugerpark.append(erzeuger)
 
+names = [obj.__class__.__name__ for obj in erzeugerpark]
+print(erzeugerpark)
+print(names)
 
 if st.button("Calculate"):
     # Zeige den Erzeugerpark
@@ -244,6 +247,8 @@ if st.button("Calculate"):
 
     st.dataframe(erzeuger_df_vor)
     st.dataframe(erzeuger_df_nach)
+
+    print(erzeuger_df_vor)
 
     actual_production_data_vor = []
     actual_production_data_nach = []
@@ -327,8 +332,8 @@ if st.button("Calculate"):
         ]
         Power_df_nach[f"Erzeuger_{i+1}_nach"] = Powerusage_nach
 
-    print(Power_df_vor)
-    print(Power_df_nach)
+    print(Power_df_vor.iloc[23:])
+    print(Power_df_nach.iloc[23:])
 
     # create df of the CO2 Emissions
     CO2_df_vor = pd.DataFrame(index=df_input.index)
@@ -396,7 +401,23 @@ if st.button("Calculate"):
             ]
             COP_df[f"Erzeuger_{i+1}_vor"] = COP
 
+    print(COP_df.iloc[23:])
     COP_df.to_json("results/COP_vor_df.json", orient="columns")
+
+    COP_df = pd.DataFrame(index=df_input.index)
+    COP_df.index = df_input.index
+    for i, erzeuger in enumerate(erzeugerpark):
+        # Check the type of the 'erzeuger'
+        if isinstance(erzeuger, (ep.Waermepumpe1, ep.Waermepumpe2)):
+            COP = [
+                erzeuger.calc_COP(
+                    df_results.loc[hour, "T_vl_nach"],
+                )
+                for hour in df_input.index
+            ]
+            COP_df[f"Erzeuger_{i+1}_nach"] = COP
+
+    print(COP_df.iloc[23:])
 
     # Define color list
     color_FFE = [erzeuger.color for erzeuger in erzeugerpark]
@@ -480,3 +501,9 @@ if st.button("Calculate"):
     )
 
     st.sidebar.success("Simulation erfolgreich")
+    erzeuger_df_vor.fillna(0, inplace=True)
+    erzeuger_df_vor_json = erzeuger_df_vor.to_json()
+    data = {"names": names, "erzeuger_df_vor": erzeuger_df_vor_json}
+
+    with open("data.json", "w") as f:
+        json.dump(data, f)

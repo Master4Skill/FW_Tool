@@ -9,8 +9,10 @@ from io import StringIO
 import json as json
 import numpy as np
 
+# from pages.Erzeugerpark import names, erzeuger_df_vor
 
-st.set_page_config(page_title="Plotting Demo", page_icon="📈")
+
+st.set_page_config(page_title="Plotting Demo2", page_icon="📈")
 add_logo("resized_image.png")
 st.markdown("# Plotting Demo")
 st.sidebar.header("Plotting Demo")
@@ -248,6 +250,11 @@ def main_pulp():
         file_name, hours
     )
 
+    with open("data.json") as f:
+        data = json.load(f)
+
+    names = data["names"]
+    erzeuger_df_vor = pd.read_json(data["erzeuger_df_vor"])
     Tiefentemperatur = 120
 
     average_strompreise = sum(strompreise) / len(strompreise)
@@ -265,33 +272,43 @@ def main_pulp():
     K_s_pow_out = 3000
     # K_s_en = 5000
     Y_s_self = 0.02
+    # Masterarbeit Therese Farber Formel/Prozent für Speicherverluste
 
     # processes; später hier für K_i Potentiale aus Erzeugerpark importieren
+
+    K_p = {}
+
+    for i, name in enumerate(names):
+        K_p[name] = [
+            0 if v is None else v
+            for v in erzeuger_df_vor[f"Erzeuger_{i+1}_vor"].tolist()
+        ]
+
     # Abwärme
-    K_p1 = 700
+    K_p1 = K_p["Abwärme"] if "Abwärme" in names else [0] * 8761
 
     # Waermepumpe1
-    K_p2 = 1000
+    K_p2 = K_p["Waermepumpe1"] if "Waermepumpe1" in names else [0] * 8761
     PL_p2 = 0.2
 
     # Waermepumpe2
-    K_p3 = 0
+    K_p3 = K_p["Waermepumpe2"] if "Waermepumpe2" in names else [0] * 8761
     PL_p3 = 0.2
 
     # Geothermie
-    K_p4 = 5000
+    K_p4 = K_p["Geothermie"] if "Geothermie" in names else [0] * 8761
     PL_p4 = 0.2
 
     # Solar
-    K_p5 = 0
+    K_p5 = K_p["Solar"] if "Solar" in names else [0] * 8761
     PL_p5 = 0
 
-    # Spizenkessel
-    K_p6 = 10000
+    # Spitzenlastkessel
+    K_p6 = K_p["Spitzenlastkessel"] if "Spitzenlastkessel" in names else [0] * 8761
     PL_p6 = 0.01
 
     # BHKW
-    K_p7 = 0
+    K_p7 = K_p["BHKW"] if "BHKW" in names else [0] * 8761
     PL_p7 = 0.1
 
     ###decision variables
@@ -372,31 +389,31 @@ def main_pulp():
         m += E_stored[i] <= K_s_en
         # Process Flows
         # p1
-        m += g1[i] <= K_p1
+        m += g1[i] <= K_p1[i]
         # p2
         m += g2[i] == f21[i] * A_p2_in
-        m += g2[i] >= x2[i] * K_p2 * PL_p2
-        m += g2[i] <= x2[i] * K_p2
+        m += g2[i] >= x2[i] * K_p2[i] * PL_p2
+        m += g2[i] <= x2[i] * K_p2[i]
         # p3
         m += g3[i] == f31[i] * A_p3_in
-        m += g3[i] >= x3[i] * K_p3 * PL_p3
-        m += g3[i] <= x3[i] * K_p3
+        m += g3[i] >= x3[i] * K_p3[i] * PL_p3
+        m += g3[i] <= x3[i] * K_p3[i]
         # p4
         m += g4[i] == f4[i] * A_p4_in
-        m += g4[i] >= x4[i] * K_p4 * PL_p4
-        m += g4[i] <= x4[i] * K_p4
+        m += g4[i] >= x4[i] * K_p4[i] * PL_p4
+        m += g4[i] <= x4[i] * K_p4[i]
         # p5
         m += g5[i] == f5[i] * A_p5_in
-        m += g5[i] <= x5[i] * K_p5
+        m += g5[i] <= x5[i] * K_p5[i]
         # p6
         m += g6[i] == f6[i] * A_p6_in
-        m += g6[i] >= x6[i] * K_p6 * PL_p6
-        m += g6[i] <= x6[i] * K_p6
+        m += g6[i] >= x6[i] * K_p6[i] * PL_p6
+        m += g6[i] <= x6[i] * K_p6[i]
         # p7
         m += g71[i] == f7[i] * A_p7_out_heat
         m += g72[i] == f7[i] * A_p7_out_elec
-        m += g71[i] + g72[i] >= x7[i] * K_p7 * PL_p7
-        m += g71[i] + g72[i] <= x7[i] * K_p7
+        m += g71[i] + g72[i] >= x7[i] * K_p7[i] * PL_p7
+        m += g71[i] + g72[i] <= x7[i] * K_p7[i]
 
         # Commodities
         # heat
@@ -467,4 +484,5 @@ def main_pulp():
 hours = st.number_input("Enter hours", min_value=1, value=2000)
 if st.button("Submit"):
     st.write(f"You entered {hours} hours.")
+
     main_pulp()
