@@ -1,0 +1,31 @@
+% !TeX root = ../thesis.tex
+
+\chapter{Theory - Literature Research}
+
+In section xxx multiple measures for future proofing DHNs have been discussed. The next step of this research will involve implementing them within a simulation model for DHNs.
+The DHN-model is designed to provide the first universally valid estimates for the effects of theses implemented measures. The focus hereby lies on the temperature reduction as well as the storage integration for various producer parks. The distinction of this simulation tool from existing ones lies in the level of detail it provides. Unlike models that focus narrowly on controlling DHNs for optimal costs (/TUD-06 12/; TIMES-Local /IWES-04 17/; POLIS /SEJP-01 16/; EnergyPLAN /IWES-04 17/; FreeOpt /TUD-06 12/) this tool examines the network as a whole and allows for as many as 10 possible producers, all of which can be manually selected and customized. It is an extension of the basic Excel tool, originally developed at FfE by K. Gruber /FfE-Gruber/. The extension incorporates the diversity and adaptability of producers feeding into the DHN, as well as the ability to include a storage element. Through optimization, the simulation can identify the best possible generation load profile to minimize either costs or CO2 emissions. 
+
+In the following section, the implemented formulas and engineering principles that are based on the physical foundations mentioned in the previous section will be explained. 
+
+First of all the basic equations for the heat transfer in pipes will be presented. The following equations are based on the work of /FfE-Gruber/.
+
+\section{Heat Transfer in Pipes}
+
+The total amount of Heat that needs to be fed in to the DHN is calculated by the following equation:
+
+\begin{equation}
+\dot{Q}_{\text{loss}} = \dot{Q}_{\text{net}} + \dot{Q}_{\text{loss, pipe}} + \dot{Q}_{\text{loss, storage}}
+\end{equation}
+
+
+
+
+
+
+
+
+
+\[
+\dot{Q}_{\text{loss}} = \frac{l_{\text{Netz}}}{1000} \frac{4 \pi \left(\frac{T_{\text{vl}} + T_{\text{rl}}}{2} - T_{\text{b}}\right)}{\frac{1}{\lambda_{\text{D}}} \ln\left(\frac{r_{\text{M}}}{r_{\text{R}}}\right) + \frac{1}{\lambda_{\text{B}}} \ln\left(4 \frac{h_{\text{Ü}} + r_{\text{M}}}{r_{\text{M}}}\right) + \frac{1}{\lambda_{\text{B}}} \ln\left(\left(\left(\frac{2(h_{\text{Ü}} + r_{\text{M}})}{a+ 2 r_{\text{M}}} \right)^2 + 1\right)^{\frac{1}{2}}\right)}
+\]
+

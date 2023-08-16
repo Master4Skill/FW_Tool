@@ -1,4 +1,5 @@
 import json
+import pandas as pd
 
 with open("results/data.json", "r") as f:
     input_data = json.load(f)
@@ -23,6 +24,9 @@ T_q_diffmax = input_data["T_q_diffmax"]
 ηSpitzenkessel = input_data["ηSpitzenkessel"]
 ηBHKW_el = input_data["ηBHKW_el"]
 ηBHKW_therm = input_data["ηBHKW_therm"]
+T_Wü_delta_r = input_data["T_Wü_delta_r"]
+T_Wü_delta_f = input_data["T_Wü_delta_f"]
+ρ_glycol_water = input_data["ρ_glycol_water"]
 
 
 Tvl_max_vor = input_data["Tvl_max_vor"]
@@ -60,13 +64,13 @@ class Abwärme(Erzeuger):
         self.Abwärmetemperatur = Abwärmetemperatur
         self.co2_emission_factor = co2_emission_factor
 
-    def calc_output(self, hour, Tvl, Trl):
+    def calc_output(self, Trl):
         return (
             ηWüE
             * self.Volumenstrom_quelle
             * ρ_water
             * cp_water
-            * (self.Abwärmetemperatur - Trl + 2)
+            * (self.Abwärmetemperatur - Trl + T_Wü_delta_r)
         )
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
@@ -88,12 +92,12 @@ class Waermepumpe1(Erzeuger):
         self.Gütegrad = Gütegrad
         self.co2_emission_factor = co2_emission_factor
 
-    def calc_output(self, hour, Tvl, Trl):
+    def calc_output(self, Tvl):
         Q_wp_q = (
             self.Volumenstrom_quelle * ρ_water * cp_water * T_q_diffmax
         )  # Wärme aus Quelle
         ε = self.Gütegrad * (Tvl + 273.15) / (Tvl - self.T_q)
-        Q_wp_el = Q_wp_q / (ε - 1)  # Wärme aus Quelle
+        Q_wp_el = Q_wp_q / (ε - 1)  # Wärme aus Strom
         return Q_wp_q + Q_wp_el
 
     def calc_COP(self, Tvl):
@@ -119,6 +123,9 @@ class Waermepumpe2(Erzeuger):
 
     def calc_output(self, hour, Tvl, Trl):
         return self.Leistung_max
+
+    def calc_flowrate(self, Tvl):
+        return self.Leistung_max / (ρ_water * cp_water * T_q_diffmax)
 
     def calc_COP(self, Tvl):
         ε = self.Gütegrad * (Tvl + 273.15) / (Tvl - self.T_q)
@@ -155,21 +162,61 @@ class Geothermie(Erzeuger):
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
         # Placeholder calculation:
-        V = current_last / (self.Tgeo - (Trl + 2) * ρ_water * cp_water)
+        V = current_last / (self.Tgeo - (Trl + T_Wü_delta_r) * ρ_water * cp_water)
         P = V / 3600 * ρ_water * 9.81 * self.h_förder / self.η_geo
         return P
 
 
 class Solarthermie(Erzeuger):
-    def __init__(self, Sun_in, color="#92D050"):  # Color for Solarthermie
+    def __init__(
+        self,
+        Irradiance,
+        η_solar_pump,
+        solar_area,
+        k_s_1,
+        k_s_2,
+        α,
+        τ,
+        d_s,
+        A_s_pipes,
+        ζ_s,
+        N_collectors,
+        color="#F7D507",
+        co2_emission_factor=0.468,
+    ):  # Color for Solarthermie
         super().__init__(color)
-        self.Sun_in = Sun_in
+        self.Irradiance = Irradiance
+        self.η_solar_pump = η_solar_pump
+        self.solar_area = solar_area
+        self.co2_emission_factor = 0
+        self.k_s_1 = k_s_1
+        self.k_s_2 = k_s_2
+        self.α = α
+        self.τ = τ
+        self.d_s = d_s
+        self.A_s_pipes = A_s_pipes
+        self.ζ_s = ζ_s
+        self.N_collectors = N_collectors
 
     def calc_output(self, hour, Tvl, Trl):
-        return self.Sun_in * 0.2  # assuming a 20% efficiency
+        df_input = pd.read_csv("Input_Netz.csv", delimiter=",", decimal=",")
+        df_input.columns = df_input.columns.str.strip()
+        df_input["Zeit"] = pd.to_numeric(df_input["Zeit"], errors="coerce")
+        df_input = df_input.sort_values(by="Zeit")
+        T_u = df_input.loc[hour, "Lufttemp"]
+        T_m = (Tvl + T_Wü_delta_f + Trl + T_Wü_delta_r) / 2
+        return (
+            (self.Irradiance * α * τ)
+            - (self.k_s_1 * (T_m - T_u))
+            - (self.k_s_2 * (T_m - T_u) ** 2) * self.solar_area
+        )
+
+    def calc_pressureloss(self, hour, Tvl, Trl):
+        return
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
-        # Placeholder calculation:
+        # p_s_delta = ζ_s * 0
+        # P_s_el = 0
         return 0
 
 

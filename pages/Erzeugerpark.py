@@ -13,6 +13,7 @@ from plotting_functions import (
     plot_total_change,
     plot_total_emissions,
 )
+from streamlit_extras.stoggle import stoggle
 
 
 with open("results/data.json", "r") as f:
@@ -91,7 +92,7 @@ max_erzeuger = 7
 anzahl_erzeuger = st.slider(
     "Wie viele Erzeuger möchten Sie hinzufügen?", 1, max_erzeuger
 )
-
+expander = st.expander("Additional Solar Parameters")
 
 for i in range(anzahl_erzeuger):
     st.markdown(f"### Erzeuger {i+1}")
@@ -187,10 +188,82 @@ for i in range(anzahl_erzeuger):
         )
 
     elif "Solarthermie" in erzeuger_type:
-        Sun_in = st.number_input(
-            "Bitte Sonneneinstrahlung eingeben (kW/m²)", key=f"Sun_in{i}"
+        Irradiance = st.number_input(
+            "Please Enter the Irradiance (kW/m²)", key=f"Irradiance{i}"
         )
-        erzeuger = ep.Solarthermie(Sun_in, color=erzeuger_color)
+
+        solar_area = st.number_input(
+            "Please Enter the total Area of Solarthermal Collectors (m²)",
+            value=1000,
+            key=f"solar_area{i}",
+        )
+
+        N_collectors = st.number_input(
+            "Please Enter the Number of Solarthermal Collectors",
+            value=1,
+            key=f"N_collectors{i}",
+        )
+
+        expander = st.expander("Additional Solar Parameters")
+        with expander:
+            η_solar_pump = st.number_input(
+                "Please Enter the Efficiency of the pump in the Solarthermal System (%)",
+                value=0.6,
+                key=f"η_solar_pump{i}",
+            )
+            k_s_1 = st.number_input(
+                "Please Enter the Heat Loss Coefficient of the Solarthermal System (kW/m²K)",
+                value=0.0015,
+                key=f"k_s_1{i}",
+            )
+            k_s_2 = st.number_input(
+                "Please Enter The Heat Loss Coefficient of the Solarthermal System (kW/m²K²)",
+                value=0.000005,
+                key=f"k_s_2{i}",
+            )
+
+            α = st.number_input(
+                "Please Enter the Absorption Coefficient of the Solarthermal System",
+                value=0.9,
+                key=f"α{i}",
+            )
+
+            τ = st.number_input(
+                "Please Enter the Transmission Coefficient of the Solarthermal System",
+                value=0.9,
+                key=f"τ{i}",
+            )
+            d_s = st.number_input(
+                "Please Enter the Diameter of the Solarthermal Pipes (m)",
+                value=0.025,
+                key=f"d_s{i}",
+            )
+
+            A_s_pipes = st.number_input(
+                "Please Enter the Area of the Solarthermal Pipes (m²)",
+                value=0.000490874,
+                key=f"A_s_pipes{i}",
+            )
+
+            ζ_s = st.number_input(
+                "Please Enter the Friction Coefficient of the Solarthermal Pipes",
+                value=0.015,
+                key=f"ζ_s{i}",
+            )
+
+        erzeuger = ep.Solarthermie(
+            Irradiance,
+            η_solar_pump,
+            solar_area,
+            k_s_1,
+            k_s_2,
+            α,
+            τ,
+            d_s,
+            A_s_pipes,
+            ζ_s,
+            color=erzeuger_color,
+        )
 
     elif "Spitzenlastkessel" in erzeuger_type:
         Leistung_max = st.number_input(

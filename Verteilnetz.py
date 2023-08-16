@@ -54,25 +54,26 @@ df_input = df_input.sort_values(by="Zeit")
 
 df_input.to_json("results/Input_Netz.json", orient="columns")
 
-# get user Input
+# get user input
 input_data["Tvl_max_vor"] = st.number_input(
-    "maximale Vorlauftemperatur vor Temperaturabsenkung", value=95
+    "Maximum supply temperature before temperature reduction", value=95
 )
 input_data["Tvl_min_vor"] = st.number_input(
-    "minimale Vorlauftemperatur vor Temperaturabsenkung", value=85
+    "Minimum supply temperature before temperature reduction", value=85
 )
 input_data["Trl_vor"] = st.number_input(
-    "Rücklauftemperatur vor Temperautrabsenkung", value=60
+    "Return temperature before temperature reduction", value=60
 )
 input_data["Tvl_max_nach"] = st.number_input(
-    "maximale Vorlauftemperatur nach Temperaturabsenkung", value=75
+    "Maximum supply temperature after temperature reduction", value=75
 )
 input_data["Tvl_min_nach"] = st.number_input(
-    "minimale Vorlauftemperatur nach Temperaturabsenkung", value=65
+    "Minimum supply temperature after temperature reduction", value=65
 )
 input_data["Trl_nach"] = st.number_input(
-    "Rücklauftemperatur nach Temperautrabsenkung", value=40
+    "Return temperature after temperature reduction", value=40
 )
+
 
 with open("results/data.json", "w") as f:
     json.dump(input_data, f)
@@ -97,6 +98,7 @@ l_Netz = input_data["l_Netz"]
 cp_water = input_data["cp_water"]
 ηWüHüs = input_data["ηWüHüs"]
 ηWüE = input_data["ηWüE"]
+p_network = input_data["p_network"]
 
 Tvl_max_vor = input_data["Tvl_max_vor"]
 Tvl_min_vor = input_data["Tvl_min_vor"]
@@ -125,24 +127,32 @@ else:
     # Calculate the 24-hour moving average of 'Lufttemp' and add it to df_results
     df_results["Air_average"] = df_input["Lufttemp"].rolling(window=24).mean()
 
-    # Definition of T_vl, right now just a linear fkt similar to Grubers Excel tool
+    st.dataframe(df_results)
+
     def calculate_T_vl_vor(air_average):
-        return Tvl_max_vor - (1 / 15) * air_average * (
-            Tvl_max_vor - Tvl_min_vor
-        )  # Placeholder function
+        if air_average < 0:
+            return Tvl_max_vor
+        if 0 < air_average < 15:
+            return Tvl_max_vor - (1 / 15) * air_average * (Tvl_max_vor - Tvl_min_vor)
+        if air_average > 15:
+            return Tvl_min_vor
 
     def calculate_T_vl_nach(air_average):
-        return Tvl_max_nach - (1 / 15) * air_average * (
-            Tvl_max_nach - Tvl_min_nach
-        )  # Placeholder function
+        if air_average < 0:
+            return Tvl_max_nach
+        if 0 < air_average < 15:
+            return Tvl_min_nach + (1 / 15) * air_average * (Tvl_max_nach - Tvl_min_nach)
+        if air_average > 15:
+            return Tvl_min_nach
 
     # Apply the function to calculate 'T_vl'
     df_results["T_vl_vor"] = df_results["Air_average"].apply(calculate_T_vl_vor)
     df_results["T_vl_nach"] = df_results["Air_average"].apply(calculate_T_vl_nach)
+    st.dataframe(df_results)
 
     # Calculate Netzverluste
-    def calc_verlust(T_vl, T_b):
-        term1 = 4 * np.pi * ((T_vl + Trl_vor) / 2 - T_b)
+    def calc_verlust(T_vl, T_b, T_rl):
+        term1 = 4 * np.pi * ((T_vl + T_rl) / 2 - T_b)
         term2 = (1 / λD) * np.log(rM / rR)
         term3 = (1 / λB) * np.log(4 * (hÜ + rM) / rM)
         term4 = (1 / λB) * np.log(((2 * (hÜ + rM) / a + 2 * rM) ** 2 + 1) ** 0.5)
@@ -150,38 +160,37 @@ else:
 
     # Calculate Wärmelast
     def calc_totalLast(Netzverluste, Lastgang):
-        return (Lastgang + Netzverluste) / (ηWüHüs * ηWüE)
+        return (Lastgang / ηWüHüs + Netzverluste) / ηWüE
 
     def calc_VerlustProzentual(Netzverluste, Wärmelast):
         return Netzverluste / Wärmelast
 
     # Calculate Volumenstrom und Strömungsgeschwindigkeit
-    def calc_flowRate(T_vl, Wärmelast):
-        return Wärmelast / (ρ_water * cp_water * (T_vl - Trl_nach))
+    def calc_flowRate(T_vl, T_rl, Wärmelast):
+        return Wärmelast / (ρ_water * cp_water * (T_vl - T_rl))
 
     def calc_flowSpeed(flowRate):
         return (flowRate / 3600) / (((np.pi) * rR**2) / 4)
 
     # calculate Pumpleistung
 
-    def water_viscosity_CoolProp(T):
+    def water_viscosity_CoolProp(T, p_network):
         """
         Calculate water viscosity given temperature in Celsius using CoolProp.
         T : temperature (degrees Celsius)
         """
-        if pd.isna(T) or T < 0:  # add this check
-            return 0  # or some other default value
+        if pd.isna(T) or T < 0 or T > 150:  # Additional check for temperature range
+            return 0  # Return None or some other default value if out of range or NaN
 
         T_K = T + 273.15  # Convert temperature to Kelvin
         P = 101325  # Assume atmospheric pressure in Pa
 
         # Get viscosity (in Pa.s)
-        viscosity = PropsSI("V", "P", P, "T", T_K, "Water")
-
+        viscosity = PropsSI("VISCOSITY", "P", p_network, "T", T_K, "Water")
         return viscosity
 
     def calc_Reynolds(flowSpeed, T):
-        return flowSpeed * rR * ρ_water / water_viscosity_CoolProp(T)
+        return flowSpeed * rR * ρ_water / water_viscosity_CoolProp(T, p_network)
 
     def calc_pressureloss(Reynolds, flowSpeed):
         λ = 64 / Reynolds if Reynolds < 2300 else 0.3164 / Reynolds**0.25
@@ -196,12 +205,16 @@ else:
 
     # create new Netzverluste column
     df_results["Netzverluste_vor"] = df_results.apply(
-        lambda row: calc_verlust(row["T_vl_vor"], df_input["Bodentemp"][row.name]),
+        lambda row: calc_verlust(
+            row["T_vl_vor"], df_input["Bodentemp"][row.name], Trl_vor
+        ),
         axis=1,
     )
 
     df_results["Netzverluste_nach"] = df_results.apply(
-        lambda row: calc_verlust(row["T_vl_nach"], df_input["Bodentemp"][row.name]),
+        lambda row: calc_verlust(
+            row["T_vl_nach"], df_input["Bodentemp"][row.name], Trl_nach
+        ),
         axis=1,
     )
     # create new Wärmelast column
@@ -235,11 +248,11 @@ else:
 
     # create new Volumenstrom und Strömungsgeschwindigkeit column
     df_results["Volumenstrom_vor"] = df_results.apply(
-        lambda row: calc_flowRate(row["T_vl_vor"], row["Wärmelast_vor"]),
+        lambda row: calc_flowRate(row["T_vl_vor"], Trl_vor, row["Wärmelast_vor"]),
         axis=1,
     )
     df_results["Volumenstrom_nach"] = df_results.apply(
-        lambda row: calc_flowRate(row["T_vl_nach"], row["Wärmelast_nach"]),
+        lambda row: calc_flowRate(row["T_vl_nach"], Trl_nach, row["Wärmelast_nach"]),
         axis=1,
     )
     df_results["Strömungsgeschwindigkeit_vor"] = df_results.apply(
@@ -466,34 +479,51 @@ else:
 
     ##Bargraph to show the part of the Wärmelast that is due to losses in the Netz
     # Calculate the sums
-    sum_warmelast_vor = df_results["Wärmelast_vor"].sum()
-    sum_warmelast_nach = df_results["Wärmelast_nach"].sum()
+    sum_consumerload = df_input["Lastgang"].sum()
 
     sum_netzverluste_vor = df_results["Netzverluste_vor"].sum()
     sum_netzverluste_nach = df_results["Netzverluste_nach"].sum()
 
+    sum_HE_losses_vor = (
+        df_results["Wärmelast_vor"].sum() - sum_consumerload - sum_netzverluste_vor
+    )
+    sum_HE_losses_nach = (
+        df_results["Wärmelast_nach"].sum() - sum_consumerload - sum_netzverluste_nach
+    )
     # Create a DataFrame from the sums
     df_sum = pd.DataFrame(
         {
             "Warmelast": ["vor", "nach"],
-            "Wärmelast": [sum_warmelast_vor, sum_warmelast_nach],
+            "Wärmelast": [sum_consumerload, sum_consumerload],
             "Netzverluste": [sum_netzverluste_vor, sum_netzverluste_nach],
+            "HE_losses": [sum_HE_losses_vor, sum_HE_losses_nach],
         }
     )
+
+    st.dataframe(df_sum)
 
     # Create the bar plot
     fig, ax = plt.subplots()
 
     # Create the 'Wärmelast' bars
-    ax.bar(df_sum["Warmelast"], df_sum["Wärmelast"], color="#515151", label="Wärmelast")
+    ax.bar(df_sum["Warmelast"], df_sum["Wärmelast"], color="#4A6F9D", label="Wärmelast")
 
     # Add 'Netzverluste' on top
     ax.bar(
         df_sum["Warmelast"],
         df_sum["Netzverluste"],
         bottom=df_sum["Wärmelast"],
-        color="#A3A3A3",
+        color="#F9E44C",
         label="Netzverluste",
+    )
+
+    # Add 'HE_losses' on top
+    ax.bar(
+        df_sum["Warmelast"],
+        df_sum["HE_losses"],
+        bottom=df_sum["Wärmelast"] + df_sum["Netzverluste"],
+        color="#AEE36E",
+        label="HE losses",
     )
 
     ax.set_xlabel("Warmelast")
