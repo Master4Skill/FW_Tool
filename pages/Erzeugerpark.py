@@ -43,15 +43,26 @@ Tvl_max_nach = input_data["Tvl_max_nach"]
 Tvl_min_nach = input_data["Tvl_min_nach"]
 Trl_nach = input_data["Trl_nach"]
 
+# Load the CSV file
+data = pd.read_csv(
+    "Zeitreihen/zeitreihen_22.csv", delimiter=";", dtype={"Einstrahlung_22": str}
+)
+
+# Convert the 'Einstrahlung_22' column from strings with commas to floats
+data["Einstrahlung_22"] = data["Einstrahlung_22"].str.replace(",", ".").astype(float)
+
+# Get the 'Einstrahlung_22' column
+irradiation_data = data["Einstrahlung_22"]
+
 
 color_dict = {
-    "♨️ Abwärme - begrenzter Volumenstrom der Quelle (m³/h), Abwärmetemperatur konstant über Netztemperatur (°C)": "#639729",
-    "🚰 Wärmepumpe1 - begrenzter Volumenstrom der Quelle (m³/h), Quelltemperatur konstant (°C)": "#1F4E79",
-    "🌊 Wärmepumpe2 - Begrenzte Leistung (kW), bei schwankender Quelltemperatur (°C)": "#F7D507",
-    "⛰️ Geothermie - Maximale Leistung (kW)": "#DD2525",
-    "☀️ Solarthermie - Sonneneinstrahlung (kW/m²)": "#92D050",
-    "🔥 Spitzenlastkessel - Maximale Leistung (kW)": "#EC9302",
-    "🏭 BHKW - Maximale Leistung (kW)": "#639729",
+    "♨️ waste heat - begrenzter Volumenstrom der Quelle (m³/h), Abwärmetemperatur konstant über Netztemperatur (°C)": "#639729",
+    "🚰 heatpump-1 - begrenzter Volumenstrom der Quelle (m³/h), Quelltemperatur konstant (°C)": "#1F4E79",
+    "🌊 heatpump-2 - Begrenzte Leistung (kW), bei schwankender Quelltemperatur (°C)": "#F7D507",
+    "⛰️ geothermal  - Maximale Leistung (kW)": "#DD2525",
+    "☀️ solarthermal - Sonneneinstrahlung (kW/m²)": "#92D050",
+    "🔥 PLB - Maximale Leistung (kW)": "#EC9302",
+    "🏭 CHP - Maximale Leistung (kW)": "#EC9302",
 }
 
 
@@ -86,6 +97,8 @@ df_input = df_input.sort_values(by="Zeit")
 # st.dataframe(df_input)
 
 erzeugerpark = []
+erzeugerpark_dict = {}
+
 
 # Maximum Anzahl an Erzeuger Eingaben
 max_erzeuger = 7
@@ -99,20 +112,20 @@ for i in range(anzahl_erzeuger):
     erzeuger_type = st.selectbox(
         f"Bitte den Typ des Erzeugers {i+1} auswählen",
         [
-            "♨️ Abwärme - begrenzter Volumenstrom der Quelle (m³/h), Abwärmetemperatur konstant über Netztemperatur (°C)",
-            "🚰 Wärmepumpe1 - begrenzter Volumenstrom der Quelle (m³/h), Quelltemperatur konstant (°C)",
-            "🌊 Wärmepumpe2 - Begrenzte Leistung (kW), bei schwankender Quelltemperatur (°C)",
-            "⛰️ Geothermie - Maximale Leistung (kW)",
-            "☀️ Solarthermie - Sonneneinstrahlung (kW/m²)",
-            "🔥 Spitzenlastkessel - Maximale Leistung (kW)",
-            "🏭 BHKW - Maximale Leistung (kW)",
+            "♨️ waste heat - begrenzter Volumenstrom der Quelle (m³/h), Abwärmetemperatur konstant über Netztemperatur (°C)",
+            "🚰 heatpump-1 - begrenzter Volumenstrom der Quelle (m³/h), Quelltemperatur konstant (°C)",
+            "🌊 heatpump-2 - Begrenzte Leistung (kW), bei schwankender Quelltemperatur (°C)",
+            "⛰️ geothermal  - Maximale Leistung (kW)",
+            "☀️ solarthermal - Sonneneinstrahlung (kW/m²)",
+            "🔥 PLB - Maximale Leistung (kW)",
+            "🏭 CHP - Maximale Leistung (kW)",
         ],
         key=f"Erzeuger{i}",
     )
 
     erzeuger_color = color_dict[erzeuger_type]
 
-    if "Abwärme" in erzeuger_type:
+    if "waste heat" in erzeuger_type:
         Volumenstrom_quelle = st.number_input(
             "Bitte Volumenstrom_quelle eingeben (m³/h)",
             value=10,
@@ -121,17 +134,17 @@ for i in range(anzahl_erzeuger):
         Abwärmetemperatur = st.number_input(
             "Bitte Quelltemperatur eingeben (°C)", value=120, key=f"Quelltemperatur{i}"
         )
-        erzeuger = ep.Abwärme(
+        erzeuger = ep.waste_heat(
             Volumenstrom_quelle,
             Abwärmetemperatur,
             color=erzeuger_color,
             co2_emission_factor=0,
         )
 
-    elif "Wärmepumpe1" in erzeuger_type:
+    elif "heatpump-1" in erzeuger_type:
         Volumenstrom_quelle = st.number_input(
             "Bitte Volumenstrom_quelle eingeben (m³/h)",
-            value=100,
+            value=200,
             key=f"Volumenstrom_quelle{i}",
         )
         T_q = st.number_input(
@@ -141,7 +154,7 @@ for i in range(anzahl_erzeuger):
             "Bitte Gütegrad Wasser-Wasser angeben", value=0.45, key=f"Gütegrad{i}"
         )
         # Leistung_max = st.number_input("Bitte maximale Leistung eingeben (kW)", key=f"Leistung_max{i}")
-        erzeuger = ep.Waermepumpe1(
+        erzeuger = ep.heatpump_1(
             Volumenstrom_quelle,
             T_q,
             Gütegrad,
@@ -149,23 +162,20 @@ for i in range(anzahl_erzeuger):
             co2_emission_factor=0.468,
         )
 
-    elif "Wärmepumpe2" in erzeuger_type:
+    elif "heatpump-2" in erzeuger_type:
         Leistung_max = st.number_input(
-            "Bitte maximale Leistung eingeben (kW)", value=5000, key=f"Leistung_max{i}"
-        )
-        T_q = st.number_input(
-            "Bitte Quelltemperatur eingeben (°C)", value=20, key=f"T_q{i}"
+            "Bitte maximale Leistung eingeben (kW)", value=2500, key=f"Leistung_max{i}"
         )
         Gütegrad = st.number_input(
             "Bitte Gütegrad Wasser-Wasser angeben", value=0.45, key=f"Gütegrad{i}"
         )
-        erzeuger = ep.Waermepumpe2(
-            Leistung_max, T_q, Gütegrad, color=erzeuger_color, co2_emission_factor=0.468
+        erzeuger = ep.heatpump_2(
+            Leistung_max, Gütegrad, color=erzeuger_color, co2_emission_factor=0.468
         )
 
-    elif "Geothermie" in erzeuger_type:
+    elif "geothermal" in erzeuger_type:
         Leistung_max = st.number_input(
-            "Bitte maximale Leistung eingeben (kW)", value=3000, key=f"Leistung_max{i}"
+            "Bitte maximale Leistung eingeben (kW)", value=2000, key=f"Leistung_max{i}"
         )
         Tgeo = st.number_input(
             "Bitte Temperatur der Geothermie eingeben (°C)", value=100, key=f"Tgeo{i}"
@@ -178,7 +188,7 @@ for i in range(anzahl_erzeuger):
             value=0.8,
             key=f"η_geo{i}",
         )
-        erzeuger = ep.Geothermie(
+        erzeuger = ep.geothermal(
             Leistung_max,
             Tgeo,
             h_förder,
@@ -187,30 +197,21 @@ for i in range(anzahl_erzeuger):
             co2_emission_factor=0.468,
         )
 
-    elif "Solarthermie" in erzeuger_type:
+    elif "solarthermal" in erzeuger_type:
         Irradiance = st.number_input(
-            "Please Enter the Irradiance (kW/m²)", key=f"Irradiance{i}"
+            "Please Enter the Irradiance (kW/m²)",
+            key=f"Irradiance{i}",
+            value=1,
         )
 
         solar_area = st.number_input(
             "Please Enter the total Area of Solarthermal Collectors (m²)",
-            value=1000,
+            value=10000,
             key=f"solar_area{i}",
-        )
-
-        N_collectors = st.number_input(
-            "Please Enter the Number of Solarthermal Collectors",
-            value=1,
-            key=f"N_collectors{i}",
         )
 
         expander = st.expander("Additional Solar Parameters")
         with expander:
-            η_solar_pump = st.number_input(
-                "Please Enter the Efficiency of the pump in the Solarthermal System (%)",
-                value=0.6,
-                key=f"η_solar_pump{i}",
-            )
             k_s_1 = st.number_input(
                 "Please Enter the Heat Loss Coefficient of the Solarthermal System (kW/m²K)",
                 value=0.0015,
@@ -233,62 +234,43 @@ for i in range(anzahl_erzeuger):
                 value=0.9,
                 key=f"τ{i}",
             )
-            d_s = st.number_input(
-                "Please Enter the Diameter of the Solarthermal Pipes (m)",
-                value=0.025,
-                key=f"d_s{i}",
-            )
 
-            A_s_pipes = st.number_input(
-                "Please Enter the Area of the Solarthermal Pipes (m²)",
-                value=0.000490874,
-                key=f"A_s_pipes{i}",
-            )
-
-            ζ_s = st.number_input(
-                "Please Enter the Friction Coefficient of the Solarthermal Pipes",
-                value=0.015,
-                key=f"ζ_s{i}",
-            )
-
-        erzeuger = ep.Solarthermie(
+        erzeuger = ep.solarthermal(
             Irradiance,
-            η_solar_pump,
             solar_area,
             k_s_1,
             k_s_2,
             α,
             τ,
-            d_s,
-            A_s_pipes,
-            ζ_s,
             color=erzeuger_color,
+            co2_emission_factor=0,
         )
 
-    elif "Spitzenlastkessel" in erzeuger_type:
+    elif "PLB" in erzeuger_type:
         Leistung_max = st.number_input(
             "Bitte maximale Leistung eingeben (kW)", value=10000, key=f"Leistung_max{i}"
         )
-        erzeuger = ep.Spitzenlastkessel(
-            Leistung_max, color=erzeuger_color, co2_emission_factor=0.201
-        )
+        erzeuger = ep.PLB(Leistung_max, color=erzeuger_color, co2_emission_factor=0.201)
 
-    elif "BHKW" in erzeuger_type:
+    elif "CHP" in erzeuger_type:
         Leistung_max = st.number_input(
             "Bitte maximale Leistung eingeben (kW)",
             value=5000,
             key=f"Leistung_max{i}",
         )
-        erzeuger = ep.BHKW(
-            Leistung_max, color=erzeuger_color, co2_emission_factor=0.201
-        )
+        erzeuger = ep.CHP(Leistung_max, color=erzeuger_color, co2_emission_factor=0.201)
     else:
         st.write("Bitte wählen Sie einen gültigen Erzeugertyp aus")
 
     erzeugerpark.append(erzeuger)
 
 names = [obj.__class__.__name__ for obj in erzeugerpark]
-print(erzeugerpark)
+
+my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names)}
+
+st.write(my_dict)
+
+print(my_dict)
 print(names)
 
 if st.button("Calculate"):
@@ -297,6 +279,7 @@ if st.button("Calculate"):
     # st.dataframe(df_erzeuger)
     st.write(erzeugerpark)
     df_input = df_input.iloc[:-2]
+    # df_input = df_input.reset_index(drop=True)
 
     erzeuger_df_vor = pd.DataFrame(index=df_input.index)
     erzeuger_df_vor.index = df_input.index
@@ -461,36 +444,28 @@ if st.button("Calculate"):
     st.write(f"Die gesamte CO2 Emission nach T-Absenkung:    {total_sum_co22} kg")
 
     # Export a DataFrame with the COP of the Heat Pumps as json, in oder to use FlixOpt for Storageoptimization
+    # Pfad zur CSV-Datei
+    file_name = "Zeitreihen/zeitreihen_22.csv"
+
+    # Lesen der benötigten Daten aus der CSV-Datei
+    df_zeitreihen = pd.read_csv(file_name, sep=";")
+
     COP_df = pd.DataFrame(index=df_input.index)
     COP_df.index = df_input.index
     for i, erzeuger in enumerate(erzeugerpark):
         # Check the type of the 'erzeuger'
-        if isinstance(erzeuger, (ep.Waermepumpe1, ep.Waermepumpe2)):
+        if isinstance(erzeuger, (ep.heatpump_1, ep.heatpump_2, ep.geothermal)):
             COP = [
                 erzeuger.calc_COP(
                     df_results.loc[hour, "T_vl_vor"],
+                    Trl_vor,
+                    df_zeitreihen.loc[hour, "Isartemp"],
                 )
                 for hour in df_input.index
             ]
-            COP_df[f"Erzeuger_{i+1}_vor"] = COP
+            COP_df[erzeuger.get_class_name()] = COP
 
-    print(COP_df.iloc[23:])
     COP_df.to_json("results/COP_vor_df.json", orient="columns")
-
-    COP_df = pd.DataFrame(index=df_input.index)
-    COP_df.index = df_input.index
-    for i, erzeuger in enumerate(erzeugerpark):
-        # Check the type of the 'erzeuger'
-        if isinstance(erzeuger, (ep.Waermepumpe1, ep.Waermepumpe2)):
-            COP = [
-                erzeuger.calc_COP(
-                    df_results.loc[hour, "T_vl_nach"],
-                )
-                for hour in df_input.index
-            ]
-            COP_df[f"Erzeuger_{i+1}_nach"] = COP
-
-    print(COP_df.iloc[23:])
 
     # Define color list
     color_FFE = [erzeuger.color for erzeuger in erzeugerpark]
@@ -508,31 +483,43 @@ if st.button("Calculate"):
         st.header("Erzeugungsgang")
         st.subheader("vor")
         sorted_df_vor = plot_actual_production(
-            df_input, actual_production_df_vor, color_FFE, "Erzeugungsgang vor"
+            df_input,
+            actual_production_df_vor,
+            color_FFE,
+            "Generation load curve berfore",
+            my_dict,
+            0,
         )
         st.subheader("nach")
         sorted_df_nach = plot_actual_production(
-            df_input, actual_production_df_nach, color_FFE, "Erzeugungsgang nach"
+            df_input,
+            actual_production_df_nach,
+            color_FFE,
+            "Generation load curve after",
+            my_dict,
+            0,
         )
 
     # Create the second container
     with st.container():
-        st.header("Jahresdauerlinie")
-        st.subheader("vor")
+        st.header("Annual duration line")
+        st.subheader("before")
         plot_df_vor = plot_sorted_production(
             df_input,
             sorted_df_vor,
             actual_production_df_vor,
             color_FFE,
-            "Jahresdauerlinie vor",
+            "Annual duration line before",
+            my_dict,
         )
-        st.subheader("nach")
+        st.subheader("after")
         plot_df_nach = plot_sorted_production(
             df_input,
             sorted_df_nach,
             actual_production_df_nach,
             color_FFE,
-            "Jahresdauerlinie nach",
+            "Annual duration line after",
+            my_dict,
         )
 
     plot_power_usage(Power_df_vor, Power_df_nach, color_FFE)
@@ -545,8 +532,9 @@ if st.button("Calculate"):
         "nach",
         "Erzeuger",
         "Change in Production",
-        "Erzeuger",
-        "Total Production [kWh]",
+        "",
+        "Total Production [GWh]",
+        my_dict,
     )
 
     plot_total_change(
@@ -557,8 +545,9 @@ if st.button("Calculate"):
         "nach",
         "Erzeuger",
         "Change in CO2 Emissions",
-        "Erzeuger",
-        "Total Emissions [kg CO2]",
+        "",
+        "Total Emissions [kt CO2]",
+        my_dict,
     )
 
     plot_total_change(
@@ -569,8 +558,9 @@ if st.button("Calculate"):
         "nach",
         "Erzeuger",
         "Change in Power Usage",
-        "Erzeuger",
-        "Total Usage [kWh]",
+        "",
+        "Total Usage [GWh]",
+        my_dict,
     )
 
     st.sidebar.success("Simulation erfolgreich")

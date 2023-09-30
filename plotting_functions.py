@@ -17,26 +17,79 @@ color_dict = {
 }
 
 
-def plot_actual_production(df_input, actual_production_df, color_FFE, title):
+def plot_actual_production(
+    df_input, actual_production_df, color_FFE, title, my_dict, start_hour
+):
     fig, ax = plt.subplots(figsize=(12, 6))
 
     lastgang_plot = df_input["Lastgang"].plot.area(
-        ax=ax, color="#E0E0E0", linewidth=0, zorder=1, alpha=0.5, label="Lastgang"
+        ax=ax, color="#E0E0E0", linewidth=0, zorder=1, alpha=0.5, label="Load profile"
     )
-
+    actual_production_df.index = range(
+        start_hour, start_hour + len(actual_production_df)
+    )
     area_plot = actual_production_df.plot.area(
         ax=ax, color=color_FFE, linewidth=0, zorder=2, alpha=0.7
     )
 
+    # Get the current labels
     handles, labels = ax.get_legend_handles_labels()
     handles.append(lastgang_plot.get_legend_handles_labels()[0][0])
-    ax.legend(handles=handles, labels=labels)
 
-    plt.xlabel("hours")
-    plt.ylabel("Erzeugung pro Stunde [kWh]")
-    plt.title(title)
-    plt.grid(True)
+    # Create a new list of labels using a mapping dictionary
+    new_labels = []
+    for label in labels:
+        split_label = label.split("_")
+        if len(split_label) >= 2:
+            key = split_label[0] + "_" + split_label[1]
+            new_labels.append(my_dict.get(key, label))
+        else:
+            new_labels.append(label)
 
+    # Set the new labels
+    ax.legend(
+        handles=handles,
+        labels=new_labels,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.15),
+        ncol=3,
+        frameon=False,
+        fontsize=16,
+        facecolor="white",
+        edgecolor="white",
+        title_fontsize="16",
+        labelcolor="#777777",
+    )
+
+    # Set labels with specified font properties
+    ax.set_xlabel(
+        "Time [h]", fontsize=16, color="#777777", fontfamily="Segoe UI SemiLight"
+    )
+    ax.set_ylabel(
+        "Production [kW]", fontsize=16, color="#777777", fontfamily="Segoe UI SemiLight"
+    )
+
+    # Set title with specified font properties
+    ax.set_title(title, fontsize=16, color="#777777", fontfamily="Segoe UI SemiLight")
+
+    # Set tick parameters
+    ax.tick_params(axis="both", which="major", labelsize=16, colors="#777777")
+
+    # Set spine colors and widths
+    ax.spines["bottom"].set_edgecolor("#A3A3A3")
+    ax.spines["bottom"].set_linewidth(1)
+    ax.spines["left"].set_edgecolor("#A3A3A3")
+    ax.spines["left"].set_linewidth(1)
+
+    # Set grid
+    ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
+
+    # Set background color and hide the top and right spines
+    ax.set_facecolor("white")
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    # Display the plot
     st.pyplot(fig)
 
     sorted_df = actual_production_df.copy()
@@ -46,29 +99,85 @@ def plot_actual_production(df_input, actual_production_df, color_FFE, title):
     return sorted_df
 
 
-def plot_sorted_production(df_input, sorted_df, actual_production_df, color_FFE, title):
+def plot_sorted_production(
+    df_input, sorted_df, actual_production_df, color_FFE, title, my_dict
+):
     fig, ax = plt.subplots(figsize=(12, 6))
 
+    # Your existing plot commands
     lastgang_plot = (
         df_input["Lastgang"]
         .sort_values(ascending=False)
         .reset_index(drop=True)
-        .plot.area(ax=ax, color="#E0E0E0", linewidth=0, zorder=1, alpha=0.5)
+        .plot.area(
+            ax=ax,
+            color="#E0E0E0",
+            linewidth=0,
+            zorder=1,
+            alpha=0.5,
+            label="Load profile",
+        )
     )
-
     area_plot = sorted_df.plot.area(
         ax=ax, color=color_FFE, linewidth=0, zorder=2, alpha=0.7
     )
 
+    # Adjusting legends as in your script
     handles, labels = ax.get_legend_handles_labels()
     handles.append(lastgang_plot.get_legend_handles_labels()[0][0])
-    ax.legend(handles=handles, labels=labels)
+    new_labels = [
+        my_dict.get(label.split("_")[0] + "_" + label.split("_")[1], label)
+        if len(label.split("_")) >= 2
+        else label
+        for label in labels
+    ]
 
-    plt.xlabel("hours")
-    plt.ylabel("kWh")
-    plt.title(title)
-    plt.grid(True)
+    # Applying similar styles as in your first plot
+    ax.set_xlabel(
+        "Time [h]", fontsize=16, color="#777777", fontfamily="Segoe UI SemiLight"
+    )
+    ax.set_ylabel(
+        "Production [kW]", fontsize=16, color="#777777", fontfamily="Segoe UI SemiLight"
+    )
 
+    ax.xaxis.label.set_color("#A3A3A3")
+    ax.tick_params(axis="x", colors="#A3A3A3", direction="out", which="both")
+    ax.spines["bottom"].set_edgecolor("#A3A3A3")
+    ax.spines["bottom"].set_linewidth(1)
+
+    ax.yaxis.label.set_color("#A3A3A3")
+    ax.tick_params(axis="y", colors="#A3A3A3", direction="out", which="both")
+    ax.spines["left"].set_edgecolor("#A3A3A3")
+    ax.spines["left"].set_linewidth(1)
+
+    ax.tick_params(axis="both", which="major", labelsize=16, colors="#777777")
+
+    ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
+
+    ax.set_title(title, fontsize=16, color="#777777", fontfamily="Segoe UI SemiLight")
+
+    ax.legend(
+        handles=handles,
+        labels=new_labels,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.15),
+        ncol=3,
+        frameon=False,
+        fontsize=16,
+        facecolor="white",
+        edgecolor="white",
+        title_fontsize="16",
+        labelcolor="#777777",
+    )
+
+    ax.set_facecolor("white")
+    for spine in ["top", "right"]:
+        ax.spines[spine].set_visible(False)
+
+    # Adjusting y-limit as in your script
+    plt.ylim(0, 20000)
+
+    # Display the plot (assuming you're using Streamlit)
     st.pyplot(fig)
 
     plot_df = actual_production_df.copy()
@@ -99,7 +208,7 @@ def lighten_color(color, amount=0.5):
     return colorsys.hls_to_rgb(c[0], 1 - amount * (1 - c[1]), c[2])
 
 
-def plot_power_usage(Power_df_vor, Power_df_nach, color_FFE):
+def plot_power_usage2(Power_df_vor, Power_df_nach, color_FFE):
     num_of_erzeuger = len(color_FFE)
 
     for i in range(num_of_erzeuger):
@@ -116,42 +225,232 @@ def plot_power_usage(Power_df_vor, Power_df_nach, color_FFE):
             Power_df_vor.index,
             Power_df_vor[f"Erzeuger_{i+1}_vor"],
             color=color_FFE[i],
-            label="vor",
+            label="before",
         )
         plt.plot(
             Power_df_nach.index,
             Power_df_nach[f"Erzeuger_{i+1}_nach"],
             color=lighten_color(color_FFE[i]),
-            label="nach",
+            label="after",
         )
 
         plt.title(f"Erzeuger {i+1} Power Usage")
         plt.xlabel("Time")
-        plt.ylabel("Power Usage [kW/h]")
+        plt.ylabel("Power Usage [kW]")
         plt.grid(True)
         plt.legend()
 
         st.pyplot(plt.gcf())
 
 
+def plot_power_usage(Power_df_vor, Power_df_nach, color_FFE):
+    num_of_erzeuger = len(color_FFE)
+
+    for i in range(num_of_erzeuger):
+        # Check if all entries in the respective columns are zero
+        if (
+            Power_df_vor[f"Erzeuger_{i+1}_vor"].sum() == 0
+            and Power_df_nach[f"Erzeuger_{i+1}_nach"].sum() == 0
+        ):
+            continue
+
+        fig, ax = plt.subplots(figsize=(12, 6))
+
+        ax.plot(
+            Power_df_vor.index,
+            Power_df_vor[f"Erzeuger_{i+1}_vor"],
+            linestyle="-",
+            linewidth=2,
+            color=color_FFE[i],
+            label="before",
+        )
+        ax.plot(
+            Power_df_nach.index,
+            Power_df_nach[f"Erzeuger_{i+1}_nach"],
+            linestyle="-",
+            linewidth=2,
+            color=lighten_color(color_FFE[i]),  # Adjust the color as needed
+            label="after",
+        )
+
+        ax.set_xlabel(
+            "Time",
+            fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
+        )
+        ax.set_ylabel(
+            "Power Usage [kW]",
+            fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
+        )
+
+        ax.xaxis.label.set_color("#A3A3A3")
+        ax.tick_params(axis="x", colors="#A3A3A3", direction="out", which="both")
+        ax.spines["bottom"].set_edgecolor("#A3A3A3")
+        ax.spines["bottom"].set_linewidth(1)
+
+        ax.yaxis.label.set_color("#A3A3A3")
+        ax.tick_params(axis="y", colors="#A3A3A3", direction="out", which="both")
+        ax.spines["left"].set_edgecolor("#A3A3A3")
+        ax.spines["left"].set_linewidth(1)
+
+        ax.tick_params(axis="both", which="major", labelsize=16, colors="#777777")
+
+        ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
+
+        ax.set_title(
+            f"Erzeuger {i+1} Power Usage",
+            fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
+        )
+
+        ax.legend(
+            loc="upper center",
+            bbox_to_anchor=(0.5, -0.15),
+            ncol=2,
+            frameon=False,
+            fontsize=16,
+            facecolor="white",
+            edgecolor="white",
+            title_fontsize="16",
+            labelcolor="#777777",
+        )
+
+        ax.set_facecolor("white")
+        for spine in ["top", "right"]:
+            ax.spines[spine].set_visible(False)
+
+        st.pyplot(fig)
+
+
+import matplotlib.pyplot as plt
+
+
+def plot_power_usage_storage(Power_df_nach, color_FFE):
+    num_of_erzeuger = len(color_FFE)
+
+    for i in range(num_of_erzeuger):
+        # Check if all entries in the respective columns are zero
+        if Power_df_nach[f"Erzeuger_{i+1}_nach"].sum() == 0:
+            continue
+
+        fig, ax = plt.subplots(figsize=(12, 6))
+
+        ax.plot(
+            Power_df_nach.index,
+            Power_df_nach[f"Erzeuger_{i+1}_nach"],
+            linestyle="-",
+            linewidth=2,
+            color=color_FFE[i],
+            label="nach",
+        )
+
+        ax.set_xlabel(
+            "Time",
+            fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
+        )
+        ax.set_ylabel(
+            "Power Usage [kW]",
+            fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
+        )
+
+        ax.xaxis.label.set_color("#A3A3A3")
+        ax.tick_params(axis="x", colors="#A3A3A3", direction="out", which="both")
+        ax.spines["bottom"].set_edgecolor("#A3A3A3")
+        ax.spines["bottom"].set_linewidth(1)
+
+        ax.yaxis.label.set_color("#A3A3A3")
+        ax.tick_params(axis="y", colors="#A3A3A3", direction="out", which="both")
+        ax.spines["left"].set_edgecolor("#A3A3A3")
+        ax.spines["left"].set_linewidth(1)
+
+        ax.tick_params(axis="both", which="major", labelsize=16, colors="#777777")
+
+        ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
+
+        ax.set_title(
+            f"Erzeuger {i+1} Power Usage",
+            fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
+        )
+
+        ax.legend(
+            loc="upper center",
+            bbox_to_anchor=(0.5, -0.15),
+            ncol=1,  # Adjusted ncol to 1, as we only have one series to plot now
+            frameon=False,
+            fontsize=16,
+            facecolor="white",
+            edgecolor="white",
+            title_fontsize="16",
+            labelcolor="#777777",
+        )
+
+        ax.set_facecolor("white")
+        for spine in ["top", "right"]:
+            ax.spines[spine].set_visible(False)
+
+        # Replace with your plot display function if not using streamlit
+        # st.pyplot(fig)
+        st.pyplot(fig)
+
+
+# Don't forget to import lighten_color function or remove it if it's not required.
+
+
 def plot_total_change(
-    df1, df2, color_FFE, label1, label2, column_name, title, x_label, y_label
+    df1, df2, color_FFE, label1, label2, column_name, title, x_label, y_label, my_dict
 ):
     df1_sum = pd.DataFrame(df1.sum(), columns=["Value"])
     df1_sum["Status"] = label1
-    df1_sum[column_name] = df1_sum.index.str.replace("_" + label1.lower(), "")
+    df1_sum["Original_Index"] = range(len(df1_sum))
+    # df1_sum[column_name] = df1_sum.index.str.replace("_" + label1.lower(), "")
 
     df2_sum = pd.DataFrame(df2.sum(), columns=["Value"])
     df2_sum["Status"] = label2
-    df2_sum[column_name] = df2_sum.index.str.replace("_" + label2.lower(), "")
+    df2_sum["Original_Index"] = range(len(df2_sum))
+    # df2_sum[column_name] = df2_sum.index.str.replace("_" + label2.lower(), "")
+
+    def get_new_label(old_label):
+        split_label = old_label.split("_")
+        if len(split_label) >= 2:
+            key = split_label[0] + "_" + split_label[1]
+            return my_dict.get(
+                key, old_label
+            )  # Use original label if key not found in my_dict
+        else:
+            return old_label  # Use original label if it doesn't contain at least two underscores
+
+    df1_sum[column_name] = df1_sum.index.to_series().apply(get_new_label)
+    df2_sum[column_name] = df2_sum.index.to_series().apply(get_new_label)
+
+    df1_sum["Value"] = df1_sum["Value"] / 1e6
+    df2_sum["Value"] = df2_sum["Value"] / 1e6
 
     # Concatenate the two DataFrames
     sum_df = pd.concat([df1_sum, df2_sum])
     st.dataframe(sum_df)
+
+    total_value_sum = df1_sum["Value"].sum()
+    st.write(f"Total sum og GWh before: {total_value_sum}")
+
+    total_value_sum = df2_sum["Value"].sum()
+    st.write(f"Total sum of values: {total_value_sum}")
+
+    # st.dataframe(df2_sum)
     # Remove rows with value 0
     sum_df = sum_df[sum_df["Value"] != 0]
     # Sort the DataFrame
-    sum_df.sort_values(by=[column_name, "Status"], inplace=True)
+    sum_df.sort_values(by=["Original_Index", "Status"], inplace=True)
+    # sum_df.sort_values(by=[column_name, "Status"], inplace=True)
 
     # Reset index
     sum_df.reset_index(drop=True, inplace=True)
@@ -159,11 +458,14 @@ def plot_total_change(
     # Calculate the total for each status
     total_1 = sum_df[sum_df["Status"] == label1]["Value"].sum()
     total_2 = sum_df[sum_df["Status"] == label2]["Value"].sum()
-    st.write(color_FFE)
+    # st.write(color_FFE)
     # Define color palette
-    palette = {label1: "#E6E6E6", label2: "#0033A0"}
+    palette = {label1: "#3795D5", label2: "#D7E6F5"}
 
     # palette = {label1: color_FFE[0], label2: color_FFE[1]}
+
+    font_color = "#777777"
+    font_family = "Segoe UI SemiLight"
 
     # Plotting with seaborn
     plt.figure(figsize=(10, 6))
@@ -175,6 +477,35 @@ def plot_total_change(
         palette=palette,
         hue_order=[label1, label2],
     )
+
+    # Applying the custom styles
+    bar_plot.set_xlabel(x_label, fontsize=16, color=font_color, fontfamily=font_family)
+    bar_plot.set_ylabel(y_label, fontsize=16, color=font_color, fontfamily=font_family)
+    bar_plot.set_title(title, fontsize=16, color=font_color, fontfamily=font_family)
+
+    # Set the tick parameters
+    bar_plot.tick_params(axis="both", which="major", labelsize=16, colors=font_color)
+
+    plt.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.15),
+        ncol=2,  # Adjust as necessary
+        frameon=False,
+        fontsize=16,
+        title_fontsize="16",
+        labelcolor=font_color,
+    )
+    # Set the color and width of the spines
+    for spine in ["bottom", "left"]:
+        bar_plot.spines[spine].set_edgecolor("#A3A3A3")
+        bar_plot.spines[spine].set_linewidth(1)
+
+    # Hide the top and right spines
+    for spine in ["top", "right"]:
+        bar_plot.spines[spine].set_visible(False)
+
+    # Set the background color
+    bar_plot.set_facecolor("white")
 
     # Get the number of unique x-values (i.e., the number of groups of bars)
     num_groups = len(sum_df[column_name].unique())

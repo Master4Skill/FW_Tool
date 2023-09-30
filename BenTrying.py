@@ -65,4 +65,87 @@ You might want to consider creating a more systematic way of generating these li
     # BHKW
     K_p7 = 0
     PL_p7 = 0.1
+
+        df_results["pressure_loss_vl"] = df_results.apply(
+        lambda row: calc_pressureloss(
+            calc_Reynolds(row["Strömungsgeschwindigkeit_vor"], row["T_vl_vor"]),
+            row["Strömungsgeschwindigkeit_vor"],
+        ),
+        axis=1,
+    )
+    df_results["pressure_loss_rl"] = df_results.apply(
+        lambda row: calc_pressureloss(
+            calc_Reynolds(row["Strömungsgeschwindigkeit_vor"], Trl_vor),
+            row["Strömungsgeschwindigkeit_vor"],
+        ),
+        axis=1,
+    )
+    df_results["Reynolds_vl"] = df_results.apply(
+        lambda row: calc_Reynolds(row["Strömungsgeschwindigkeit_vor"], row["T_vl_vor"]),
+        axis=1,
+    )
+    df_results["Reynolds_rl"] = df_results.apply(
+        lambda row: calc_Reynolds(row["Strömungsgeschwindigkeit_nach"], Trl_vor),
+        axis=1,
+    )
+    df_results["viscosity_vor"] = df_results.apply(
+        lambda row: water_viscosity_CoolProp(row["T_vl_vor"], p_network), axis=1
+    )
+    print(df_results.loc[0, "viscosity_vor"])
+    df_results["viscosity_nach"] = df_results.apply(
+        lambda row: water_viscosity_CoolProp(row["T_vl_nach"], p_network), axis=1
+    )
+
     """
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import streamlit as st
+import numpy as np
+from CoolProp.CoolProp import PropsSI
+from streamlit_extras.app_logo import add_logo
+from PIL import Image
+import sys
+import json
+from scipy.interpolate import interp1d
+
+# Load the data from the json file
+with open("results/data.json", "r") as f:
+    input_data = json.load(f)
+
+λD = input_data["λD"]
+λB = input_data["λB"]
+rM = input_data["rM"]
+rR = input_data["rR"]
+hÜ = input_data["hÜ"]
+a = input_data["a"]
+ζ = input_data["ζ"]
+l_Netz = input_data["l_Netz"]
+ηPump = input_data["ηPump"]
+ρ_water = input_data["ρ_water"]
+cp_water = input_data["cp_water"]
+ηWüHüs = input_data["ηWüHüs"]
+ηWüE = input_data["ηWüE"]
+p_network = input_data["p_network"]
+
+Tvl_max_vor = input_data["Tvl_max_vor"]
+Tvl_min_vor = input_data["Tvl_min_vor"]
+Trl_vor = input_data["Trl_vor"]
+Tvl_max_nach = input_data["Tvl_max_nach"]
+Tvl_min_nach = input_data["Tvl_min_nach"]
+Trl_nach = input_data["Trl_nach"]
+
+from matplotlib import font_manager
+
+fonts = font_manager.findSystemFonts(fontpaths=None, fontext="ttf")
+
+font_names = []
+for font in fonts:
+    try:
+        font_names.append(font_manager.FontProperties(fname=font).get_name())
+    except RuntimeError:
+        print(f"Could not retrieve the name for font: {font}")
+        continue
+
+for font_name in font_names:
+    print(font_name)

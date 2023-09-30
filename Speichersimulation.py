@@ -42,16 +42,6 @@ def plot_data3(df, strompreise_export, strompreise):
         linewidth=1,
     )
 
-    # Plot electricity prices on the second subplot
-    axs[1].plot(
-        df.index,
-        strompreise_export,
-        label="strompreise_export",
-        color="magenta",
-        linewidth=1,
-    )
-    axs[1].plot(df.index, strompreise, label="strompreise", color="teal", linewidth=1)
-
     # Set labels and title
     axs[0].set_xlabel("Time Step")
     axs[0].set_ylabel("Energy Values")
@@ -80,6 +70,16 @@ def plot_data3(df, strompreise_export, strompreise):
 
 def plot_data2(df, strompreise_export, strompreise):
     fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Plot electricity prices on the second subplot
+    axs[1].plot(
+        df.index,
+        strompreise_export,
+        label="strompreise_export",
+        color="magenta",
+        linewidth=1,
+    )
+    axs[1].plot(df.index, strompreise, label="strompreise", color="teal", linewidth=1)
 
     # Prepare data for producers and s_out
     cumulative = np.zeros_like(df.index, dtype=np.float64)

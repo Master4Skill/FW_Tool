@@ -43,9 +43,10 @@ with expander:
     input_data["hÜ"] = st.number_input(
         "Minimum Cover Height (m)", value=(1 - input_data["rM"])
     )
-    input_data["ρ_water"] = st.number_input("Water Density (g/cm³)", value=0.98)
-    input_data["cp_water"] = st.number_input(
-        "Specific Heat Capacity of Water (Wh/kg·K)", value=1.162
+    input_data["ρ_water"] = st.number_input("Water Density (kg/m³)", value=980)
+    input_data["cp_water"] = (
+        st.number_input("Specific Heat Capacity of Water (J/kg·K)", value=4184)
+        / 3600000
     )
     input_data["ρ_glycol_water"] = st.number_input(
         "Densitiy Glykol-Water Mixture in solarthermal units (kg/m³)", value=1025
@@ -84,8 +85,8 @@ with expander:
     )
 
 # Saving the input data to a json file
-with open("results/data.json", "w") as f:
-    json.dump(input_data, f)
+# with open("results/data.json", "w") as f:
+#    json.dump(input_data, f)
 
 if st.button("Save"):
     with open("results/data.json", "w") as f:
