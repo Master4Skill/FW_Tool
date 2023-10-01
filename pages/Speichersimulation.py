@@ -93,8 +93,7 @@ def plot_data3(df):  # only plots the producion of the erzeuger
     # Define the names_map dictionary with your mappings
     names_map = {
         "g1": "Waste Heat",
-        "g2": "Heat Pump 1",
-        "g3": "Heat Pump 2",
+        "g2": "Heat Pump",
         "g4": "Geothermal",
         "g5": "Solar Thermal",
         "g6": "Peak Load Boiler",
@@ -106,7 +105,6 @@ def plot_data3(df):  # only plots the producion of the erzeuger
     colors = [
         "#639729",
         "#1F4E79",
-        "#F7D507",
         "#DD2525",
         "#92D050",
         "#EC9302",
@@ -116,7 +114,7 @@ def plot_data3(df):  # only plots the producion of the erzeuger
     previous_cumulative = 0
     proxies = []
     patches = []
-    for i, column in enumerate((["g1", "g4", "g3", "g2", "g5", "g6"])):
+    for i, column in enumerate((["g1", "g4", "g2", "g5", "g6"])):
         # Use the names_map to get the descriptive label for the column
         label = names_map.get(column, column)
 
@@ -485,7 +483,7 @@ def plot_preise_flusstemp2(
 def plot_char_values(df_results):
     # Step 1: Sum up the necessary values
     e_stored_sum = df_results["E_stored"].sum()
-    g_columns_sum = df_results[["g1", "g2", "g3", "g4", "g5", "g6"]].sum().sum()
+    g_columns_sum = df_results[["g1", "g2", "g4", "g5", "g6"]].sum().sum()
 
     # Step 2: Create a new data structure to hold these summed values
     sums = {"E_stored": e_stored_sum, "g_columns": g_columns_sum}

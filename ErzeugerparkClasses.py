@@ -98,7 +98,7 @@ class waste_heat(Erzeuger):
         return 0
 
 
-class heatpump_1(Erzeuger):
+class heatpump_v1(Erzeuger):
     def __init__(
         self,
         Volumenstrom_quelle,
@@ -132,7 +132,7 @@ class heatpump_1(Erzeuger):
         return P
 
 
-class heatpump_2(Erzeuger):
+class heatpump_v2(Erzeuger):
     def __init__(
         self, Leistung_max, Gütegrad, color="#F7D507", co2_emission_factor=0.468
     ):  # Color for Waermepumpe2

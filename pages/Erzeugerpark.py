@@ -154,7 +154,7 @@ for i in range(anzahl_erzeuger):
             "Bitte Gütegrad Wasser-Wasser angeben", value=0.45, key=f"Gütegrad{i}"
         )
         # Leistung_max = st.number_input("Bitte maximale Leistung eingeben (kW)", key=f"Leistung_max{i}")
-        erzeuger = ep.heatpump_1(
+        erzeuger = ep.heatpump_v1(
             Volumenstrom_quelle,
             T_q,
             Gütegrad,
@@ -169,7 +169,7 @@ for i in range(anzahl_erzeuger):
         Gütegrad = st.number_input(
             "Bitte Gütegrad Wasser-Wasser angeben", value=0.45, key=f"Gütegrad{i}"
         )
-        erzeuger = ep.heatpump_2(
+        erzeuger = ep.heatpump_v2(
             Leistung_max, Gütegrad, color=erzeuger_color, co2_emission_factor=0.468
         )
 
@@ -264,7 +264,8 @@ for i in range(anzahl_erzeuger):
 
     erzeugerpark.append(erzeuger)
 
-names = [obj.__class__.__name__ for obj in erzeugerpark]
+names = [obj.__class__.__name__.replace("_", " ") for obj in erzeugerpark]
+
 
 my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names)}
 
