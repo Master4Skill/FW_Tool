@@ -198,11 +198,11 @@ def returnreduction(T_rl_range, T_vl):
     )  # figsize needs to be in inches, dpi is usually 80
 
     # Plotting
-    ax.plot(T_rl_range, Netzverluste_list, label="Networklosses", lw=2)
-    ax.plot(T_rl_range, Wärmelast_list, label="Total heat load", lw=2)
-    ax.plot(T_rl_range, flowRate_list, label="Flow rate", lw=2)
-    ax.plot(T_rl_range, flowSpeed_list, label="Flow speed", linestyle=":", lw=2)
-    ax.plot(T_rl_range, pumpleistung_list, label="Pump power", lw=2)
+    ax.plot(T_rl_range, Netzverluste_list, label="Network Losses", lw=2)
+    ax.plot(T_rl_range, Wärmelast_list, label="Total Heat Load", lw=2)
+    ax.plot(T_rl_range, flowRate_list, label="Flow Rate", lw=2)
+    ax.plot(T_rl_range, flowSpeed_list, label="Flow Speed", linestyle=":", lw=2)
+    ax.plot(T_rl_range, pumpleistung_list, label="Pump Power", lw=2)
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
@@ -240,7 +240,7 @@ def returnreduction(T_rl_range, T_vl):
 
     # Title with style configuration
     ax.set_title(
-        r"Sensitivity of the Network for $T_f$ = constant (95°C) ",
+        r"Sensitivity of the Network for $T_f$ = Constant (95°C) ",
         fontsize=16,
         color="#777777",
         fontfamily="Segoe UI SemiLight",
@@ -303,11 +303,11 @@ def returnandflowreduction(T_rl_range, T_vl_range):
     )  # figsize needs to be in inches, dpi is usually 80
 
     # Plotting
-    ax.plot(T_vl_range, Netzverluste_list, label="Networklosses", lw=2)
-    ax.plot(T_vl_range, Wärmelast_list, label="Total heat load", lw=2)
-    ax.plot(T_vl_range, flowRate_list, label="Flow rate", lw=2)
-    ax.plot(T_vl_range, flowSpeed_list, label="Flow speed", linestyle=":", lw=2)
-    ax.plot(T_vl_range, pumpleistung_list, label="Pump power", lw=2)
+    ax.plot(T_vl_range, Netzverluste_list, label="Network Losses", lw=2)
+    ax.plot(T_vl_range, Wärmelast_list, label="Total Heat Load", lw=2)
+    ax.plot(T_vl_range, flowRate_list, label="Flow Rate", lw=2)
+    ax.plot(T_vl_range, flowSpeed_list, label="Flow Speed", linestyle=":", lw=2)
+    ax.plot(T_vl_range, pumpleistung_list, label="Pump Power", lw=2)
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
@@ -323,6 +323,7 @@ def returnandflowreduction(T_rl_range, T_vl_range):
     ax.set_ylabel(
         "Relative Change", fontsize=16, color="#777777", fontfamily="Segoe UI SemiLight"
     )
+    ax.set_ylim(None, 1.5)
 
     # X-axis properties
     ax.xaxis.label.set_color("#A3A3A3")
@@ -345,7 +346,7 @@ def returnandflowreduction(T_rl_range, T_vl_range):
 
     # Title with style configuration
     ax.set_title(
-        r"Sensitivity of the Network for $\Delta T$ = constant (30°C) ",
+        r"Sensitivity of the Network for $\Delta T$ = Constant (30°C) ",
         fontsize=16,
         color="#777777",
         fontfamily="Segoe UI SemiLight",
@@ -407,11 +408,11 @@ def flowreduction(T_vl_range, T_rl):
     )  # figsize needs to be in inches, dpi is usually 80
 
     # Plotting
-    ax.plot(T_vl_range, Netzverluste_list, label="Networklosses", lw=2)
-    ax.plot(T_vl_range, Wärmelast_list, label="Total heat load", lw=2)
-    ax.plot(T_vl_range, flowRate_list, label="Flow rate", lw=2)
-    ax.plot(T_vl_range, flowSpeed_list, label="Flow speed", linestyle=":", lw=2)
-    ax.plot(T_vl_range, pumpleistung_list, label="Pump power", lw=2)
+    ax.plot(T_vl_range, Netzverluste_list, label="Network Losses", lw=2)
+    ax.plot(T_vl_range, Wärmelast_list, label="Total Heat Load", lw=2)
+    ax.plot(T_vl_range, flowRate_list, label="Flow Rate", lw=2)
+    ax.plot(T_vl_range, flowSpeed_list, label="Flow Speed", linestyle=":", lw=2)
+    ax.plot(T_vl_range, pumpleistung_list, label="Pump Power", lw=2)
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
@@ -449,7 +450,7 @@ def flowreduction(T_vl_range, T_rl):
 
     # Title with style configuration
     ax.set_title(
-        r"Sensitivity of the Network for $T_r$ = constant (45°C) ",
+        r"Sensitivity of the Network for $T_r$ = Constant (45°C) ",
         fontsize=16,
         color="#777777",
         fontfamily="Segoe UI SemiLight",
@@ -496,6 +497,59 @@ flowreduction(T_vl_range, T_rl)
 returnandflowreduction(T_rl_range, T_vl_range)
 
 
+# Extracted style configurations
+def style_plot(ax, T_range, option):
+    ax.invert_xaxis()
+    ax.set_ylim(bottom=0)
+    ax.set_ylim(top=1.5)
+    ax.set_xlabel(
+        "Return Temperature[°C]" if option == 2 else "Flow Temperature[°C]",
+        fontsize=16,
+        color="#777777",
+        fontfamily="Segoe UI SemiLight",
+    )
+    ax.set_ylabel(
+        "Relative Change", fontsize=16, color="#777777", fontfamily="Segoe UI SemiLight"
+    )
+    ax.xaxis.label.set_color("#A3A3A3")
+    ax.tick_params(axis="x", colors="#A3A3A3", direction="out", which="both")
+    ax.spines["bottom"].set_edgecolor("#A3A3A3")
+    ax.spines["bottom"].set_linewidth(1)
+    ax.yaxis.label.set_color("#A3A3A3")
+    ax.tick_params(axis="y", colors="#A3A3A3", direction="out", which="both")
+    ax.spines["left"].set_edgecolor("#A3A3A3")
+    ax.spines["left"].set_linewidth(1)
+    ax.set_xticks(T_range)
+    ax.tick_params(axis="both", which="major", labelsize=16, colors="#777777")
+    ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
+    title_options = {
+        1: r"Sensitivity of the Heat Pump for $T_r$ = Constant (45°C)",
+        2: r"Sensitivity of the Heat Pump for $T_f$ = Constant (95°C)",
+        3: r"Sensitivity of the Heat Pump for $\Delta T$ = Constant (30°C)",
+    }
+    ax.set_title(
+        title_options.get(option, ""),
+        fontsize=16,
+        color="#777777",
+        fontfamily="Segoe UI SemiLight",
+    )
+    ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.15),
+        ncol=2,
+        frameon=False,
+        fontsize=16,
+        facecolor="white",
+        edgecolor="white",
+        title_fontsize="16",
+        labelcolor="#777777",
+    )
+    ax.set_facecolor("white")
+    for spine in ["top", "right"]:
+        ax.spines[spine].set_visible(False)
+    ax.invert_xaxis()
+
+
 def producer_sensitivitywp1(producer, T_range, T_rl, T_vl, current_last, option):
     COP_list = []
     flowrate_list = []  # assuming this is Volumenstrom
@@ -505,10 +559,10 @@ def producer_sensitivitywp1(producer, T_range, T_rl, T_vl, current_last, option)
     if option == 1:
         for T_vl in T_range:
             # Get the values
-            COP = producer.calc_COP(T_vl)
+            COP = producer.calc_COP(T_vl, None, None)
             poweruse = producer.calc_Poweruse(None, T_vl, T_rl, current_last)
-            # Here, I'm assuming that the flow rate for the Waermepumpe1 is constant and given by Volumenstrom_quelle.
-            # If it's not constant, you'd need a method in your class to compute it.
+            # Here, I'm assuming that the flow rate for the Waermepumpe1 is Constant and given by Volumenstrom_quelle.
+            # If it's not Constant, you'd need a method in your class to compute it.
             flowrate = producer.Volumenstrom_quelle
             powerout = producer.calc_output(None, T_vl, T_rl)
 
@@ -521,10 +575,10 @@ def producer_sensitivitywp1(producer, T_range, T_rl, T_vl, current_last, option)
     elif option == 2:
         for T_rl in T_range:
             # Get the values
-            COP = producer.calc_COP(T_vl)
+            COP = producer.calc_COP(T_vl, None, None)
             poweruse = producer.calc_Poweruse(None, T_vl, T_rl, current_last)
-            # Here, I'm assuming that the flow rate for the Waermepumpe1 is constant and given by Volumenstrom_quelle.
-            # If it's not constant, you'd need a method in your class to compute it.
+            # Here, I'm assuming that the flow rate for the Waermepumpe1 is Constant and given by Volumenstrom_quelle.
+            # If it's not Constant, you'd need a method in your class to compute it.
             flowrate = producer.Volumenstrom_quelle
             powerout = producer.calc_output(None, T_vl, T_rl)
 
@@ -537,10 +591,10 @@ def producer_sensitivitywp1(producer, T_range, T_rl, T_vl, current_last, option)
     elif option == 3:
         for T_vl in T_range:
             # Get the values
-            COP = producer.calc_COP(T_vl)
+            COP = producer.calc_COP(T_vl, None, None)
             poweruse = producer.calc_Poweruse(None, T_vl, T_vl - 30, current_last)
-            # Here, I'm assuming that the flow rate for the Waermepumpe1 is constant and given by Volumenstrom_quelle.
-            # If it's not constant, you'd need a method in your class to compute it.
+            # Here, I'm assuming that the flow rate for the Waermepumpe1 is Constant and given by Volumenstrom_quelle.
+            # If it's not Constant, you'd need a method in your class to compute it.
             flowrate = producer.Volumenstrom_quelle
             powerout = producer.calc_output(None, T_vl, T_rl)
 
@@ -559,15 +613,15 @@ def producer_sensitivitywp1(producer, T_range, T_rl, T_vl, current_last, option)
 
     # Plotting
     ax.plot(T_range, COP_list, label="COP", lw=2)
-    ax.plot(T_range, poweruse_list, label="Electrical power use", lw=2, color="purple")
+    ax.plot(T_range, poweruse_list, label="Electrical Power Use", lw=2, color="purple")
     ax.plot(
         T_range,
         flowrate_list,
-        label="Heat delivered by the source",
+        label="Heat from the Source",
         lw=2,
         color="green",
     )
-    ax.plot(T_range, powerout_list, label="Power out", lw=2, color="orange")
+    ax.plot(T_range, powerout_list, label="Heat Output", lw=2, color="orange")
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
@@ -614,21 +668,21 @@ def producer_sensitivitywp1(producer, T_range, T_rl, T_vl, current_last, option)
     # Title with style configuration
     if option == 2:
         ax.set_title(
-            r"Sensitivity of the heat pump for $T_f$ = constant (95°C) ",
+            r"Sensitivity of the Heat Pump for $T_f$ = Constant (95°C)",
             fontsize=16,
             color="#777777",
             fontfamily="Segoe UI SemiLight",
         )
     elif option == 1:
         ax.set_title(
-            r"Sensitivity of the heat pump for $T_r$ = constant (45°C) ",
+            r"Sensitivity of the Heat Pump for $T_r$ = Constant (45°C)",
             fontsize=16,
             color="#777777",
             fontfamily="Segoe UI SemiLight",
         )
     else:
         ax.set_title(
-            r"Sensitivity of the heat pump for $\Delta T$ = constant (30°C) ",
+            r"Sensitivity of the Heat Pump for $\Delta T$ = Constant (30°C)",
             fontsize=16,
             color="#777777",
             fontfamily="Segoe UI SemiLight",
@@ -652,13 +706,15 @@ def producer_sensitivitywp1(producer, T_range, T_rl, T_vl, current_last, option)
     for spine in ["top", "right"]:
         ax.spines[spine].set_visible(False)
 
+    style_plot(ax, T_range, option)
+
     # Display the plot (assuming you're using Streamlit)
     st.pyplot(fig)
 
     return
 
 
-def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, current_last, option):
+def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, T_q, current_last, option):
     COP_list = []
     flowrate_list = []  # assuming this is Volumenstrom
     poweruse_list = []
@@ -666,10 +722,10 @@ def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, current_last, option)
     if option == 1:
         for T_vl in T_range:
             # Get the values
-            COP = producer.calc_COP(T_vl)
+            COP = producer.calc_COP(T_vl, None, T_q)
             poweruse = producer.calc_Poweruse(None, T_vl, T_rl, current_last)
-            # Here, I'm assuming that the flow rate for the Waermepumpe1 is constant and given by Volumenstrom_quelle.
-            # If it's not constant, you'd need a method in your class to compute it.
+            # Here, I'm assuming that the flow rate for the Waermepumpe1 is Constant and given by Volumenstrom_quelle.
+            # If it's not Constant, you'd need a method in your class to compute it.
             flowrate = producer.calc_flowrate(T_vl)
 
             # Append to lists
@@ -680,10 +736,10 @@ def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, current_last, option)
     elif option == 2:
         for T_rl in T_range:
             # Get the values
-            COP = producer.calc_COP(T_vl)
+            COP = producer.calc_COP(T_vl, None, T_q)
             poweruse = producer.calc_Poweruse(None, T_vl, T_rl, current_last)
-            # Here, I'm assuming that the flow rate for the Waermepumpe1 is constant and given by Volumenstrom_quelle.
-            # If it's not constant, you'd need a method in your class to compute it.
+            # Here, I'm assuming that the flow rate for the Waermepumpe1 is Constant and given by Volumenstrom_quelle.
+            # If it's not Constant, you'd need a method in your class to compute it.
             flowrate = producer.calc_flowrate(T_vl)
 
             # Append to lists
@@ -694,10 +750,10 @@ def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, current_last, option)
     elif option == 3:
         for T_vl in T_range:
             # Get the values
-            COP = producer.calc_COP(T_vl)
+            COP = producer.calc_COP(T_vl, None, T_q)
             poweruse = producer.calc_Poweruse(None, T_vl, T_vl - 30, current_last)
-            # Here, I'm assuming that the flow rate for the Waermepumpe1 is constant and given by Volumenstrom_quelle.
-            # If it's not constant, you'd need a method in your class to compute it.
+            # Here, I'm assuming that the flow rate for the Waermepumpe1 is Constant and given by Volumenstrom_quelle.
+            # If it's not Constant, you'd need a method in your class to compute it.
             flowrate = producer.calc_flowrate(T_vl)
 
             # Append to lists
@@ -713,8 +769,8 @@ def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, current_last, option)
 
     # Plotting
     ax.plot(T_range, COP_list, label="COP", lw=2)
-    ax.plot(T_range, poweruse_list, label="Power use", lw=2, color="purple")
-    ax.plot(T_range, flowrate_list, label="Flow rate", lw=2, color="green")
+    ax.plot(T_range, poweruse_list, label="Power Use", lw=2, color="purple")
+    ax.plot(T_range, flowrate_list, label="Flow Rate", lw=2, color="green")
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
@@ -749,8 +805,8 @@ def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, current_last, option)
 
     # Title with style configuration
     ax.set_title(
-        f"Sensitivity of the heat pump{' 2' if 'wp2' in globals()['__name__'] else ''} for "
-        f"${'T_f' if option == 2 else 'T_r' if option == 1 else 'Delta T'}$ = constant "
+        f"Sensitivity of the Heat Pump{' 2' if 'wp2' in globals()['__name__'] else ''} for "
+        f"${'T_f' if option == 2 else 'T_r' if option == 1 else 'Delta T'}$ = Constant "
         f"({95 if option == 2 else 45 if option == 1 else 30}°C) ",
         fontsize=16,
         color="#777777",
@@ -827,11 +883,11 @@ def producer_sensitivitygeo(producer, T_range, T_rl, T_vl, current_last, option)
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # Plotting
-    ax.plot(T_range, poweruse_list, label="Power use", lw=2, color="purple")
+    ax.plot(T_range, poweruse_list, label="Electrical Power Use", lw=2, color="purple")
     ax.plot(
-        T_range, flowrate_list, label="Flow rate", lw=2, color="yellow", linestyle="--"
+        T_range, flowrate_list, label="Flow Rate", lw=2, color="yellow", linestyle="--"
     )
-    ax.plot(T_range, T_inject_list, label="Injection temperature", lw=2)
+    ax.plot(T_range, T_inject_list, label="Injection Temperature", lw=2)
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
@@ -858,17 +914,17 @@ def producer_sensitivitygeo(producer, T_range, T_rl, T_vl, current_last, option)
     # Title with larger font
     if option == 2:
         ax.set_title(
-            r"Sensitivity of the geothermal unit for $T_f$ = constant (95°C) ",
+            r"Sensitivity of The Geothermal Unit for $T_f$ = Constant (95°C) ",
             fontsize=16,
         )
     elif option == 1:
         ax.set_title(
-            r"Sensitivity of the geothermal unit for $T_r$ = constant (45°C) ",
+            r"Sensitivity of The Geothermal Unit for $T_r$ = Constant (45°C) ",
             fontsize=16,
         )
     else:
         ax.set_title(
-            r"Sensitivity of the geothermal unit for $\Delta T$ = constant (30°C) ",
+            r"Sensitivity of the Geothermal Unit for $\Delta T$ = Constant (30°C) ",
             fontsize=16,
         )
 
@@ -943,11 +999,11 @@ def producer_sensitivitysolar(producer, T_range, T_rl, T_vl, current_last, optio
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # Plotting
-    ax.plot(T_range, poweruse_list, label="Power use", lw=2, color="purple")
+    ax.plot(T_range, poweruse_list, label="Electrical Power Use", lw=2, color="purple")
     ax.plot(
-        T_range, flowrate_list, label="Flow rate", lw=2, color="yellow", linestyle="--"
+        T_range, flowrate_list, label="Flow Rate", lw=2, color="yellow", linestyle="--"
     )
-    ax.plot(T_range, T_inject_list, label="Injection temperature", lw=2)
+    ax.plot(T_range, T_inject_list, label="Injection Temperature", lw=2)
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
@@ -974,17 +1030,17 @@ def producer_sensitivitysolar(producer, T_range, T_rl, T_vl, current_last, optio
     # Title with larger font
     if option == 2:
         ax.set_title(
-            r"Sensitivity of the geothermal unit for $T_f$ = constant (95°C) ",
+            r"Sensitivity of the geothermal unit for $T_f$ = Constant (95°C) ",
             fontsize=16,
         )
     elif option == 1:
         ax.set_title(
-            r"Sensitivity of the geothermal unit for $T_r$ = constant (45°C) ",
+            r"Sensitivity of the geothermal unit for $T_r$ = Constant (45°C) ",
             fontsize=16,
         )
     else:
         ax.set_title(
-            r"Sensitivity of the geothermal unit for $\Delta T$ = constant (30°C) ",
+            r"Sensitivity of the geothermal unit for $\Delta T$ = Constant (30°C) ",
             fontsize=16,
         )
 
@@ -1036,7 +1092,7 @@ def producer_sensitivitywh(producer, T_range, T_rl, T_vl, current_last, option):
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # Plotting
-    ax.plot(T_range, powerout_list, label="Power out", lw=2, color="orange")
+    ax.plot(T_range, powerout_list, label="Heat Output", lw=2, color="orange")
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
@@ -1063,17 +1119,17 @@ def producer_sensitivitywh(producer, T_range, T_rl, T_vl, current_last, option):
     # Title with larger font
     if option == 2:
         ax.set_title(
-            r"Sensitivity of the wast heat unit for $T_f$ = constant (95°C) ",
+            r"Sensitivity of the wast heat unit for $T_f$ = Constant (95°C) ",
             fontsize=16,
         )
     elif option == 1:
         ax.set_title(
-            r"Sensitivity of the waste heat unit for $T_r$ = constant (45°C) ",
+            r"Sensitivity of the waste heat unit for $T_r$ = Constant (45°C) ",
             fontsize=16,
         )
     else:
         ax.set_title(
-            r"Sensitivity of the waste heat unit for $\Delta T$ = constant (30°C) ",
+            r"Sensitivity of the waste heat unit for $\Delta T$ = Constant (30°C) ",
             fontsize=16,
         )
 
@@ -1120,9 +1176,9 @@ producer_sensitivitywp1(wp1, T_vl_range, T_rl, T_vl, Lastgang, option=1)
 producer_sensitivitywp1(wp1, T_rl_range, T_rl, T_vl, Lastgang, option=2)
 producer_sensitivitywp1(wp1, T_vl_range, T_rl, T_vl, Lastgang, option=3)
 
-producer_sensitivitywp2(wp2, T_vl_range, T_rl, T_vl, Lastgang, option=1)
-producer_sensitivitywp2(wp2, T_rl_range, T_rl, T_vl, Lastgang, option=2)
-producer_sensitivitywp2(wp2, T_vl_range, T_rl, T_vl, Lastgang, option=3)
+producer_sensitivitywp2(wp2, T_vl_range, T_rl, T_vl, 25, Lastgang, option=1)
+producer_sensitivitywp2(wp2, T_rl_range, T_rl, T_vl, 25, Lastgang, option=2)
+producer_sensitivitywp2(wp2, T_vl_range, T_rl, T_vl, 25, Lastgang, option=3)
 
 producer_sensitivitygeo(geo, T_vl_range, T_rl, T_vl, Lastgang, option=1)
 producer_sensitivitygeo(geo, T_rl_range, T_rl, T_vl, Lastgang, option=2)

@@ -135,17 +135,100 @@ Tvl_max_nach = input_data["Tvl_max_nach"]
 Tvl_min_nach = input_data["Tvl_min_nach"]
 Trl_nach = input_data["Trl_nach"]
 
-from matplotlib import font_manager
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import streamlit as st
 
-fonts = font_manager.findSystemFonts(fontpaths=None, fontext="ttf")
 
-font_names = []
-for font in fonts:
-    try:
-        font_names.append(font_manager.FontProperties(fname=font).get_name())
-    except RuntimeError:
-        print(f"Could not retrieve the name for font: {font}")
-        continue
+def plot_char_values(df_results):
+    # Ensure your DataFrame is structured with a 'Mode' column to differentiate the three modes
+    # Example:
+    #    Category        Value  Mode
+    # 0  E_stored        1000  Mode1
+    # 1  E_stored        1200  Mode2
+    # 2  E_stored        1100  Mode3
+    # 3  g1              1500  Mode1
+    # 4  g1              1600  Mode2
+    # 5  g1              1400  Mode3
+    # ...
 
-for font_name in font_names:
-    print(font_name)
+    # Define labels, titles, etc.
+    title = "Comparison of Modes"
+    x_label = "Categories"
+    y_label = "Values (in units)"
+
+    # Define color palette, font color, and font family
+    palette = sns.color_palette("viridis", n_colors=3)  # Adjust as necessary
+    font_color = "#777777"
+    font_family = "Segoe UI SemiLight"
+
+    # Plotting with seaborn
+    plt.figure(figsize=(10, 6))
+    bar_plot = sns.barplot(
+        x="Category",
+        y="Value",
+        hue="Mode",
+        data=df_results,
+        palette=palette,
+    )
+
+    # Applying the custom styles
+    bar_plot.set_xlabel(x_label, fontsize=16, color=font_color, fontfamily=font_family)
+    bar_plot.set_ylabel(y_label, fontsize=16, color=font_color, fontfamily=font_family)
+    bar_plot.set_title(title, fontsize=16, color=font_color, fontfamily=font_family)
+
+    # Set the tick parameters
+    bar_plot.tick_params(axis="both", which="major", labelsize=16, colors=font_color)
+
+    plt.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.15),
+        ncol=3,  # Adjust as necessary
+        frameon=False,
+        fontsize=16,
+        title_fontsize="16",
+        labelcolor=font_color,
+    )
+
+    # Set the color and width of the spines
+    for spine in ["bottom", "left"]:
+        bar_plot.spines[spine].set_edgecolor("#A3A3A3")
+        bar_plot.spines[spine].set_linewidth(1)
+
+    # Hide the top and right spines
+    for spine in ["top", "right"]:
+        bar_plot.spines[spine].set_visible(False)
+
+    # Set the background color
+    bar_plot.set_facecolor("white")
+
+    # Adding values above the bars
+    for p in bar_plot.patches:
+        height = p.get_height()
+        bar_plot.text(
+            p.get_x() + p.get_width() / 2.0,
+            p.get_height(),
+            f"{height:.0f}",  # Formatting as an integer (remove .0f for exact value)
+            ha="center",
+            va="bottom",
+            fontsize=10,  # Adjust fontsize to fit the values properly
+            color=font_color,
+        )
+
+    # Display the plot in Streamlit
+    st.pyplot(plt.gcf())
+    return
+
+
+# Example percentages
+percentages = [100, 97, 92, 0, 97, 100, 83, 80, 100]
+
+# Rearrange the list
+rearranged_percentages = []
+for i in range(3):  # Assuming there are 3 modes
+    rearranged_percentages.extend(percentages[i::3])
+
+# Output
+print("Original: ", percentages)
+print("Rearranged: ", rearranged_percentages)

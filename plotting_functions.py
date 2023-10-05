@@ -234,9 +234,9 @@ def plot_power_usage2(Power_df_vor, Power_df_nach, color_FFE):
             label="after",
         )
 
-        plt.title(f"Erzeuger {i+1} Power Usage")
+        plt.title(f"Erzeuger {i+1} Power Consumption")
         plt.xlabel("Time")
-        plt.ylabel("Power Usage [kW]")
+        plt.ylabel("Power Consumption [kW]")
         plt.grid(True)
         plt.legend()
 
@@ -262,7 +262,7 @@ def plot_power_usage(Power_df_vor, Power_df_nach, color_FFE):
             linestyle="-",
             linewidth=2,
             color=color_FFE[i],
-            label="before",
+            label="before Temp. reduction",
         )
         ax.plot(
             Power_df_nach.index,
@@ -270,7 +270,7 @@ def plot_power_usage(Power_df_vor, Power_df_nach, color_FFE):
             linestyle="-",
             linewidth=2,
             color=lighten_color(color_FFE[i]),  # Adjust the color as needed
-            label="after",
+            label="after Temp. reduction",
         )
 
         ax.set_xlabel(
@@ -280,7 +280,7 @@ def plot_power_usage(Power_df_vor, Power_df_nach, color_FFE):
             fontfamily="Segoe UI SemiLight",
         )
         ax.set_ylabel(
-            "Power Usage [kW]",
+            "Power Consumption [kW]",
             fontsize=16,
             color="#777777",
             fontfamily="Segoe UI SemiLight",
@@ -301,7 +301,7 @@ def plot_power_usage(Power_df_vor, Power_df_nach, color_FFE):
         ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
 
         ax.set_title(
-            f"Erzeuger {i+1} Power Usage",
+            f"Erzeuger {i+1} Power Consumption",
             fontsize=16,
             color="#777777",
             fontfamily="Segoe UI SemiLight",
@@ -355,7 +355,7 @@ def plot_power_usage_storage(Power_df_nach, color_FFE):
             fontfamily="Segoe UI SemiLight",
         )
         ax.set_ylabel(
-            "Power Usage [kW]",
+            "Power Consumption [kW]",
             fontsize=16,
             color="#777777",
             fontfamily="Segoe UI SemiLight",
@@ -376,7 +376,7 @@ def plot_power_usage_storage(Power_df_nach, color_FFE):
         ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
 
         ax.set_title(
-            f"Erzeuger {i+1} Power Usage",
+            f"Erzeuger {i+1} Power Consumption",
             fontsize=16,
             color="#777777",
             fontfamily="Segoe UI SemiLight",
@@ -407,7 +407,18 @@ def plot_power_usage_storage(Power_df_nach, color_FFE):
 
 
 def plot_total_change(
-    df1, df2, color_FFE, label1, label2, column_name, title, x_label, y_label, my_dict
+    df1,
+    df2,
+    color_FFE,
+    label1,
+    label2,
+    column_name,
+    title,
+    x_label,
+    y_label,
+    my_dict,
+    box_x,
+    box_y,
 ):
     df1_sum = pd.DataFrame(df1.sum(), columns=["Value"])
     df1_sum["Status"] = label1
@@ -437,13 +448,13 @@ def plot_total_change(
 
     # Concatenate the two DataFrames
     sum_df = pd.concat([df1_sum, df2_sum])
-    st.dataframe(sum_df)
+    # st.dataframe(sum_df)
 
     total_value_sum = df1_sum["Value"].sum()
-    st.write(f"Total sum og GWh before: {total_value_sum}")
+    # st.write(f"Total sum og GWh before: {total_value_sum}")
 
     total_value_sum = df2_sum["Value"].sum()
-    st.write(f"Total sum of values: {total_value_sum}")
+    # st.write(f"Total sum of values: {total_value_sum}")
 
     # st.dataframe(df2_sum)
     # Remove rows with value 0
@@ -488,13 +499,26 @@ def plot_total_change(
 
     plt.legend(
         loc="upper center",
-        bbox_to_anchor=(0.5, -0.15),
+        bbox_to_anchor=(0.5, -0.35),
         ncol=2,  # Adjust as necessary
         frameon=False,
         fontsize=16,
         title_fontsize="16",
         labelcolor=font_color,
     )
+    explanation_text = (
+        "% - represent share of all producers \n before or after temp. reduction "
+    )
+    plt.gcf().text(
+        box_x,
+        box_y,
+        explanation_text,
+        ha="center",
+        fontsize=12,
+        bbox=dict(facecolor="none", edgecolor="black", boxstyle="round,pad=0.5"),
+    )
+
+    plt.xticks(rotation=45)
     # Set the color and width of the spines
     for spine in ["bottom", "left"]:
         bar_plot.spines[spine].set_edgecolor("#A3A3A3")

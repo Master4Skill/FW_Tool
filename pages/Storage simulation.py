@@ -4,6 +4,7 @@ from pulp import LpProblem, LpVariable, LpMinimize, LpStatus, PULP_CBC_CMD, GURO
 import streamlit as st
 from streamlit_extras.app_logo import add_logo
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 import pandas as pd
 from io import StringIO
 import json as json
@@ -45,11 +46,7 @@ Tvl_max_nach = input_data["Tvl_max_nach"]
 Tvl_min_nach = input_data["Tvl_min_nach"]
 Trl_nach = input_data["Trl_nach"]
 # from pages.Erzeugerpark import names, erzeuger_df_vor
-file_path = "results/COP_vor_df.json"
 
-# Lesen der JSON-Datei in einen DataFrame
-COP_df_imported = pd.read_json(file_path, orient="columns")
-COP_df_imported.fillna(COP_df_imported.mean(), inplace=True)
 
 with open("results/df_results.json", "r") as f:
     df_results = json.load(f)
@@ -87,10 +84,9 @@ legend_properties = {
 }
 
 
-def plot_data3(df):  # only plots the producion of the erzeuger
+def plot_data3(df):
     fig, axs = plt.subplots(1, figsize=(10, 6))
 
-    # Define the names_map dictionary with your mappings
     names_map = {
         "g1": "Waste Heat",
         "g2": "Heat Pump",
@@ -100,7 +96,6 @@ def plot_data3(df):  # only plots the producion of the erzeuger
         "g7": "CHP",
     }
 
-    # Prepare data for producers and s_out
     cumulative = np.zeros_like(df.index, dtype=np.float64)
     colors = [
         "#639729",
@@ -112,10 +107,8 @@ def plot_data3(df):  # only plots the producion of the erzeuger
     ]
 
     previous_cumulative = 0
-    proxies = []
-    patches = []
+    patches = []  # For shaded areas in legend
     for i, column in enumerate((["g1", "g4", "g2", "g5", "g6"])):
-        # Use the names_map to get the descriptive label for the column
         label = names_map.get(column, column)
 
         cumulative += df[column]
@@ -123,9 +116,8 @@ def plot_data3(df):  # only plots the producion of the erzeuger
         axs.plot(
             df.index,
             cumulative,
-            label=label,
             linewidth=1,
-            color=colors[i],
+            color="grey",
             alpha=0.7,
         )
 
@@ -139,7 +131,6 @@ def plot_data3(df):  # only plots the producion of the erzeuger
         patches.append(mpatches.Patch(color=colors[i], label=label, alpha=0.7))
         previous_cumulative = cumulative.copy()
 
-    # Plot P_to_dem as a standalone line
     axs.plot(
         df.index,
         df["P_to_dem"],
@@ -150,38 +141,86 @@ def plot_data3(df):  # only plots the producion of the erzeuger
     )
     df["E_stored"].fillna(0, inplace=True)
 
-    # Plot E_stored as a standalone line
-    axs.plot(
+    # Create a second y-axis for the stored energy
+    axs2 = axs.twinx()
+
+    # Plot the stored energy on the second y-axis
+    axs2.plot(
         df.index,
         -df["E_stored"],
-        label="stored Energy (negative) [kWh]",
-        color="olive",
-        linewidth=1,
-    )
-    axs.plot(
-        df.index,
-        -df["s_out"],
-        label="storage ouflow (negative)",
-        color="purple",
-        linewidth=1,
-    )
-    axs.plot(
-        df.index,
-        -df["s_in"],
-        label="storage inflow (negative)",
-        color="black",
+        color="#F7D507",  # Choose a color
         linewidth=1,
     )
 
+    # Label the second y-axis
+
+    axs.set_ylim(-4400, None)
+
+    # Add a legend for the second y-axis
+    axs2.legend(
+        loc="upper right",
+        fontsize=16,
+        frameon=False,
+        facecolor="white",
+        edgecolor="white",
+    )
+
+    # Label the second y-axis
+    axs2.set_ylabel(
+        "Stored Energy [kWh]",
+        fontsize=16,
+        color="#777777",
+        fontfamily="Segoe UI SemiLight",
+    )
+    axs2.yaxis.label.set_color("#777777")
+
+    # Add a legend for the second y-axis
+    axs2.legend(
+        loc="upper right",
+        fontsize=16,
+        frameon=False,
+        facecolor="white",
+        edgecolor="white",
+    )
+
+    # Ensure the tick parameters and spine colors of the second y-axis match the first
+    axs2.tick_params(axis="y", colors="#A3A3A3", direction="out", which="both")
+    axs2.spines["right"].set_edgecolor("#A3A3A3")
+    axs2.spines["right"].set_linewidth(1)
+    axs2.tick_params(axis="both", which="major", labelsize=16, colors="#777777")
+
+    # Set the limits of the second y-axis to be the same as the first
+    axs2.set_ylim(axs.get_ylim())
+
+    # Turn off the tick labels for the second y-axis
+    axs2.set_yticklabels([])
+
+    axs.plot(
+        df.index,
+        -df["s_out"],
+        label="storage Outflow (negative)",
+        color="#AB2626",
+        linewidth=1,
+    )
+    # Change color of storage inflow from black to, e.g., cyan
+    axs.plot(
+        df.index,
+        -df["s_in"],
+        label="storage Inflow (negative)",
+        color="#1F4E79",  # Changed color here
+        linewidth=1,
+    )
     # Set labels and title with style configuration
     font_properties = {
         "fontsize": 16,
         "color": "#777777",
         "fontfamily": "Segoe UI SemiLight",
     }
-
     axs.set_xlabel("Time [h]", **font_properties)
-    axs.set_ylabel("Energy [kW/kWh]", **font_properties)
+    axs.set_ylabel("Power [kW]", **font_properties)
+
+    axs2.yaxis.label.set_color(font_properties["color"])
+    axs2.yaxis.label.set_fontsize(font_properties["fontsize"])
     # axs[1].set_ylabel("Electricity Prices [ct/kWh]", **font_properties)
 
     title_properties = {
@@ -190,10 +229,7 @@ def plot_data3(df):  # only plots the producion of the erzeuger
         "fontfamily": "Segoe UI SemiLight",
     }
 
-    axs.set_title("Energy Flow", **title_properties)
-
-    # Remove the electricity price plot and title setting for the second subplot
-    # axs[1].remove()
+    axs.set_title("Heat Generation and Storage", **title_properties)
 
     # Add legend with style configuration
     legend_properties = {
@@ -208,7 +244,18 @@ def plot_data3(df):  # only plots the producion of the erzeuger
         "labelcolor": "#777777",
     }
 
-    axs.legend(handles=patches, **legend_properties)
+    # Adding line objects for the lines in the legend
+    lines = [
+        mlines.Line2D([], [], color="black", label="Load Profile"),
+        mlines.Line2D([], [], color="#F7D507", label="Stored Energy (Negative) [kWh]"),
+        mlines.Line2D([], [], color="#AB2626", label="Storage ouflow (Negative)"),
+        mlines.Line2D(
+            [], [], color="#1F4E79", label="Storage Inflow (Negative)"
+        ),  # Adjusted color
+    ]
+
+    # Ensure all items (patches and lines) have labels to appear in the legend
+    axs.legend(handles=patches + lines, **legend_properties)
 
     # X and Y axis properties with style configuration
 
@@ -222,6 +269,7 @@ def plot_data3(df):  # only plots the producion of the erzeuger
 
     axs.xaxis.label.set_color("#A3A3A3")
     axs.yaxis.label.set_color("#A3A3A3")
+    axs2.yaxis.label.set_color("#A3A3A3")
 
     axs.tick_params(axis="both", which="major", labelsize=16, colors="#777777")
 
@@ -229,85 +277,98 @@ def plot_data3(df):  # only plots the producion of the erzeuger
 
     # Background and other spines color
     axs.set_facecolor("white")
+    axs.spines["top"].set_visible(False)
+    axs2.spines["top"].set_visible(False)
+    axs2.spines["left"].set_visible(False)
+    axs2.spines["bottom"].set_visible(False)
+
+    # Show the plot
+    st.pyplot(fig)
+
+
+def plot_char_values_comparison(df_results):
+    df_results["Value"] = df_results["Value"] / 1000
+    # Define labels, titles, etc.
+    title = "Comparison of Modes"
+    x_label = " "
+    y_label = "Values (in units)"
+
+    # Define color palette, font color, and font family
+    palette = ["#1F4E79", "#356CA5", "#8AB5E1"]  # Adjust as necessary
+    font_color = "#777777"
+    font_family = "Segoe UI SemiLight"
+
+    # Plotting with seaborn
+    plt.figure(figsize=(10, 6))
+    bar_plot = sns.barplot(
+        x="Category",
+        y="Value",
+        hue="Mode",
+        data=df_results,
+        palette=palette,
+    )
+
+    # Applying the custom styles
+    bar_plot.set_xlabel(x_label, fontsize=16, color=font_color, fontfamily=font_family)
+    bar_plot.set_ylabel(y_label, fontsize=16, color=font_color, fontfamily=font_family)
+    bar_plot.set_title(title, fontsize=16, color=font_color, fontfamily=font_family)
+
+    # Set the tick parameters
+    bar_plot.tick_params(axis="both", which="major", labelsize=16, colors=font_color)
+    plt.xticks(rotation=45)
+
+    plt.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.35),
+        ncol=3,  # Adjust as necessary
+        frameon=False,
+        fontsize=16,
+        title_fontsize="16",
+        labelcolor=font_color,
+    )
+
+    # Set the color and width of the spines
+    for spine in ["bottom", "left"]:
+        bar_plot.spines[spine].set_edgecolor("#A3A3A3")
+        bar_plot.spines[spine].set_linewidth(1)
+
+    # Hide the top and right spines
     for spine in ["top", "right"]:
-        axs.spines[spine].set_visible(False)
+        bar_plot.spines[spine].set_visible(False)
 
-    # Show the plot
-    st.pyplot(fig)
+    # Set the background color
+    bar_plot.set_facecolor("white")
 
+    # Calculate percentages based on the highest value in each category
+    max_values = df_results.groupby("Category")["Value"].max()
+    percentages = [
+        (value / max_values[category]) * 100
+        for _, (value, category) in df_results[["Value", "Category"]].iterrows()
+    ]
 
-def plot_storage_data2(df):
-    fig, axs = plt.subplots(2, 1, figsize=(10, 12), sharex=True)
+    # Rearrange the list
+    rearranged_percentages = []
+    for i in range(3):  # Assuming there are 3 modes
+        rearranged_percentages.extend(percentages[i::3])
 
-    # Plot s_in and s_out in the first subplot
-    axs[0].plot(df.index, df["s_in"], label="storage inflow", linewidth=1, color="blue")
-    axs[0].plot(
-        df.index, df["s_out"], label="storage outflow", linewidth=1, color="green"
-    )
+    # Annotate bars with calculated percentages
+    for p, percentage in zip(bar_plot.patches, rearranged_percentages):
+        height = p.get_height()
+        bar_plot.annotate(
+            f"{percentage:.0f}%",  # Annotate with integer percentage
+            (p.get_x() + p.get_width() / 2.0, height),
+            ha="center",
+            va="center",
+            xytext=(0, 10),
+            textcoords="offset points",
+            fontsize=9,  # Adjust fontsize as needed
+            color="#777777",  # Adjust color as needed
+        )
 
-    # Plot E_stored in the second subplot
-    axs[1].plot(
-        df.index, df["E_stored"], label="stored Energy", linewidth=1, color="red"
-    )
-
-    # Set labels and title with style configuration
-    font_properties = {
-        "fontsize": 16,
-        "color": "#777777",
-        "fontfamily": "Segoe UI SemiLight",
-    }
-
-    axs[0].set_xlabel("Time [h]", **font_properties)
-    axs[0].set_ylabel("s_in and s_out values", **font_properties)
-    axs[1].set_ylabel("E_stored values", **font_properties)
-
-    title_properties = {
-        "fontsize": 16,
-        "color": "#777777",
-        "fontfamily": "Segoe UI SemiLight",
-    }
-
-    axs[0].set_title("Storage in- and outflow over time", **title_properties)
-    axs[1].set_title("stored Energy over time", **title_properties)
-
-    # Add legends with style configuration
-
-    legend_properties = {
-        "loc": "upper center",
-        "bbox_to_anchor": (0.5, -0.15),
-        "ncol": 1,  # Stack legend items vertically
-        "frameon": False,  # Make frame visible
-        "fontsize": 16,
-        "labelcolor": "#777777",
-    }
-
-    axs[0].legend(**legend_properties)
-    axs[1].legend(**legend_properties)
-
-    # Setting x and y axis properties with style configuration
-    for ax in axs:
-        ax.tick_params(axis="x", colors="#A3A3A3", direction="out", which="both")
-        ax.spines["bottom"].set_edgecolor("#A3A3A3")
-        ax.spines["bottom"].set_linewidth(1)
-
-        ax.tick_params(axis="y", colors="#A3A3A3", direction="out", which="both")
-        ax.spines["left"].set_edgecolor("#A3A3A3")
-        ax.spines["left"].set_linewidth(1)
-
-        ax.xaxis.label.set_color("#A3A3A3")
-        ax.yaxis.label.set_color("#A3A3A3")
-
-        ax.tick_params(axis="both", which="major", labelsize=16, colors="#777777")
-
-        ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
-
-        # Setting background and other spines color
-        ax.set_facecolor("white")
-        for spine in ["top", "right"]:
-            ax.spines[spine].set_visible(False)
-
-    # Show the plot
-    st.pyplot(fig)
+    # Display the plot in Streamlit
+    st.pyplot(plt.gcf())
+    configure_style(bar_plot)
+    return
 
 
 def plot_storage_data(df):
@@ -330,7 +391,7 @@ def plot_storage_data(df):
     # Plot E_stored individually
     fig2, ax2 = plt.subplots(figsize=(10, 6))
 
-    ax2.plot(df.index, df["E_stored"], label="stored energy", linewidth=1, color="red")
+    ax2.plot(df.index, df["E_stored"], label="Stored Heat", linewidth=1, color="red")
 
     # Configure Labels, Title, Legend and Style for the Second Plot
     ax2.set_xlabel("Time [h]", **font_properties)
@@ -356,7 +417,7 @@ def configure_style(ax):
     ax.yaxis.label.set_color("#A3A3A3")
 
     ax.tick_params(axis="both", which="major", labelsize=16, colors="#777777")
-    ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
+    # ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
 
     ax.set_facecolor("white")
     for spine in ["top", "right"]:
@@ -494,7 +555,7 @@ def plot_char_values(df_results):
     label2 = "g_columns"
     column_name = "Category"
     title = "Sum of Values"
-    x_label = "Categories"
+    x_label = "operating Mode"
     y_label = "Values (in units)"
 
     # Define color palette, font color, and font family
@@ -572,19 +633,21 @@ def plot_single_values(df_results):
     names_map = {
         "E_stored": "Stored Energy",
         "g1": "Waste Heat",
-        "g2": "Heat Pump 1",
-        "g3": "Heat Pump 2",
+        "g2": "Heat Pump",
+        "g3": "Heat Pump II",
         "g4": "Geothermal",
         "g5": "Solar Thermal",
         "g6": "Peak Load Boiler",
         "g7": "CHP",
     }
+
     # Calculating the sums for each category
-    sums = df_results[["E_stored", "g1", "g2", "g3", "g4", "g5", "g6"]].sum()
+    sums = df_results[["E_stored", "g1", "g2", "g4", "g5", "g6"]].sum()
 
     # Creating a new DataFrame to hold the sums
     sum_df = pd.DataFrame({"Category": sums.index, "Sum": sums.values})
     sum_df["Category"] = sum_df["Category"].replace(names_map)
+    st.dataframe(sum_df)
 
     # Creating the bar plot
     plt.figure(figsize=(10, 6))
@@ -599,13 +662,16 @@ def plot_single_values(df_results):
         "Category", fontsize=16, color=font_color, fontfamily=font_family
     )
     bar_plot.set_ylabel(
-        "produced/stored heat [kWh]",
+        "Heat [kWh]",
         fontsize=16,
         color=font_color,
         fontfamily=font_family,
     )
     bar_plot.set_title(
-        "Sum of Each Category", fontsize=16, color=font_color, fontfamily=font_family
+        "Sum of the Stored and Generated Heat",
+        fontsize=16,
+        color=font_color,
+        fontfamily=font_family,
     )
     plt.xticks(rotation=45, fontsize=12)
 
@@ -627,18 +693,41 @@ def plot_single_values(df_results):
     return
 
 
-def plot_comparison(df_melted, percentages):
+def plot_comparison(df_melted, title, percentage_mode):
     plt.figure(figsize=(10, 6))
+    palette = ["#1F4E79", "#356CA5", "#8AB5E1"]
     ax = sns.barplot(
-        x="variable", y="value", hue="Mode", data=df_melted, palette="coolwarm"
+        x="variable", y="value", hue="Mode", data=df_melted, palette=palette
     )
-    plt.xlabel(" ", **font_properties)
+    plt.xlabel("", **font_properties)
     plt.ylabel("€/kWh²/hg CO₂", **font_properties)
-    plt.title("Comparison of Operating Modes", **title_properties)
+    plt.title(title, **title_properties)
     plt.xticks(rotation=45)
+    plt.ylim(0, 22000000)
 
-    # Annotate bars with provided percentages from the list
-    for p, percentage in zip(ax.patches, percentages):
+    # Calculate percentages based on the highest value in each category
+    max_values = df_melted.groupby("variable")["value"].max()
+    percentages = [
+        (value / max_values[variable]) * 100
+        for _, (value, variable) in df_melted[["value", "variable"]].iterrows()
+    ]
+    # Calculate percentages based on the highest value across all categories
+
+    max_value = df_melted["value"].max()
+    percentages2 = [(value / max_value) * 100 for value in df_melted["value"]]
+
+    # Rearrange the list
+    rearranged_percentages = []
+
+    # Annotate bars with calculated percentages
+    if percentage_mode == "global":
+        for i in range(3):
+            rearranged_percentages.extend(percentages2[i::3])
+    elif percentage_mode == "local":
+        for i in range(3):
+            rearranged_percentages.extend(percentages[i::3])
+
+    for p, percentage in zip(ax.patches, rearranged_percentages):
         height = p.get_height()
         ax.annotate(
             f"{percentage:.0f}%",  # Annotate with integer percentage
@@ -653,6 +742,16 @@ def plot_comparison(df_melted, percentages):
 
     # Adapt legend style
     leg = plt.legend(**legend_properties)
+
+    plt.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.35),
+        ncol=3,  # Adjust as necessary
+        frameon=False,
+        fontsize=16,
+        title_fontsize="16",
+        labelcolor="#777777",
+    )
     for text in leg.get_texts():
         plt.setp(text, color="#777777")
 
@@ -663,6 +762,7 @@ def plot_comparison(df_melted, percentages):
     ax.spines["left"].set_edgecolor("#A3A3A3")
     ax.xaxis.label.set_color("#A3A3A3")
     ax.yaxis.label.set_color("#A3A3A3")
+    configure_style(ax)
 
     for spine in ["top", "right"]:
         ax.spines[spine].set_visible(False)
@@ -674,6 +774,15 @@ def plot_comparison(df_melted, percentages):
 
 
 def main_pulp():
+    if checkbox4 == 0:
+        file_path = "results/COP_vor_df.json"
+    elif checkbox4 == 1:
+        file_path = "results/COP_nach_df.json"
+
+    # Lesen der JSON-Datei in einen DataFrame
+    COP_df_imported = pd.read_json(file_path, orient="columns")
+    COP_df_imported.fillna(COP_df_imported.mean(), inplace=True)
+
     df_results = pd.DataFrame()
     df_input = pd.read_csv("Input_Netz.csv", delimiter=",", decimal=",")
     df_input.columns = df_input.columns.str.strip()
@@ -922,8 +1031,17 @@ def main_pulp():
         K_s_en = 4000
 
     ###Constraints
-    m += E_tot
-    m += E_tot == E_imp + E_exp
+    if checkbox3 == 0:
+        m += E_tot
+        m += E_tot == E_imp + E_exp
+    elif checkbox3 == 1:
+        m += E_tot
+        if checkbox == 0:
+            m += E_tot == E_emissions
+        elif checkbox == 1:
+            strompreise_export_c = preise_constant_low
+            strompreise_c = preise_constant_low
+            gaspreise_c = preise_constant_high
     m += (
         E_real
         == sum(strompreise[i] * e_imp_real[i] for i in I) / 100
@@ -1173,8 +1291,9 @@ def main_pulp():
         list(column_mapping.values())  # + ["storage"]
     ]
 
+    st.write(f"Das Ergebnis der Kostenfunktion im Modell ist {E_tot_m:.2f} ")
+
     st.write(f"Die tatsächlichen Energiekosten betragen {E_real_m:.2f} €")
-    st.write(f"Die Energiekosten im Modell betragen {E_tot_m:.2f} €")
 
     total = df_results["E_stored"].sum()
 
@@ -1208,59 +1327,13 @@ hours = st.number_input("Enter hours", min_value=1, value=2000)
 
 checkbox = st.checkbox("Use constant prices")
 checkbox2 = st.checkbox("Use no storage")
+checkbox3 = st.checkbox("optimimize for minimal emisssions")
+checkbox4 = st.checkbox("Use Networktemperatures after Temperature Reduction")
 if st.button("Submit"):
     st.write(f"You entered {hours} hours.")
 
     main_pulp()
-
     checkbox = 1
     main_pulp()
     checkbox2 = 1
     main_pulp()
-    data = {
-        "Mode": ["Optimized", "Heat-Driven", "No Storage"],
-        "Production Costs": [
-            18017339,
-            19072433,
-            19570587,
-        ],  # Replace with actual values
-        "Stored Energy": [
-            6812859,
-            10433713,
-            0,
-        ],  # Replace with actual values
-        "Emissions": [4251344, 4122257, 5127091],  # Replace with actual values
-    }
-
-    df = pd.DataFrame(data)
-    df_melted = df.melt(
-        id_vars="Mode", value_vars=["Production Costs", "Stored Energy", "Emissions"]
-    )
-
-    # Define your style properties
-    font_properties = {
-        "fontsize": 16,
-        "color": "#777777",
-        "fontfamily": "Segoe UI SemiLight",
-    }
-
-    title_properties = {
-        "fontsize": 16,
-        "color": "#777777",
-        "fontfamily": "Segoe UI SemiLight",
-    }
-
-    legend_properties = {
-        "loc": "upper center",
-        "bbox_to_anchor": (0.5, -0.15),
-        "ncol": 2,
-        "frameon": False,
-        "fontsize": 16,
-        "facecolor": "white",
-        "edgecolor": "white",
-        "title_fontsize": "16",
-        "labelcolor": "#777777",
-    }
-    percentages = [92, 65, 83, 95, 100, 80, 100, 0, 100]
-
-    plot_comparison(df_melted, percentages)

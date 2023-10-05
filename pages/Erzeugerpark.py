@@ -154,7 +154,7 @@ for i in range(anzahl_erzeuger):
             "Bitte Gütegrad Wasser-Wasser angeben", value=0.45, key=f"Gütegrad{i}"
         )
         # Leistung_max = st.number_input("Bitte maximale Leistung eingeben (kW)", key=f"Leistung_max{i}")
-        erzeuger = ep.heatpump_v1(
+        erzeuger = ep.heatpump_1(
             Volumenstrom_quelle,
             T_q,
             Gütegrad,
@@ -169,7 +169,7 @@ for i in range(anzahl_erzeuger):
         Gütegrad = st.number_input(
             "Bitte Gütegrad Wasser-Wasser angeben", value=0.45, key=f"Gütegrad{i}"
         )
-        erzeuger = ep.heatpump_v2(
+        erzeuger = ep.heatpump_2(
             Leistung_max, Gütegrad, color=erzeuger_color, co2_emission_factor=0.468
         )
 
@@ -264,21 +264,41 @@ for i in range(anzahl_erzeuger):
 
     erzeugerpark.append(erzeuger)
 
-names = [obj.__class__.__name__.replace("_", " ") for obj in erzeugerpark]
+names2 = [obj.__class__.__name__ for obj in erzeugerpark]
+
+# my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names2)}
+
+# st.write(my_dict)
+
+name_mapping = {
+    "waste_heat": "Waste Heat",
+    "heatpump_1": "Heat Pump",
+    "heatpump_2": "Heat Pump II",
+    "solarthermal": "Solar Thermal",
+    "geothermal": "Geothermal",
+    "PLB": "Peak Load Boiler",
+    "CHP": "CHP",
+}
+
+
+names = [
+    name_mapping.get(obj.__class__.__name__, obj.__class__.__name__)
+    for obj in erzeugerpark
+]
 
 
 my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names)}
 
-st.write(my_dict)
+# st.write(my_dict)
 
-print(my_dict)
-print(names)
+# print(my_dict)
+# print(names)
 
 if st.button("Calculate"):
     # Zeige den Erzeugerpark
     # df_erzeuger = pd.DataFrame([vars(erzeuger) for erzeuger in erzeugerpark])
     # st.dataframe(df_erzeuger)
-    st.write(erzeugerpark)
+    # st.write(erzeugerpark)
     df_input = df_input.iloc[:-2]
     # df_input = df_input.reset_index(drop=True)
 
@@ -302,8 +322,8 @@ if st.button("Calculate"):
         erzeuger_df_vor[f"Erzeuger_{i+1}_vor"] = waermeleistung_vor
         erzeuger_df_nach[f"Erzeuger_{i+1}_nach"] = waermeleistung_nach
 
-    st.dataframe(erzeuger_df_vor)
-    st.dataframe(erzeuger_df_nach)
+    # st.dataframe(erzeuger_df_vor)
+    # st.dataframe(erzeuger_df_nach)
 
     print(erzeuger_df_vor)
 
@@ -429,20 +449,30 @@ if st.button("Calculate"):
     CO2_df_vor.to_json("results/CO2_df_vor.json", orient="columns")
     CO2_df_nach.to_json("results/CO2_df_nach.json", orient="columns")
 
-    st.subheader("Numerische Ergebnisse")
-    total_sum = round(actual_production_df_vor.sum().sum() / 1000)
-    total_sum2 = round(actual_production_df_nach.sum().sum() / 1000)
-    st.write(f"Die gesamte Wärme Produktion:{total_sum} MWh")
+    st.subheader("Numerical Results")
 
-    total_sum_power = round(Power_df_vor.sum().sum() / 1000)
-    total_sum_power2 = round(Power_df_nach.sum().sum() / 1000)
-    st.write(f"Die gesamte Strom Nutzung vor T-Absenkung:     {total_sum_power} MWh")
-    st.write(f"Die gesamte Strom Nutzung nach T-Absenkung:    {total_sum_power2} MWh")
+    data = {
+        "Metric": [
+            "Total Heat Production before Temperature Reduction",
+            "Total Heat Production after Temperature Reduction",
+            "Total Power Consumption before Temperature Reduction",
+            "Total Power Consumption after Temperature Reduction",
+            "Total CO2 Emission before Temperature Reduction",
+            "Total CO2 Emission after Temperature Reduction",
+        ],
+        "Value": [
+            f"{round(actual_production_df_vor.sum().sum() / 1000)} MWh",
+            f"{round(actual_production_df_nach.sum().sum() / 1000)} MWh",
+            f"{round(Power_df_vor.sum().sum() / 1000)} MWh",
+            f"{round(Power_df_nach.sum().sum() / 1000)} MWh",
+            f"{round(CO2_df_vor.sum().sum() / 1000)} kg",
+            f"{round(CO2_df_nach.sum().sum() / 1000)} kg",
+        ],
+    }
 
-    total_sum_co2 = round(CO2_df_vor.sum().sum() / 1000)
-    total_sum_co22 = round(CO2_df_nach.sum().sum() / 1000)
-    st.write(f"Die gesamte CO2 Emission vor T-Absenkung:     {total_sum_co2} kg")
-    st.write(f"Die gesamte CO2 Emission nach T-Absenkung:    {total_sum_co22} kg")
+    df_numerical = pd.DataFrame(data)
+
+    st.table(df_numerical)
 
     # Export a DataFrame with the COP of the Heat Pumps as json, in oder to use FlixOpt for Storageoptimization
     # Pfad zur CSV-Datei
@@ -468,6 +498,21 @@ if st.button("Calculate"):
 
     COP_df.to_json("results/COP_vor_df.json", orient="columns")
 
+    for i, erzeuger in enumerate(erzeugerpark):
+        # Check the type of the 'erzeuger'
+        if isinstance(erzeuger, (ep.heatpump_1, ep.heatpump_2, ep.geothermal)):
+            COP = [
+                erzeuger.calc_COP(
+                    df_results.loc[hour, "T_vl_nach"],
+                    Trl_nach,
+                    df_zeitreihen.loc[hour, "Isartemp"],
+                )
+                for hour in df_input.index
+            ]
+            COP_df[erzeuger.get_class_name()] = COP
+
+    COP_df.to_json("results/COP_nach_df.json", orient="columns")
+
     # Define color list
     color_FFE = [erzeuger.color for erzeuger in erzeugerpark]
 
@@ -481,8 +526,8 @@ if st.button("Calculate"):
         sorted_df[col] = sorted_df[col].sort_values(ascending=False).values
 
     with st.container():
-        st.header("Erzeugungsgang")
-        st.subheader("vor")
+        st.header("Generation load profile")
+        st.subheader("Before Temperature Reduction")
         sorted_df_vor = plot_actual_production(
             df_input,
             actual_production_df_vor,
@@ -491,7 +536,7 @@ if st.button("Calculate"):
             my_dict,
             0,
         )
-        st.subheader("nach")
+        st.subheader("After Temperature Reduction")
         sorted_df_nach = plot_actual_production(
             df_input,
             actual_production_df_nach,
@@ -504,7 +549,7 @@ if st.button("Calculate"):
     # Create the second container
     with st.container():
         st.header("Annual duration line")
-        st.subheader("before")
+        st.subheader("Before Temperature Reduction")
         plot_df_vor = plot_sorted_production(
             df_input,
             sorted_df_vor,
@@ -513,7 +558,7 @@ if st.button("Calculate"):
             "Annual duration line before",
             my_dict,
         )
-        st.subheader("after")
+        st.subheader("After Temperature Reduction")
         plot_df_nach = plot_sorted_production(
             df_input,
             sorted_df_nach,
@@ -529,45 +574,51 @@ if st.button("Calculate"):
         actual_production_df_vor,
         actual_production_df_nach,
         color_FFE,
-        "vor",
-        "nach",
+        "before Temp. Reduction",
+        "after Temp. Reduction",
         "Erzeuger",
-        "Change in Production",
+        "Change in Heat Generation",
         "",
         "Total Production [GWh]",
         my_dict,
+        0.7,
+        0.8,
     )
 
     plot_total_change(
         CO2_df_vor,
         CO2_df_nach,
         color_FFE,
-        "vor",
-        "nach",
+        "before Temp. Reduction",
+        "after Temp. Reduction",
         "Erzeuger",
         "Change in CO2 Emissions",
         "",
         "Total Emissions [kt CO2]",
         my_dict,
+        0.7,
+        0.8,
     )
 
     plot_total_change(
         Power_df_vor,
         Power_df_nach,
         color_FFE,
-        "vor",
-        "nach",
+        "before Temp. Reduction",
+        "after Temp. Reduction",
         "Erzeuger",
-        "Change in Power Usage",
+        "Change in Power Consumption",
         "",
         "Total Usage [GWh]",
         my_dict,
+        0.4,
+        0.8,
     )
 
     st.sidebar.success("Simulation erfolgreich")
     erzeuger_df_vor.fillna(0, inplace=True)
     erzeuger_df_vor_json = erzeuger_df_vor.to_json()
-    data = {"names": names, "erzeuger_df_vor": erzeuger_df_vor_json}
+    data = {"names": names2, "erzeuger_df_vor": erzeuger_df_vor_json}
 
     with open("data.json", "w") as f:
         json.dump(data, f)
