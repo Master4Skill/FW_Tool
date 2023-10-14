@@ -57,8 +57,8 @@ T_vl_vor = list(df_results["T_vl_vor"].values())
 
 st.set_page_config(page_title="Plotting Demo2", page_icon="📈")
 add_logo("resized_image.png")
-st.markdown("# Plotting Demo")
-st.sidebar.header("Plotting Demo")
+st.markdown("# Storage Simulation")
+st.sidebar.header("Storage Simulation")
 
 # Don't forget to pass a proper DataFrame as an argument when calling the function.
 # plot_data3(your_dataframe)
@@ -84,12 +84,12 @@ legend_properties = {
 }
 
 
-def plot_data3(df):
+def plot_data3(df, title):
     fig, axs = plt.subplots(1, figsize=(10, 6))
 
     names_map = {
         "g1": "Waste Heat",
-        "g2": "Heat Pump",
+        "g3": "Heat Pump",
         "g4": "Geothermal",
         "g5": "Solar Thermal",
         "g6": "Peak Load Boiler",
@@ -108,7 +108,7 @@ def plot_data3(df):
 
     previous_cumulative = 0
     patches = []  # For shaded areas in legend
-    for i, column in enumerate((["g1", "g4", "g2", "g5", "g6"])):
+    for i, column in enumerate((["g1", "g4", "g3", "g5", "g6"])):
         label = names_map.get(column, column)
 
         cumulative += df[column]
@@ -198,7 +198,7 @@ def plot_data3(df):
     axs.plot(
         df.index,
         -df["s_out"],
-        label="storage Outflow (negative)",
+        label="Storage Outflow (negative)",
         color="#AB2626",
         linewidth=1,
     )
@@ -206,7 +206,7 @@ def plot_data3(df):
     axs.plot(
         df.index,
         -df["s_in"],
-        label="storage Inflow (negative)",
+        label="Storage Inflow (negative)",
         color="#1F4E79",  # Changed color here
         linewidth=1,
     )
@@ -229,7 +229,7 @@ def plot_data3(df):
         "fontfamily": "Segoe UI SemiLight",
     }
 
-    axs.set_title("Heat Generation and Storage", **title_properties)
+    axs.set_title(title, **title_properties)
 
     # Add legend with style configuration
     legend_properties = {
@@ -248,7 +248,7 @@ def plot_data3(df):
     lines = [
         mlines.Line2D([], [], color="black", label="Load Profile"),
         mlines.Line2D([], [], color="#F7D507", label="Stored Energy (Negative) [kWh]"),
-        mlines.Line2D([], [], color="#AB2626", label="Storage ouflow (Negative)"),
+        mlines.Line2D([], [], color="#AB2626", label="Storage Outflow (Negative)"),
         mlines.Line2D(
             [], [], color="#1F4E79", label="Storage Inflow (Negative)"
         ),  # Adjusted color
@@ -428,9 +428,9 @@ def plot_preise_flusstemp(strompreise_export, strompreise, gaspreise, flusstempe
     # First Plot
     fig1, ax1 = plt.subplots(figsize=(10, 6))
     ax1.plot(
-        strompreise_export, label="electricity export price", linewidth=1, color="blue"
+        strompreise_export, label="Electricity Export Price", linewidth=1, color="blue"
     )
-    ax1.plot(strompreise, label="electricity import price", linewidth=1, color="green")
+    ax1.plot(strompreise, label="Electricity Import Price", linewidth=1, color="green")
     ax1.set_ylabel("Electricity Prices [€/MWh]", **font_properties)
     ax1.set_title("Electricity Prices", **title_properties)
     ax1.legend(**legend_properties)
@@ -629,20 +629,33 @@ def plot_char_values(df_results):
     return
 
 
-def plot_single_values(df_results):
+def plot_single_values(df_results, mode):
     names_map = {
         "E_stored": "Stored Energy",
         "g1": "Waste Heat",
         "g2": "Heat Pump",
-        "g3": "Heat Pump II",
+        "g3": "Heat Pump",
         "g4": "Geothermal",
         "g5": "Solar Thermal",
         "g6": "Peak Load Boiler",
         "g7": "CHP",
     }
+    if mode == 0:
+        # Calculating the sums for each category
+        sums = df_results[["E_stored", "g1", "g3", "g4", "g5", "g6"]].sum()
 
-    # Calculating the sums for each category
-    sums = df_results[["E_stored", "g1", "g2", "g4", "g5", "g6"]].sum()
+    elif mode == 1:
+        names_map = {
+            "E_stored": "Stored Energy",
+            "f1": "Waste Heat",
+            # "f2": "Heat Pump",
+            "f3": "Heat Pump",
+            "f4": "Geothermal",
+            "f5": "Solar Thermal",
+            "f6": "Peak Load Boiler",
+            "f7": "CHP",
+        }
+        sums = df_results[["f3", "f4", "f5", "f6"]].sum()
 
     # Creating a new DataFrame to hold the sums
     sum_df = pd.DataFrame({"Category": sums.index, "Sum": sums.values})
@@ -773,7 +786,7 @@ def plot_comparison(df_melted, title, percentage_mode):
 # Continue with your existing data and call the modified function
 
 
-def main_pulp():
+def main_pulp(graphtitle):
     if checkbox4 == 0:
         file_path = "results/COP_vor_df.json"
     elif checkbox4 == 1:
@@ -782,6 +795,12 @@ def main_pulp():
     # Lesen der JSON-Datei in einen DataFrame
     COP_df_imported = pd.read_json(file_path, orient="columns")
     COP_df_imported.fillna(COP_df_imported.mean(), inplace=True)
+
+    # print the average values of each column in the dataframe to streamlit
+    st.write("Average values of each column in the dataframe:")
+    st.write(COP_df_imported.mean())
+
+    # st.dataframe(COP_df_imported.iloc[start_hour : start_hour + hours, :])
 
     df_results = pd.DataFrame()
     df_input = pd.read_csv("Input_Netz.csv", delimiter=",", decimal=",")
@@ -861,14 +880,19 @@ def main_pulp():
     def read_data2(filename, start_hour, hours):
         data = pd.read_csv(filename, sep=";", header=None)
 
-        # Convert the strompreise column to string, replace ',' with '.', and convert to float
+        # Convert the strompreise (electricity import prices) column to float
         data.iloc[:, 0] = (
             data.iloc[:, 0].astype(str).str.replace(",", ".").astype(float)
         )
 
+        # Convert the strompreise_export (electricity export prices) column to float
+        data.iloc[:, 1] = (
+            data.iloc[:, 1].astype(str).str.replace(",", ".").astype(float)
+        )
+
         # For gaspreise, take each value for 24 hours and only use the first 365 of them
         gaspreise_raw = (
-            data.iloc[:365, 1].astype(str).str.replace(",", ".").astype(float)
+            data.iloc[:365, 2].astype(str).str.replace(",", ".").astype(float)
         )
         gaspreise = []
         for price in gaspreise_raw:
@@ -876,9 +900,14 @@ def main_pulp():
 
         # Slice the dataframe and the gaspreise list according to the start_hour and hours
         strompreise = data.iloc[start_hour : start_hour + hours, 0].tolist()
+        strompreise_export = data.iloc[start_hour : start_hour + hours, 1].tolist()
         gaspreise = gaspreise[start_hour : start_hour + hours]
 
-        return strompreise, gaspreise  # Add other return variables as needed
+        return (
+            strompreise,
+            strompreise_export,
+            gaspreise,
+        )  # Add other return variables as needed
 
     # Add other return variables as needed
 
@@ -892,26 +921,33 @@ def main_pulp():
     file_name = "Zeitreihen/zeitreihen_22.csv"
 
     (
-        strompreise_export,
-        strompreise,
-        gaspreise,
+        strompreise_export_2,
+        strompreise_2,
+        gaspreise_2,
         Flusstemperatur,
     ) = read_data(file_name, start_hour, hours)
 
-    file_name = "Zeitreihen/preise.csv"
-    strompreise_2, gaspreise_2 = read_data2(file_name, start_hour, hours)
+    file_name = "Zeitreihen/preise2.csv"
+    strompreise, strompreise_export, gaspreise = read_data2(
+        file_name, start_hour, hours
+    )
 
     preise_null = [0] * len(strompreise_export)
     preise_constant_high = [1000] * len(strompreise_export)
     preise_constant_low = [0.01] * len(strompreise_export)
-    with open("data.json") as f:
-        data = json.load(f)
+    with open("erzeuger_df_vor.json") as f:
+        data1 = json.load(f)
+
+    with open("erzeuger_df_nach.json") as f:
+        data2 = json.load(f)
 
     with open("results/color_FFE.json", "r") as f:
         color_FFE = json.load(f)
 
-    names = data["names"]
-    erzeuger_df_vor = pd.read_json(data["erzeuger_df_vor"])
+    names1 = data1["names"]
+    names2 = data2["names"]
+    erzeuger_df_vor = pd.read_json(data1["erzeuger_df_vor"])
+    erzeuger_df_nach = pd.read_json(data2["erzeuger_df_nach"])
     Tiefentemperatur = 120
 
     # average_strompreise = sum(strompreise) / len(strompreise)
@@ -923,7 +959,7 @@ def main_pulp():
     ΔT = 1  # hours
     # comodities
     K_elec_imp = 100000
-    K_elec_exp = 100000
+    K_elec_exp = 0
     # storage
     K_s_pow_in = 3000  # kW
     K_s_pow_out = 3000
@@ -932,29 +968,37 @@ def main_pulp():
     big_M = 3100
     # Masterarbeit Therese Farber Formel/Prozent für Speicherverluste
 
-    # processes; später hier für K_i Potentiale aus Erzeugerpark importieren
-
     K_p = {}
+    if checkbox4 == 0:
+        names = names1
+        for i, name in enumerate(names):
+            K_p[name] = [
+                0 if v is None else v
+                for v in erzeuger_df_vor[f"Erzeuger_{i+1}_vor"].tolist()
+            ]
+    elif checkbox4 == 1:
+        names = names2
+        for i, name in enumerate(names):
+            K_p[name] = [
+                0 if v is None else v
+                for v in erzeuger_df_nach[f"Erzeuger_{i+1}_nach"].tolist()
+            ]
 
-    for i, name in enumerate(names):
-        K_p[name] = [
-            0 if v is None else v
-            for v in erzeuger_df_vor[f"Erzeuger_{i+1}_vor"].tolist()
-        ]
+    # st.dataframe(erzeuger_df_vor)
 
     # Abwärme
     K_p1 = K_p["waste_heat"][start_hour:] if "waste_heat" in names else [0] * 8761
 
     # Waermepumpe1
     K_p2 = K_p["heatpump_1"][start_hour:] if "heatpump_1" in names else [0] * 8761
-    PL_p2 = 0.2
+    PL_p2 = 0.4
     # Waermepumpe2
     K_p3 = K_p["heatpump_2"][start_hour:] if "heatpump_2" in names else [0] * 8761
     PL_p3 = 0.2
 
     # Geothermie
     K_p4 = K_p["geothermal"][start_hour:] if "geothermal" in names else [0] * 8761
-    PL_p4 = 0.5
+    PL_p4 = 0.3
 
     # Solar
     K_p5 = K_p["solarthermal"][start_hour:] if "solarthermal" in names else [0] * 8761
@@ -979,6 +1023,9 @@ def main_pulp():
     e_exp = LpVariable.dicts(
         "ρ_exp_elec_t", I, lowBound=0, upBound=K_elec_exp, cat="Continuous"
     )
+    e_imag = LpVariable.dicts(
+        "ρ_imag_elec_t", I, lowBound=0, upBound=K_elec_imp, cat="Continuous"
+    )
     g_imp = LpVariable.dicts("ρ_imp_gas_t", I, lowBound=0, cat="Continuous")
     s_in = LpVariable.dicts(
         "ρ_in_s_t", I, lowBound=0, upBound=K_s_pow_in, cat="Continuous"
@@ -991,9 +1038,9 @@ def main_pulp():
     z_out = LpVariable.dicts("z_out", I, lowBound=0, upBound=big_M, cat="Continuous")
 
     E_stored = LpVariable.dicts("E_stored", I, lowBound=0, cat="Continuous")
-    f21 = LpVariable.dicts("ρ_in_WP1_elec_t", I, lowBound=0, cat="Continuous")
+    f2 = LpVariable.dicts("ρ_in_WP1_elec_t", I, lowBound=0, cat="Continuous")
     # f22 = LpVariable.dicts("ρ_in_WP1_water_t", I, lowBound=0, cat="Continuous")
-    f31 = LpVariable.dicts("ρ_in_WP2_elec_t", I, lowBound=0, cat="Continuous")
+    f3 = LpVariable.dicts("ρ_in_WP2_elec_t", I, lowBound=0, cat="Continuous")
     # f32 = LpVariable.dicts("ρ_in_WP2_water_t", I, lowBound=0, cat="Continuous")
     f4 = LpVariable.dicts("ρ_in_Geo_elec_t", I, lowBound=0, cat="Continuous")
     f5 = LpVariable.dicts("ρ_in_Solar_sun_t", I, lowBound=0, cat="Continuous")
@@ -1019,12 +1066,29 @@ def main_pulp():
     x_s = LpVariable.dicts(
         "storage_Charge_Discharge", I, lowBound=0, upBound=1, cat="Integer"
     )
+    Elec_sum = LpVariable("Elec_sum")
+    Gas_sum = LpVariable("Gas_sum")
+
     E_real = LpVariable("total_actual_Euros")
     E_tot = LpVariable("total_theoretical_Euros")
     E_imp = LpVariable("Euros_for_Import")
     E_exp = LpVariable("Euros_for_Export")
     E_emissions = LpVariable("Emissions")
+    E_imag = LpVariable("Euros_for_Import_imaginary")
     # K_s_en = LpVariable("storage_energy_capacity", lowBound=0, cat="Continuous")
+    if checkbox == 1:
+        strompreise_export_c = preise_constant_low
+        strompreise_c = preise_constant_low
+        gaspreise_c = preise_constant_high
+    elif checkbox == 3:
+        strompreise_export_c = preise_constant_low
+        strompreise_c = preise_constant_low
+        gaspreise_c = preise_constant_high
+    else:
+        strompreise_export_c = strompreise_export
+        strompreise_c = strompreise
+        gaspreise_c = gaspreise
+
     if checkbox2 == 1:
         K_s_en = 0
     else:
@@ -1035,55 +1099,55 @@ def main_pulp():
         m += E_tot
         m += E_tot == E_imp + E_exp
     elif checkbox3 == 1:
-        m += E_tot
         if checkbox == 0:
-            m += E_tot == E_emissions
-        elif checkbox == 1:
-            strompreise_export_c = preise_constant_low
-            strompreise_c = preise_constant_low
-            gaspreise_c = preise_constant_high
-    m += (
-        E_real
-        == sum(strompreise[i] * e_imp_real[i] for i in I) / 100
-        + sum(gaspreise[i] * g_imp[i] for i in I) / 100
-        + sum(strompreise_export[i] * e_exp[i] for i in I) / 100
-    )
-    m += (
-        E_emissions
-        == sum(0.468 * e_imp[i] for i in I) / 100
-        + sum(0.201 * g_imp[i] for i in I) / 100
-    )
+            m += E_tot
+            m += E_tot == E_emissions + 0.0001 * E_imag
+        if checkbox == 1:
+            m += E_tot
+            m += E_tot == E_imp + E_exp
 
-    if checkbox == 1:
-        strompreise_export_c = preise_constant_low
-        strompreise_c = preise_constant_low
-        gaspreise_c = preise_constant_high
-    else:
-        strompreise_export_c = strompreise_export
-        strompreise_c = strompreise
-        gaspreise_c = gaspreise
     m += (
         E_imp
         == sum(strompreise_c[i] * e_imp[i] for i in I) / 100
         + sum(gaspreise_c[i] * g_imp[i] for i in I) / 100
     )
+    # e imag
+    m += E_imag == sum(e_imag[i] for i in I) / 100
     m += E_exp == sum(strompreise_export_c[i] * e_exp[i] for i in I) / 100
+    m += (
+        E_real
+        == sum(strompreise[i] * e_imp_real[i] for i in I) / 1000
+        + sum(gaspreise[i] * g_imp[i] for i in I) / 1000
+        + sum(strompreise_export[i] * e_exp[i] for i in I) / 1000
+    )
+    m += (
+        E_emissions
+        == sum(0.468 * e_imp_real[i] for i in I) / 1000
+        + sum(0.201 * g_imp[i] for i in I) / 1000
+    )
+    m += Elec_sum == sum(e_imp_real[i] for i in I)
+    m += Gas_sum == sum(g_imp[i] for i in I)
+
     # m += X == sum(average_strompreise * x[i] for i in I) / 100
 
     for i in range(len(P_to_dem)):
         P = P_to_dem[i]
 
         # Check if column exists in DataFrame, if not, assign 0
-
-        A_p2_in = COP_df_imported.get(
-            "heatpump_1", pd.Series(0, index=COP_df_imported.index)
-        ).loc[i + start_hour]
-        A_p3_in = COP_df_imported.get(
-            "heatpump_2", pd.Series(0, index=COP_df_imported.index)
-        ).loc[i + start_hour]
-        A_p4_in = COP_df_imported.get(
-            "geothermal", pd.Series(0, index=COP_df_imported.index)
-        ).loc[i + start_hour]
+        try:
+            A_p2_in = COP_df_imported.get(
+                "heatpump_1", pd.Series(0, index=COP_df_imported.index)
+            ).loc[i + start_hour]
+            A_p3_in = COP_df_imported.get(
+                "heatpump_2", pd.Series(0, index=COP_df_imported.index)
+            ).loc[i + start_hour]
+            A_p4_in = COP_df_imported.get(
+                "geothermal", pd.Series(0, index=COP_df_imported.index)
+            ).loc[i + start_hour]
+        except KeyError:
+            A_p2_in = 0
+            A_p3_in = 0
+            A_p4_in = 0
 
         # 0.45 * (T_vl_vor[i] + 273.15) / (T_vl_vor[i] - Flusstemperatur[i]) #compare to ε = self.Gütegrad * ((Tvl + 273.15) / (Tvl - self.T_q))
         # A_p3_in = 0.45 * (60 + 273.15) / (60 - Flusstemperatur[i]) #        ε = self.Gütegrad * (Tvl + 273.15) / (Tvl - self.T_q)
@@ -1091,7 +1155,7 @@ def main_pulp():
         # V = current_last / (self.Tgeo - (Trl + T_Wü_delta_r) * ρ_water * cp_water)
         # P = V / 3600 * ρ_water * 9.81 * self.h_förder / self.η_geo
         # return P / 1000
-        A_p5_in = 100
+        A_p5_in = 100  # Very high COP for solar thermal, since it is only used to prioritize WH over Solarthermalheat, as none of them is actually considered in the prices as they are modelled without electrical input
         A_p6_in = 0.8
         A_p7_in = 1
         A_p7_out_elec = 0.38
@@ -1123,14 +1187,14 @@ def main_pulp():
         # p1 WH
         m += g1[i] <= K_p1[i]
         # p2 WP1
-        m += g2[i] == f21[i] * A_p2_in
+        m += g2[i] == f2[i] * A_p2_in
         m += g2[i] >= x2[i] * K_p2[i] * PL_p2
         m += g2[i] <= x2[i] * K_p2[i]
 
         # m += g2[i] <= K_p2[i]
         # m += g2[i] - K_p2[i] * PL_p2 >= -(1 - x2[i]) * K_p2[i]
         # p3 WP2
-        m += g3[i] == f31[i] * A_p3_in
+        m += g3[i] == f3[i] * A_p3_in
         m += g3[i] >= x3[i] * K_p3[i] * PL_p3
         m += g3[i] <= x3[i] * K_p3[i]
         # p4 Geothermal
@@ -1157,8 +1221,12 @@ def main_pulp():
             == s_in[i] + P
         )
         # electricity
-        m += e_imp[i] == f21[i] + f31[i] + f4[i] + f5[i] + e_exp[i]
-        m += e_imp_real[i] == f21[i] + f31[i] + f4[i] + e_exp[i]
+        m += e_imp[i] == f2[i] + f3[i] + f4[i] + f5[i] + e_exp[i]
+        m += e_imp_real[i] == f2[i] + f3[i] + f4[i]
+        # e_imag
+
+        m += e_imag[i] == f5[i]
+
         # gas
         m += g_imp[i] == f6[i] + f7[i]
 
@@ -1176,8 +1244,8 @@ def main_pulp():
     s_in_m = {i: s_in[i].varValue for i in I}
     s_out_m = {i: s_out[i].varValue for i in I}
     E_stored_m = {i: E_stored[i].varValue for i in I}
-    f21_m = {i: f21[i].varValue for i in I}
-    f31_m = {i: f31[i].varValue for i in I}
+    f2_m = {i: f2[i].varValue for i in I}
+    f3_m = {i: f3[i].varValue for i in I}
     f4_m = {i: f4[i].varValue for i in I}
     f5_m = {i: f5[i].varValue for i in I}
     f6_m = {i: f6[i].varValue for i in I}
@@ -1195,80 +1263,45 @@ def main_pulp():
     E_tot_m = E_tot.varValue
     E_real_m = E_real.varValue
     E_emissions_m = E_emissions.varValue
+    Elec_sum = Elec_sum.varValue
+    Gas_sum = Gas_sum.varValue
 
     df_results = pd.DataFrame()
 
     for key in e_imp_m.keys():
-        if checkbox == 0:
-            data = {
-                # "K_s_en": K_s_en_m,
-                "E_tot": E_tot_m,
-                "e_imp": e_imp_m[key],
-                "e_exp": e_exp_m[key],
-                "s_in": s_in_m[key],
-                "s_out": s_out_m[key],
-                "E_stored": E_stored_m[key],
-                "f21": f21_m[key],
-                "f31": f31_m[key],
-                "f4": f4_m[key],
-                "f5": f5_m[key],
-                "f6": f6_m[key],
-                "f7": f7_m[key],
-                "g1": g1_m[key],
-                "g2": g2_m[key],
-                "g3": g3_m[key],
-                "g4": g4_m[key],
-                "g5": g5_m[key],
-                "g6": g6_m[key],
-                "P_to_dem": P_to_dem_m[key],
-                "COP_hp1": COP_df_imported.get(
-                    "heatpump_1", pd.Series(0, index=COP_df_imported.index)
-                ).loc[key + start_hour],
-                "COP_hp2": COP_df_imported.get(
-                    "heatpump_2", pd.Series(0, index=COP_df_imported.index)
-                ).loc[key + start_hour],
-                "COP_geo": COP_df_imported.get(
-                    "geothermal", pd.Series(0, index=COP_df_imported.index)
-                ).loc[key + start_hour],
-            }
-        else:
-            data = {
-                # "K_s_en": K_s_en_m,
-                "E_real": E_real_m,
-                "e_imp": e_imp_m[key],
-                "e_exp": e_exp_m[key],
-                "s_in": s_in_m[key],
-                "s_out": s_out_m[key],
-                "E_stored": E_stored_m[key],
-                "f21": f21_m[key],
-                "f31": f31_m[key],
-                "f4": f4_m[key],
-                "f5": f5_m[key],
-                "f6": f6_m[key],
-                "f7": f7_m[key],
-                "g1": g1_m[key],
-                "g2": g2_m[key],
-                "g3": g3_m[key],
-                "g4": g4_m[key],
-                "g5": g5_m[key],
-                "g6": g6_m[key],
-                "P_to_dem": P_to_dem_m[key],
-                "COP_hp1": COP_df_imported.get(
-                    "heatpump_1", pd.Series(0, index=COP_df_imported.index)
-                ).loc[key + start_hour],
-                "COP_hp2": COP_df_imported.get(
-                    "heatpump_2", pd.Series(0, index=COP_df_imported.index)
-                ).loc[key + start_hour],
-                "COP_geo": COP_df_imported.get(
-                    "geothermal", pd.Series(0, index=COP_df_imported.index)
-                ).loc[key + start_hour],
-            }
+        data = {
+            # "K_s_en": K_s_en_m,
+            "E_real": E_real_m,
+            "e_imp": e_imp_m[key],
+            "e_exp": e_exp_m[key],
+            "s_in": s_in_m[key],
+            "s_out": s_out_m[key],
+            "E_stored": E_stored_m[key],
+            "x_elec": strompreise[key],
+            # "x_elec_export": strompreise_export[key + start_hour],
+            "x_gas": gaspreise[key],
+            # "f2": f2_m[key],
+            # "f3": f3_m[key],
+            # "f4": f4_m[key],
+            # "f5": f5_m[key],
+            # "f6": f6_m[key],
+            # "f7": f7_m[key],
+            "g1": g1_m[key],
+            "g2": g2_m[key],
+            "g3": g3_m[key],
+            "g4": g4_m[key],
+            "g5": g5_m[key],
+            "g6": g6_m[key],
+            "P_to_dem": P_to_dem_m[key],
+        }
         df_results = pd.concat(
             [df_results, pd.DataFrame(data, index=[key])], ignore_index=True
         )
 
     print(df_results)
     st.dataframe(df_results)
+    st.write(Elec_sum)
+    st.write(Gas_sum)
 
     # Creating a dictionary to map the old column names to the new column names
     column_mapping = {
@@ -1290,7 +1323,7 @@ def main_pulp():
     df_production_storage = df_production_storage[
         list(column_mapping.values())  # + ["storage"]
     ]
-
+    st.write("# Numerical Results")
     st.write(f"Das Ergebnis der Kostenfunktion im Modell ist {E_tot_m:.2f} ")
 
     st.write(f"Die tatsächlichen Energiekosten betragen {E_real_m:.2f} €")
@@ -1298,9 +1331,9 @@ def main_pulp():
     total = df_results["E_stored"].sum()
 
     # Display the total sum of the column in Streamlit
-    st.write(f"The Integral of the stored Energy is: {total}")
-    st.write(f"Der gesamten Emissionen betragen {E_emissions_m:.2f} kg CO2")
-    plot_data3(df_results)
+    st.write(f"The sum of the stored energy is: {total/1000:.2f} MWh")
+    st.write(f"Die gesamten Emissionen betragen {E_emissions_m:.2f} t CO₂")
+    plot_data3(df_results, graphtitle)
     # plot_power_usage_storage(df_production_storage, color_FFE)
 
     my_dict = {
@@ -1311,7 +1344,9 @@ def main_pulp():
         "Erzeuger_5": "PLB",
     }
 
-    plot_single_values(df_results)
+    plot_single_values(df_results, 0)
+    # plot_single_values(df_results, 1)
+
     # plot_char_values(df_results)
     # plot_storage_data(df_results)
     plot_preise_flusstemp(strompreise_export, strompreise, gaspreise, Flusstemperatur)
@@ -1324,16 +1359,58 @@ def main_pulp():
 
 start_hour = st.number_input("Enter start hour", min_value=1, value=1)
 hours = st.number_input("Enter hours", min_value=1, value=2000)
-
+K_s_en = st.number_input("Enter storage size [kWh]", min_value=0, value=4000)
 checkbox = st.checkbox("Use constant prices")
 checkbox2 = st.checkbox("Use no storage")
-checkbox3 = st.checkbox("optimimize for minimal emisssions")
-checkbox4 = st.checkbox("Use Networktemperatures after Temperature Reduction")
+checkbox3 = st.checkbox("Optimimize for minimal emisssions")
+checkbox4 = st.checkbox("Use networktemperatures after temperature reduction")
 if st.button("Submit"):
     st.write(f"You entered {hours} hours.")
+    if checkbox4 == 0:
+        if checkbox3 == 0:
+            main_pulp("Cost Optimized Heat Generation and Storage")
+            checkbox = 1
+            main_pulp("Linear Prioritized Heat Generation and Optimized Storage")
+            checkbox = 0
+            checkbox3 = 1
+            main_pulp("Emission Optimized Heat Generation and Storage")
+            checkbox3 = 0
+            checkbox2 = 1
+            # main_pulp("Cost Optimized Heat Generation")
+            checkbox = 1
+            checkbox2 = 1
+            main_pulp("Linear Prioritized Heat Generation")
 
-    main_pulp()
-    checkbox = 1
-    main_pulp()
-    checkbox2 = 1
-    main_pulp()
+        elif checkbox3 == 1:
+            main_pulp("Emission Optimized Heat Generation and Storage")
+            checkbox = 1
+            main_pulp("Linear Prioritized Heat Generation and Optimized Storage")
+            checkbox = 0
+            checkbox2 = 1
+            main_pulp("Emission Optimized Heat Generation")
+            checkbox = 1
+            checkbox2 = 1
+            main_pulp("Linear Prioritized Heat Generation")
+    elif checkbox4 == 1:
+        if checkbox3 == 0:
+            main_pulp("Cost Optimized Heat Generation and Storage at lower Temp.")
+            checkbox = 1
+            main_pulp(
+                "Linear Prioritized Heat Generation and Optimized Storage at lower Temp."
+            )
+            checkbox3 = 1
+            checkbox = 0
+            main_pulp("Emission Optimized Heat Generation and Storage at lower Temp.")
+            checkbox3 = 0
+            checkbox2 = 1
+
+            main_pulp("Cost Optimized Heat Generation at lower Temp.")
+
+        elif checkbox3 == 1:
+            main_pulp("Emission Optimized Heat Generation and Storage at lower Temp.")
+            checkbox = 1
+            main_pulp(
+                "Linear Prioritized Heat Generation and Optimized Storage at lower Temp."
+            )
+            checkbox2 = 1
+            main_pulp("Emission Optimized Heat Generation at lower Temp.")

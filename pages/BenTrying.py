@@ -230,5 +230,79 @@ for i in range(3):  # Assuming there are 3 modes
     rearranged_percentages.extend(percentages[i::3])
 
 # Output
-print("Original: ", percentages)
-print("Rearranged: ", rearranged_percentages)
+# print("Original: ", percentages)
+# print("Rearranged: ", rearranged_percentages)
+
+
+def read_data2(filename, start_hour, hours):
+    data = pd.read_csv(filename, sep=";", header=None)
+
+    # Convert the strompreise (electricity import prices) column to float
+    data.iloc[:, 0] = data.iloc[:, 0].astype(str).str.replace(",", ".").astype(float)
+
+    # Convert the strompreise_export (electricity export prices) column to float
+    data.iloc[:, 1] = data.iloc[:, 1].astype(str).str.replace(",", ".").astype(float)
+
+    # For gaspreise, take each value for 24 hours and only use the first 365 of them
+    gaspreise_raw = data.iloc[:365, 2].astype(str).str.replace(",", ".").astype(float)
+    gaspreise = []
+    for price in gaspreise_raw:
+        gaspreise.extend([price] * 24)  # Each gas price is repeated 24 times
+
+    # Slice the dataframe and the gaspreise list according to the start_hour and hours
+    strompreise = data.iloc[start_hour : start_hour + hours, 0].tolist()
+    strompreise_export = data.iloc[start_hour : start_hour + hours, 1].tolist()
+    gaspreise = gaspreise[start_hour : start_hour + hours]
+
+    return (
+        strompreise,
+        strompreise_export,
+        gaspreise,
+    )  # Add other return variables as needed
+
+
+file_name = "Zeitreihen/preise2.csv"
+strompreise, strompreise_export, gaspreise = read_data2(file_name, 1, 8759)
+
+# calculate the average value
+average_strompreise = sum(strompreise) / len(strompreise)
+average_strompreise_export = sum(strompreise_export) / len(strompreise_export)
+average_gaspreise = sum(gaspreise) / len(gaspreise)
+
+
+file_path = "results/COP_vor_df.json"
+
+
+# Lesen der JSON-Datei in einen DataFrame
+COP_df_imported = pd.read_json(file_path, orient="columns")
+COP_df_imported.fillna(COP_df_imported.mean(), inplace=True)
+# find minimum COP for each producer in there
+min_cop = COP_df_imported.mean(axis=0)
+# print it
+print(min_cop)
+
+# print averages
+# print(average_strompreise)
+# print(average_strompreise_export)
+# print(average_gaspreise)
+
+
+import pandas as pd
+
+# Your data
+data = {
+    "Category": ["Endenergiebedarf", "Kosten", "Emissionen"],
+    "Strom": [6481772, 10017060, 29551],
+    "Gas": [6697031, 8034763, 22411],
+}
+
+# Create a DataFrame
+df = pd.DataFrame(data)
+
+# Save the DataFrame as a JSON file
+df.to_json("FW_Tool_Results.json", orient="split", indent=4)
+
+print(df)
+
+# read in df
+df = pd.read_json("FW_Tool_Results.json", orient="split")

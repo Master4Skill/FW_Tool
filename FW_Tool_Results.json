@@ -1,0 +1,29 @@
+{
+    "columns":[
+        "Category",
+        "Strom",
+        "Gas"
+    ],
+    "index":[
+        0,
+        1,
+        2
+    ],
+    "data":[
+        [
+            "Endenergiebedarf",
+            6481772,
+            6697031
+        ],
+        [
+            "Kosten",
+            10017060,
+            8034763
+        ],
+        [
+            "Emissionen",
+            29551,
+            22411
+        ]
+    ]
+}

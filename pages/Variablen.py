@@ -62,7 +62,7 @@ with expander:
         "Efficiency of Compressor Heat Pumps (%)", value=0.85
     )
     input_data["T_q_diffmax"] = st.number_input(
-        "Maximum Temperature Difference Heat Source at Heat Pump(°K)", value=5
+        "Heat pump: maximum Temperature Difference of the Heat Source(°K)", value=5
     )
     input_data["T_Wü_delta_r"] = st.number_input(
         "minimal residual Temperature delta at return side of heat Exchanger (°K)",

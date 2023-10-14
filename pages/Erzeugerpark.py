@@ -56,13 +56,13 @@ irradiation_data = data["Einstrahlung_22"]
 
 
 color_dict = {
-    "♨️ waste heat - begrenzter Volumenstrom der Quelle (m³/h), Abwärmetemperatur konstant über Netztemperatur (°C)": "#639729",
-    "🚰 heatpump-1 - begrenzter Volumenstrom der Quelle (m³/h), Quelltemperatur konstant (°C)": "#1F4E79",
-    "🌊 heatpump-2 - Begrenzte Leistung (kW), bei schwankender Quelltemperatur (°C)": "#F7D507",
-    "⛰️ geothermal  - Maximale Leistung (kW)": "#DD2525",
-    "☀️ solarthermal - Sonneneinstrahlung (kW/m²)": "#92D050",
-    "🔥 PLB - Maximale Leistung (kW)": "#EC9302",
-    "🏭 CHP - Maximale Leistung (kW)": "#EC9302",
+    "♨️ waste heat - limited volume flow of the source (m³/h)": "#639729",
+    "🚰 heat pump - limited volume flow of the source (m³/h), source temperature constant (°C)": "#1F4E79",
+    "🌊 river heat pump - limited power (kW), fluctuating source temperature (°C)": "#F7D507",
+    "⛰️ geothermal  - maximum power (kW)": "#DD2525",
+    "☀️ solarthermal - solar radiation (kW/m²)": "#92D050",
+    "🔥 PLB - maximum power (kW)": "#EC9302",
+    "🏭 CHP - maximum power (kW)": "#EC9302",
 }
 
 
@@ -72,11 +72,11 @@ st.set_page_config(
 )
 add_logo("resized_image.png")
 
-st.sidebar.header("Temperaturabsenkung in Erzeugerkombinationen")
+st.sidebar.header("Temperature Reduction in the Heat Generation Park")
 
-st.sidebar.info("Wählen Sie die gewünschten Erzeuger")
+st.sidebar.info("Select the desired generators and their parameters")
 
-st.markdown("# Erzeugerparksimulation")
+st.markdown("# Heat Generation Park Simulation")
 
 df_input = pd.read_csv("Input_Netz.csv", delimiter=",", decimal=",")
 df_input.columns = df_input.columns.str.strip()
@@ -100,25 +100,25 @@ erzeugerpark = []
 erzeugerpark_dict = {}
 
 
-# Maximum Anzahl an Erzeuger Eingaben
+# Maximum Number of Generator Inputs
 max_erzeuger = 7
 anzahl_erzeuger = st.slider(
-    "Wie viele Erzeuger möchten Sie hinzufügen?", 1, max_erzeuger
+    "How many generators would you like to add?", 1, max_erzeuger
 )
 expander = st.expander("Additional Solar Parameters")
 
 for i in range(anzahl_erzeuger):
-    st.markdown(f"### Erzeuger {i+1}")
+    st.markdown(f"### Generator {i+1}")
     erzeuger_type = st.selectbox(
-        f"Bitte den Typ des Erzeugers {i+1} auswählen",
+        f"Please select the type of the generator {i+1}",
         [
-            "♨️ waste heat - begrenzter Volumenstrom der Quelle (m³/h), Abwärmetemperatur konstant über Netztemperatur (°C)",
-            "🚰 heatpump-1 - begrenzter Volumenstrom der Quelle (m³/h), Quelltemperatur konstant (°C)",
-            "🌊 heatpump-2 - Begrenzte Leistung (kW), bei schwankender Quelltemperatur (°C)",
-            "⛰️ geothermal  - Maximale Leistung (kW)",
-            "☀️ solarthermal - Sonneneinstrahlung (kW/m²)",
-            "🔥 PLB - Maximale Leistung (kW)",
-            "🏭 CHP - Maximale Leistung (kW)",
+            "♨️ waste heat - limited volume flow of the source (m³/h)",
+            "🚰 heat pump - limited volume flow of the source (m³/h), source temperature constant (°C)",
+            "🌊 river heat pump - limited power (kW), fluctuating source temperature (°C)",
+            "⛰️ geothermal  - maximum power (kW)",
+            "☀️ solarthermal - solar radiation (kW/m²)",
+            "🔥 PLB - maximum power (kW)",
+            "🏭 CHP - maximum power (kW)",
         ],
         key=f"Erzeuger{i}",
     )
@@ -127,12 +127,14 @@ for i in range(anzahl_erzeuger):
 
     if "waste heat" in erzeuger_type:
         Volumenstrom_quelle = st.number_input(
-            "Bitte Volumenstrom_quelle eingeben (m³/h)",
+            "Please enter the volume flow rate of the source (m³/h)",
             value=10,
             key=f"Volumenstrom_quelle{i}",
         )
         Abwärmetemperatur = st.number_input(
-            "Bitte Quelltemperatur eingeben (°C)", value=120, key=f"Quelltemperatur{i}"
+            "Please enter the source temperature (°C)",
+            value=120,
+            key=f"Quelltemperatur{i}",
         )
         erzeuger = ep.waste_heat(
             Volumenstrom_quelle,
@@ -141,19 +143,22 @@ for i in range(anzahl_erzeuger):
             co2_emission_factor=0,
         )
 
-    elif "heatpump-1" in erzeuger_type:
+    elif "🚰 heat pump" in erzeuger_type:
         Volumenstrom_quelle = st.number_input(
-            "Bitte Volumenstrom_quelle eingeben (m³/h)",
+            "Please enter the volume flow rate of the source (m³/h)",
             value=200,
             key=f"Volumenstrom_quelle{i}",
         )
         T_q = st.number_input(
-            "Bitte Quelltemperatur eingeben (°C)", value=25, key=f"Quelltemperatur{i}"
+            "Please enter the source temperature (°C)",
+            value=25,
+            key=f"Quelltemperatur{i}",
         )
         Gütegrad = st.number_input(
-            "Bitte Gütegrad Wasser-Wasser angeben", value=0.45, key=f"Gütegrad{i}"
+            "Please specify the efficiency of the water-water heat pump",
+            value=0.45,
+            key=f"Gütegrad{i}",
         )
-        # Leistung_max = st.number_input("Bitte maximale Leistung eingeben (kW)", key=f"Leistung_max{i}")
         erzeuger = ep.heatpump_1(
             Volumenstrom_quelle,
             T_q,
@@ -162,12 +167,14 @@ for i in range(anzahl_erzeuger):
             co2_emission_factor=0.468,
         )
 
-    elif "heatpump-2" in erzeuger_type:
+    elif "river heat pump" in erzeuger_type:
         Leistung_max = st.number_input(
-            "Bitte maximale Leistung eingeben (kW)", value=2500, key=f"Leistung_max{i}"
+            "Please enter the maximum power (kW)", value=2500, key=f"Leistung_max{i}"
         )
         Gütegrad = st.number_input(
-            "Bitte Gütegrad Wasser-Wasser angeben", value=0.45, key=f"Gütegrad{i}"
+            "Please specify the efficiency of the water-water heat pump",
+            value=0.45,
+            key=f"Gütegrad{i}",
         )
         erzeuger = ep.heatpump_2(
             Leistung_max, Gütegrad, color=erzeuger_color, co2_emission_factor=0.468
@@ -175,16 +182,16 @@ for i in range(anzahl_erzeuger):
 
     elif "geothermal" in erzeuger_type:
         Leistung_max = st.number_input(
-            "Bitte maximale Leistung eingeben (kW)", value=2000, key=f"Leistung_max{i}"
+            "Please enter the maximum power (kW)", value=2000, key=f"Leistung_max{i}"
         )
         Tgeo = st.number_input(
-            "Bitte Temperatur der Geothermie eingeben (°C)", value=100, key=f"Tgeo{i}"
+            "Please enter the geothermal temperature (°C)", value=100, key=f"Tgeo{i}"
         )
         h_förder = st.number_input(
-            "Bitte Förderhöhe eingeben (m)", value=2000, key=f"h_förder{i}"
+            "Please enter the extraction height (m)", value=2000, key=f"h_förder{i}"
         )
         η_geo = st.number_input(
-            "Bitte Wirkungsgrad der Geothermiepumpe eingeben (%)",
+            "Please specify the efficiency of the geothermal pump (%)",
             value=0.8,
             key=f"η_geo{i}",
         )
@@ -198,12 +205,6 @@ for i in range(anzahl_erzeuger):
         )
 
     elif "solarthermal" in erzeuger_type:
-        Irradiance = st.number_input(
-            "Please Enter the Irradiance (kW/m²)",
-            key=f"Irradiance{i}",
-            value=1,
-        )
-
         solar_area = st.number_input(
             "Please Enter the total Area of Solarthermal Collectors (m²)",
             value=10000,
@@ -213,13 +214,15 @@ for i in range(anzahl_erzeuger):
         expander = st.expander("Additional Solar Parameters")
         with expander:
             k_s_1 = st.number_input(
-                "Please Enter the Heat Loss Coefficient of the Solarthermal System (kW/m²K)",
-                value=0.0015,
+                "Please Enter the first Heat Loss Coefficient of the Solarthermal System (W/m²K)",
+                value=1.5,
+                format="%.4f",
                 key=f"k_s_1{i}",
             )
             k_s_2 = st.number_input(
-                "Please Enter The Heat Loss Coefficient of the Solarthermal System (kW/m²K²)",
-                value=0.000005,
+                "Please Enter the second Heat Loss Coefficient of the Solarthermal System (W/m²K²)",
+                value=0.005,
+                format="%.4f",
                 key=f"k_s_2{i}",
             )
 
@@ -236,10 +239,9 @@ for i in range(anzahl_erzeuger):
             )
 
         erzeuger = ep.solarthermal(
-            Irradiance,
             solar_area,
-            k_s_1,
-            k_s_2,
+            k_s_1 / 1000,
+            k_s_2 / 1000,
             α,
             τ,
             color=erzeuger_color,
@@ -248,21 +250,22 @@ for i in range(anzahl_erzeuger):
 
     elif "PLB" in erzeuger_type:
         Leistung_max = st.number_input(
-            "Bitte maximale Leistung eingeben (kW)", value=10000, key=f"Leistung_max{i}"
+            "Please enter the maximum power (kW)", value=10000, key=f"Leistung_max{i}"
         )
         erzeuger = ep.PLB(Leistung_max, color=erzeuger_color, co2_emission_factor=0.201)
 
     elif "CHP" in erzeuger_type:
         Leistung_max = st.number_input(
-            "Bitte maximale Leistung eingeben (kW)",
+            "Please enter the maximum power (kW)",
             value=5000,
             key=f"Leistung_max{i}",
         )
         erzeuger = ep.CHP(Leistung_max, color=erzeuger_color, co2_emission_factor=0.201)
     else:
-        st.write("Bitte wählen Sie einen gültigen Erzeugertyp aus")
+        st.write("Please select a valid generator type")
 
     erzeugerpark.append(erzeuger)
+
 
 names2 = [obj.__class__.__name__ for obj in erzeugerpark]
 
@@ -273,7 +276,7 @@ names2 = [obj.__class__.__name__ for obj in erzeugerpark]
 name_mapping = {
     "waste_heat": "Waste Heat",
     "heatpump_1": "Heat Pump",
-    "heatpump_2": "Heat Pump II",
+    "heatpump_2": "Ambient\nHeat Pump",
     "solarthermal": "Solar Thermal",
     "geothermal": "Geothermal",
     "PLB": "Peak Load Boiler",
@@ -618,7 +621,13 @@ if st.button("Calculate"):
     st.sidebar.success("Simulation erfolgreich")
     erzeuger_df_vor.fillna(0, inplace=True)
     erzeuger_df_vor_json = erzeuger_df_vor.to_json()
-    data = {"names": names2, "erzeuger_df_vor": erzeuger_df_vor_json}
+    erzeuger_df_nach.fillna(0, inplace=True)
+    erzeuger_df_nach_json = erzeuger_df_nach.to_json()
+    data1 = {"names": names2, "erzeuger_df_vor": erzeuger_df_vor_json}
+    data2 = {"names": names2, "erzeuger_df_nach": erzeuger_df_nach_json}
 
-    with open("data.json", "w") as f:
-        json.dump(data, f)
+    with open("erzeuger_df_vor.json", "w") as f:
+        json.dump(data1, f)
+
+    with open("erzeuger_df_nach.json", "w") as f:
+        json.dump(data2, f)

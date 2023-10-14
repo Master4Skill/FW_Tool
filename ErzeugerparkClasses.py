@@ -195,7 +195,6 @@ class geothermal(Erzeuger):
 class solarthermal(Erzeuger):
     def __init__(
         self,
-        Irradiance,
         solar_area,
         k_s_1,
         k_s_2,
@@ -205,7 +204,6 @@ class solarthermal(Erzeuger):
         co2_emission_factor=0.468,
     ):  # Color for Solarthermie
         super().__init__(color)
-        self.Irradiance = Irradiance
         self.solar_area = solar_area
         self.co2_emission_factor = 0
         self.k_s_1 = k_s_1

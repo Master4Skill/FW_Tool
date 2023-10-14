@@ -19,11 +19,11 @@ with open("results/data.json", "r") as f:
 
 st.set_page_config(page_title="Verteilnetz", page_icon=":house:")
 
-st.markdown("# Fernwärmenetzsimulation")
+st.markdown("# Distributed Heating Network Simulation")
 
-st.sidebar.header("Temperaturabsenkung im Fernwärmenetz")
+st.sidebar.header("Temperature Reduction in the Network")
 
-st.sidebar.info("Geben Sie die gewünschten Temperaturen ein")
+st.sidebar.info("Enter the desired temperatures for the network.")
 
 with Image.open("Logo-dunkelblau-1000-px.webp") as img:
     # Resize the image
@@ -82,7 +82,7 @@ input_data["Trl_nach"] = st.number_input(
 with open("results/data.json", "w") as f:
     json.dump(input_data, f)
 
-if st.button("Speichern"):
+if st.button("Save"):
     with open("results/data.json", "w") as f:
         json.dump(input_data, f)
     st.sidebar.success("Data saved successfully.")
@@ -137,17 +137,17 @@ else:
     def calculate_T_vl_vor(air_average):
         if air_average < 0:
             return Tvl_max_vor
-        if 0 < air_average < 15:
+        if 0 <= air_average < 15:
             return Tvl_max_vor - (1 / 15) * air_average * (Tvl_max_vor - Tvl_min_vor)
-        if air_average > 15:
+        if air_average >= 15:
             return Tvl_min_vor
 
     def calculate_T_vl_nach(air_average):
         if air_average < 0:
             return Tvl_max_nach
-        if 0 < air_average < 15:
+        if 0 <= air_average < 15:
             return Tvl_max_nach - (1 / 15) * air_average * (Tvl_max_nach - Tvl_min_nach)
-        if air_average > 15:
+        if air_average >= 15:
             return Tvl_min_nach
 
     # Apply the function to calculate 'T_vl'

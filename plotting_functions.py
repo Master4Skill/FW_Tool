@@ -7,15 +7,6 @@ import colorsys
 from typing import Generator, Sequence
 from contextlib import contextmanager
 
-color_dict = {
-    "🚰 Wärmepumpe1 - begrenzter Volumenstrom der Quelle (m³/h), Quelltemperatur konstant (°C)": "#1F4E79",
-    "🌊 Wärmepumpe2 - Begrenzte Leistung (kW), bei schwankender Quelltemperatur (°C)": "#F7D507",
-    "⛰️ Geothermie - Maximale Leistung (kW)": "#DD2525",
-    "☀️ Solarthermie - Sonneneinstrahlung (kW/m²)": "#92D050",
-    "🔥 Spitzenlastkessel - Maximale Leistung (kW)": "#EC9302",
-    "🏭 BHKW - Maximale Leistung (kW)": "#639729",
-}
-
 
 def plot_actual_production(
     df_input, actual_production_df, color_FFE, title, my_dict, start_hour
@@ -301,7 +292,7 @@ def plot_power_usage(Power_df_vor, Power_df_nach, color_FFE):
         ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
 
         ax.set_title(
-            f"Erzeuger {i+1} Power Consumption",
+            f"Generator {i+1} Power Consumption",
             fontsize=16,
             color="#777777",
             fontfamily="Segoe UI SemiLight",
@@ -499,7 +490,7 @@ def plot_total_change(
 
     plt.legend(
         loc="upper center",
-        bbox_to_anchor=(0.5, -0.35),
+        bbox_to_anchor=(0.5, -0.45),
         ncol=2,  # Adjust as necessary
         frameon=False,
         fontsize=16,
@@ -510,8 +501,8 @@ def plot_total_change(
         "% - represent share of all producers \n before or after temp. reduction "
     )
     plt.gcf().text(
-        box_x,
-        box_y,
+        0.5,
+        -0.2,
         explanation_text,
         ha="center",
         fontsize=12,
