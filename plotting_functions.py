@@ -490,7 +490,7 @@ def plot_total_change(
 
     plt.legend(
         loc="upper center",
-        bbox_to_anchor=(0.5, -0.45),
+        bbox_to_anchor=(0.5, -0.55),
         ncol=2,  # Adjust as necessary
         frameon=False,
         fontsize=16,
@@ -502,7 +502,7 @@ def plot_total_change(
     )
     plt.gcf().text(
         0.5,
-        -0.2,
+        -0.3,
         explanation_text,
         ha="center",
         fontsize=12,
@@ -531,7 +531,7 @@ def plot_total_change(
     # Then in your loop, use these labels to determine the total
     for p, status in zip(bar_plot.patches, status_labels):
         total = total_1 if status == label1 else total_2
-        percentage = "{:.1f}%".format(100 * p.get_height() / total)
+        percentage = "{:.0f}%".format(100 * p.get_height() / total)
         bar_plot.text(
             p.get_x() + p.get_width() / 2.0,
             p.get_height(),

@@ -275,7 +275,7 @@ names2 = [obj.__class__.__name__ for obj in erzeugerpark]
 
 name_mapping = {
     "waste_heat": "Waste Heat",
-    "heatpump_1": "Heat Pump",
+    "heatpump_1": "Waste Heat Pump",
     "heatpump_2": "Ambient\nHeat Pump",
     "solarthermal": "Solar Thermal",
     "geothermal": "Geothermal",
@@ -336,8 +336,9 @@ if st.button("Calculate"):
     # Iterate over each hour
     for hour in df_input.index:
         # Get the demand for this hour
-        demand_vor = demand_nach = df_input.loc[hour, "Lastgang"]
-
+        # demand_vor = demand_nach = df_input.loc[hour, "Lastgang"]
+        demand_vor = df_results.loc[hour, "Wärmelast_vor"]
+        demand_nach = df_results.loc[hour, "Wärmelast_nach"]
         # Initialize a dictionary to store the actual production of each Erzeuger
         actual_production_vor = {}
         actual_production_nach = {}
@@ -452,6 +453,8 @@ if st.button("Calculate"):
     CO2_df_vor.to_json("results/CO2_df_vor.json", orient="columns")
     CO2_df_nach.to_json("results/CO2_df_nach.json", orient="columns")
 
+    st.dataframe(actual_production_df_vor)
+    st.dataframe(actual_production_df_nach)
     st.subheader("Numerical Results")
 
     data = {

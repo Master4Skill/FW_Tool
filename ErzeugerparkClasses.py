@@ -152,7 +152,7 @@ class heatpump_2(Erzeuger):
         return ε
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
-        T_q = df_zeitreihen.at[hour, "Isartemp"]
+        T_q = df_zeitreihen.loc[hour, "Isartemp"]
         ε = self.Gütegrad * (Tvl + 273.15) / (Tvl - T_q)
         P = current_last / ε * 1 / (ηVerdichter * p_WP_loss)
         return P
@@ -265,7 +265,7 @@ class CHP(Erzeuger):
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
         # Placeholder calculation:
-        gas_verbraucht = current_last / (ηBHKW_therm + ηBHKW_el)
+        gas_verbraucht = current_last / (ηBHKW_therm)
         return gas_verbraucht
 
 

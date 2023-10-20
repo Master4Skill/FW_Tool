@@ -89,11 +89,12 @@ def plot_data3(df, title):
 
     names_map = {
         "g1": "Waste Heat",
-        "g3": "Heat Pump",
+        "g2": "Heat Pump",
+        "g3": "Ambient\nHeat Pump",
         "g4": "Geothermal",
         "g5": "Solar Thermal",
         "g6": "Peak Load Boiler",
-        "g7": "CHP",
+        "g71": "CHP",
     }
 
     cumulative = np.zeros_like(df.index, dtype=np.float64)
@@ -108,7 +109,12 @@ def plot_data3(df, title):
 
     previous_cumulative = 0
     patches = []  # For shaded areas in legend
-    for i, column in enumerate((["g1", "g4", "g3", "g5", "g6"])):
+    columns_to_check = ["g1", "g4", "g3", "g2", "g5", "g6", "g71"]
+    non_zero_columns = [col for col in columns_to_check if df[col].sum() != 0]
+
+    cumulative = 0
+
+    for i, column in enumerate(non_zero_columns):
         label = names_map.get(column, column)
 
         cumulative += df[column]
@@ -965,7 +971,7 @@ def main_pulp(graphtitle):
     K_s_pow_out = 3000
     # K_s_en = 5000
     Y_s_self = 0.02
-    big_M = 3100
+    big_M = 4100
     # Masterarbeit Therese Farber Formel/Prozent für Speicherverluste
 
     K_p = {}
@@ -1075,7 +1081,7 @@ def main_pulp(graphtitle):
     E_exp = LpVariable("Euros_for_Export")
     E_emissions = LpVariable("Emissions")
     E_imag = LpVariable("Euros_for_Import_imaginary")
-    # K_s_en = LpVariable("storage_energy_capacity", lowBound=0, cat="Continuous")
+
     if checkbox == 1:
         strompreise_export_c = preise_constant_low
         strompreise_c = preise_constant_low
@@ -1093,6 +1099,8 @@ def main_pulp(graphtitle):
         K_s_en = 0
     else:
         K_s_en = 4000
+
+    big_M = 1.2 * K_s_en
 
     ###Constraints
     if checkbox3 == 0:
@@ -1156,10 +1164,10 @@ def main_pulp(graphtitle):
         # P = V / 3600 * ρ_water * 9.81 * self.h_förder / self.η_geo
         # return P / 1000
         A_p5_in = 100  # Very high COP for solar thermal, since it is only used to prioritize WH over Solarthermalheat, as none of them is actually considered in the prices as they are modelled without electrical input
-        A_p6_in = 0.8
+        A_p6_in = 0.8  # PLB
         A_p7_in = 1
-        A_p7_out_elec = 0.38
-        A_p7_out_heat = 0.42
+        A_p7_out_heat = 0.5  # BHKW heat
+        A_p7_out_elec = 0.3  # BHKW elec
 
         # Storage
         if i == 0:  # for the first period, E_stored_prev is 0
@@ -1217,12 +1225,12 @@ def main_pulp(graphtitle):
         # Commodities
         # heat
         m += (
-            g1[i] + g2[i] + g3[i] + g4[i] + g5[i] + g6[i] + g72[i] + s_out[i]
+            g1[i] + g2[i] + g3[i] + g4[i] + g5[i] + g6[i] + g71[i] + s_out[i]
             == s_in[i] + P
         )
         # electricity
-        m += e_imp[i] == f2[i] + f3[i] + f4[i] + f5[i] + e_exp[i]
-        m += e_imp_real[i] == f2[i] + f3[i] + f4[i]
+        m += e_imp[i] == f2[i] + f3[i] + f4[i] + f5[i] + g72[i] + e_exp[i]
+        m += e_imp_real[i] == f2[i] + f3[i] + f4[i] + e_exp[i]
         # e_imag
 
         m += e_imag[i] == f5[i]
@@ -1292,6 +1300,8 @@ def main_pulp(graphtitle):
             "g4": g4_m[key],
             "g5": g5_m[key],
             "g6": g6_m[key],
+            "g71": g71_m[key],
+            "g72": g72_m[key],
             "P_to_dem": P_to_dem_m[key],
         }
         df_results = pd.concat(
@@ -1311,6 +1321,7 @@ def main_pulp(graphtitle):
         "g4": "Erzeuger_4_nach",
         "g5": "Erzeuger_5_nach",
         "g6": "Erzeuger_6_nach",
+        "g71": "Erzeuger_7_nach",
     }
 
     # Creating a new dataframe with the renamed columns

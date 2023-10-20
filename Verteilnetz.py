@@ -369,7 +369,7 @@ else:
         fontfamily="Segoe UI",
     )
     plt.title(
-        "Temperature vs Time",
+        "Course of Network Temperatures before and after Temperature Reduction",
         fontsize=16,
         color="#777777",
         fontfamily="Segoe UI",
@@ -462,7 +462,7 @@ else:
         "Network Losses after Temp. Reduction",
         "Time [h]",
         "Losses [kW]",
-        "Network Losses vs Time",
+        "Network Losses before and after Temperature Reduction",
     )
 
     styled_plot(
@@ -475,7 +475,7 @@ else:
         "Percentage Loss after Temp. Reduction",
         "Time [h]",
         "%",
-        "Percentage Loss vs Time",
+        "Notwork Losses Percentage of Total Heat Load before and after Temperature Reduction",
     )
     styled_plot(
         df_results["hours"],
@@ -487,7 +487,7 @@ else:
         "Flow Rate after Temp. Reduction",
         "Time [h]",
         "Flow Rate per Hour [m³/h]",
-        "Flow Rate per Hour vs Time",
+        "Flow Rate per Hour before and after Temperature Reduction",
     )
     styled_plot(
         df_results["hours"],
@@ -499,7 +499,7 @@ else:
         "Flow Velocity after Temp. Reduction",
         "Time [h]",
         "Flow Velocity per Second [m/s]",
-        "Flow Velocity per Second vs Time",
+        "Flow Velocity per Second before and after Temperature Reduction",
     )
     styled_plot(
         df_results["hours"],
@@ -511,7 +511,7 @@ else:
         "Pump Performance after Temp. Reduction",
         "Time [h]",
         "Pump Performance [kW]",
-        "Pump Performance vs Time",
+        "Pump Performance before and after Temperature Reduction",
     )
 
     st.dataframe(df_results)

@@ -491,10 +491,6 @@ T_rl = 45
 returnreduction(T_rl_range, T_vl)
 flowreduction(T_vl_range, T_rl)
 returnandflowreduction(T_rl_range, T_vl_range)
-Lastgang = 10
-returnreduction(T_rl_range, T_vl)
-flowreduction(T_vl_range, T_rl)
-returnandflowreduction(T_rl_range, T_vl_range)
 
 
 # Extracted style configurations
@@ -613,7 +609,13 @@ def producer_sensitivitywp1(producer, T_range, T_rl, T_vl, current_last, option)
 
     # Plotting
     ax.plot(T_range, COP_list, label="COP", lw=2)
-    ax.plot(T_range, poweruse_list, label="Electrical Power Use", lw=2, color="purple")
+    ax.plot(
+        T_range,
+        poweruse_list,
+        label="Electrical Power Consumption",
+        lw=2,
+        color="purple",
+    )
     ax.plot(
         T_range,
         flowrate_list,
@@ -668,21 +670,21 @@ def producer_sensitivitywp1(producer, T_range, T_rl, T_vl, current_last, option)
     # Title with style configuration
     if option == 2:
         ax.set_title(
-            r"Sensitivity of the Heat Pump for $T_f$ = Constant (95°C)",
+            r"Sensitivity of the Waste Heat Pump for $T_f$ = Constant (95°C)",
             fontsize=16,
             color="#777777",
             fontfamily="Segoe UI SemiLight",
         )
     elif option == 1:
         ax.set_title(
-            r"Sensitivity of the Heat Pump for $T_r$ = Constant (45°C)",
+            r"Sensitivity of the Waste Heat Pump for $T_r$ = Constant (45°C)",
             fontsize=16,
             color="#777777",
             fontfamily="Segoe UI SemiLight",
         )
     else:
         ax.set_title(
-            r"Sensitivity of the Heat Pump for $\Delta T$ = Constant (30°C)",
+            r"Sensitivity of the Waste Heat Pump for $\Delta T$ = Constant (30°C)",
             fontsize=16,
             color="#777777",
             fontfamily="Segoe UI SemiLight",
@@ -723,7 +725,7 @@ def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, T_q, current_last, op
         for T_vl in T_range:
             # Get the values
             COP = producer.calc_COP(T_vl, None, T_q)
-            poweruse = producer.calc_Poweruse(None, T_vl, T_rl, current_last)
+            poweruse = producer.calc_Poweruse(5000, T_vl, T_rl, current_last)
             # Here, I'm assuming that the flow rate for the Waermepumpe1 is Constant and given by Volumenstrom_quelle.
             # If it's not Constant, you'd need a method in your class to compute it.
             flowrate = producer.calc_flowrate(T_vl)
@@ -737,7 +739,7 @@ def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, T_q, current_last, op
         for T_rl in T_range:
             # Get the values
             COP = producer.calc_COP(T_vl, None, T_q)
-            poweruse = producer.calc_Poweruse(None, T_vl, T_rl, current_last)
+            poweruse = producer.calc_Poweruse(5000, T_vl, T_rl, current_last)
             # Here, I'm assuming that the flow rate for the Waermepumpe1 is Constant and given by Volumenstrom_quelle.
             # If it's not Constant, you'd need a method in your class to compute it.
             flowrate = producer.calc_flowrate(T_vl)
@@ -751,7 +753,7 @@ def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, T_q, current_last, op
         for T_vl in T_range:
             # Get the values
             COP = producer.calc_COP(T_vl, None, T_q)
-            poweruse = producer.calc_Poweruse(None, T_vl, T_vl - 30, current_last)
+            poweruse = producer.calc_Poweruse(5000, T_vl, T_vl - 30, current_last)
             # Here, I'm assuming that the flow rate for the Waermepumpe1 is Constant and given by Volumenstrom_quelle.
             # If it's not Constant, you'd need a method in your class to compute it.
             flowrate = producer.calc_flowrate(T_vl)
@@ -769,7 +771,7 @@ def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, T_q, current_last, op
 
     # Plotting
     ax.plot(T_range, COP_list, label="COP", lw=2)
-    ax.plot(T_range, poweruse_list, label="Power Use", lw=2, color="purple")
+    ax.plot(T_range, poweruse_list, label="Power Consumption", lw=2, color="purple")
     ax.plot(T_range, flowrate_list, label="Flow Rate", lw=2, color="green")
 
     ax.invert_xaxis()
@@ -805,7 +807,7 @@ def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, T_q, current_last, op
 
     # Title with style configuration
     ax.set_title(
-        f"Sensitivity of the Heat Pump{' 2' if 'wp2' in globals()['__name__'] else ''} for "
+        f"Sensitivity of the Ambient Heat Pump{' 2' if 'wp2' in globals()['__name__'] else ''} for "
         f"${'T_f' if option == 2 else 'T_r' if option == 1 else 'Delta T'}$ = Constant "
         f"({95 if option == 2 else 45 if option == 1 else 30}°C) ",
         fontsize=16,
@@ -883,7 +885,13 @@ def producer_sensitivitygeo(producer, T_range, T_rl, T_vl, current_last, option)
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # Plotting
-    ax.plot(T_range, poweruse_list, label="Electrical Power Use", lw=2, color="purple")
+    ax.plot(
+        T_range,
+        poweruse_list,
+        label="Electrical Power Consumption",
+        lw=2,
+        color="purple",
+    )
     ax.plot(
         T_range, flowrate_list, label="Flow Rate", lw=2, color="yellow", linestyle="--"
     )
@@ -999,7 +1007,13 @@ def producer_sensitivitysolar(producer, T_range, T_rl, T_vl, current_last, optio
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # Plotting
-    ax.plot(T_range, poweruse_list, label="Electrical Power Use", lw=2, color="purple")
+    ax.plot(
+        T_range,
+        poweruse_list,
+        label="Electrical Power Consumption",
+        lw=2,
+        color="purple",
+    )
     ax.plot(
         T_range, flowrate_list, label="Flow Rate", lw=2, color="yellow", linestyle="--"
     )
@@ -1189,7 +1203,23 @@ producer_sensitivitywh(wh, T_vl_range, T_rl, T_vl, Lastgang, option=1)
 producer_sensitivitywh(wh, T_rl_range, T_rl, T_vl, Lastgang, option=2)
 producer_sensitivitywh(wh, T_vl_range, T_rl, T_vl, Lastgang, option=3)
 
-solar = ep.solarthermal(Leistung_max_value, T_q_value, Gütegrad_value)
+solar_area = 10000
+
+k_s_1 = 1.5 / 1000  # Dividing by 1000 to convert to the appropriate unit
+k_s_2 = 0.005 / 1000  # Dividing by 1000 to convert to the appropriate unit
+α = 0.9
+τ = 0.9
+erzeuger_color = "black"  # Assuming no color is set by default, you might want to provide an actual default color
+
+solar = ep.solarthermal(
+    solar_area,
+    k_s_1,
+    k_s_2,
+    α,
+    τ,
+    color=erzeuger_color,
+    co2_emission_factor=0,
+)
 producer_sensitivitysolar(solar, T_vl_range, T_rl, T_vl, Lastgang, option=1)
 producer_sensitivitysolar(solar, T_rl_range, T_rl, T_vl, Lastgang, option=2)
 producer_sensitivitysolar(solar, T_vl_range, T_rl, T_vl, Lastgang, option=3)
