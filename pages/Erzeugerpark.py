@@ -14,7 +14,7 @@ from plotting_functions import (
     plot_total_emissions,
 )
 from streamlit_extras.stoggle import stoggle
-
+import pickle
 
 with open("results/data.json", "r") as f:
     input_data = json.load(f)
@@ -57,8 +57,8 @@ irradiation_data = data["Einstrahlung_22"]
 
 color_dict = {
     "♨️ waste heat - limited volume flow of the source (m³/h)": "#639729",
-    "🚰 heat pump - limited volume flow of the source (m³/h), source temperature constant (°C)": "#1F4E79",
-    "🌊 river heat pump - limited power (kW), fluctuating source temperature (°C)": "#F7D507",
+    "🚰 waste heat pump - limited volume flow of the source (m³/h), source temperature constant (°C)": "#1F4E79",
+    "🌊 ambient heat pump - limited power (kW), fluctuating source temperature (°C)": "#F7D507",
     "⛰️ geothermal  - maximum power (kW)": "#DD2525",
     "☀️ solarthermal - solar radiation (kW/m²)": "#92D050",
     "🔥 PLB - maximum power (kW)": "#EC9302",
@@ -113,8 +113,8 @@ for i in range(anzahl_erzeuger):
         f"Please select the type of the generator {i+1}",
         [
             "♨️ waste heat - limited volume flow of the source (m³/h)",
-            "🚰 heat pump - limited volume flow of the source (m³/h), source temperature constant (°C)",
-            "🌊 river heat pump - limited power (kW), fluctuating source temperature (°C)",
+            "🚰 waste heat pump - limited volume flow of the source (m³/h), source temperature constant (°C)",
+            "🌊 ambient heat pump - limited power (kW), fluctuating source temperature (°C)",
             "⛰️ geothermal  - maximum power (kW)",
             "☀️ solarthermal - solar radiation (kW/m²)",
             "🔥 PLB - maximum power (kW)",
@@ -143,7 +143,7 @@ for i in range(anzahl_erzeuger):
             co2_emission_factor=0,
         )
 
-    elif "🚰 heat pump" in erzeuger_type:
+    elif "🚰 waste heat pump" in erzeuger_type:
         Volumenstrom_quelle = st.number_input(
             "Please enter the volume flow rate of the source (m³/h)",
             value=200,
@@ -159,15 +159,22 @@ for i in range(anzahl_erzeuger):
             value=0.45,
             key=f"Gütegrad{i}",
         )
+        Partload = st.number_input(
+            "Please enter the partload of the waste heat pump",
+            value=0.5,
+            key=f"Partload{i}",
+        )
+
         erzeuger = ep.heatpump_1(
             Volumenstrom_quelle,
             T_q,
             Gütegrad,
+            Partload,
             color=erzeuger_color,
             co2_emission_factor=0.468,
         )
 
-    elif "river heat pump" in erzeuger_type:
+    elif "ambient heat pump" in erzeuger_type:
         Leistung_max = st.number_input(
             "Please enter the maximum power (kW)", value=2500, key=f"Leistung_max{i}"
         )
@@ -265,6 +272,9 @@ for i in range(anzahl_erzeuger):
         st.write("Please select a valid generator type")
 
     erzeugerpark.append(erzeuger)
+
+with open("erzeugerpark.pkl", "wb") as file:
+    pickle.dump(erzeugerpark, file)
 
 
 names2 = [obj.__class__.__name__ for obj in erzeugerpark]

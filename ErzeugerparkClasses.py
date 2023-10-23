@@ -104,6 +104,7 @@ class heatpump_1(Erzeuger):
         Volumenstrom_quelle,
         T_q,
         Gütegrad,
+        Partload,
         color="#1F4E79",
         co2_emission_factor=0.468,
     ):  # Color for Waermepumpe1

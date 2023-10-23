@@ -14,7 +14,7 @@ def plot_actual_production(
     fig, ax = plt.subplots(figsize=(12, 6))
 
     lastgang_plot = df_input["Lastgang"].plot.area(
-        ax=ax, color="#E0E0E0", linewidth=0, zorder=1, alpha=0.5, label="Load profile"
+        ax=ax, color="#E0E0E0", linewidth=0, zorder=1, alpha=0.5, label="Load Profile"
     )
     actual_production_df.index = range(
         start_hour, start_hour + len(actual_production_df)
@@ -106,7 +106,7 @@ def plot_sorted_production(
             linewidth=0,
             zorder=1,
             alpha=0.5,
-            label="Load profile",
+            label="Load Profile",
         )
     )
     area_plot = sorted_df.plot.area(

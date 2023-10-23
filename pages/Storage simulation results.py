@@ -203,7 +203,7 @@ def plot_comparison_old(df_melted, title, ylabel, percentage_mode, divisor):
         lambda x: x / divisor if pd.api.types.is_number(x) else x
     )
     plt.figure(figsize=(10, 6))
-    palette = ["#1F4E79", "#356CA5", "#FEC05C", "#8AB5E1"]
+    palette = ["#1F4E79", "#356CA5", "#8AB5E1", "#FEC05C"]
     ax = sns.barplot(
         x="variable", y="value", hue="Mode", data=df_melted, palette=palette
     )
@@ -892,7 +892,7 @@ if st.button("Submit"):
         ],
     }
 
-    data5 = {  # only costs heat pump 2
+    data51 = {  # only costs heat pump 2
         "Mode": [
             "No Storage ",
             "Avoid PLB",
@@ -912,13 +912,49 @@ if st.button("Submit"):
             1653304.62,  # Optimized
         ],
     }
-    data4 = {  # only emissions heat pump 2
+    data41 = {  # only emissions heat pump 2
         "Mode": ["No Storage ", "Avoid PLB", "Cost Optimized", "Emission Optimized"],
         "before Temp.\n Reduction": [
             4634.58,  # No Storage
             4504.04,  # PLB Avoid
             4523.51,  # Optimized
             4494.04,  # emission Optimized
+        ],
+        "after Temp.\n Reduction": [
+            3365.81,  # No Storage
+            3188.82,  # PLB Avoid
+            3238.38,  # Optimized
+            3188.33,  # emission Optimized
+        ],
+    }
+
+    data5 = {  # only costs heat pump 2
+        "Mode": [
+            "No Storage ",
+            "Avoid PLB",
+            "Cost Optimized",
+            "Emission Optimized",
+        ],
+        "before Temp.\n Reduction": [
+            2412533.79,  # No Storage
+            2350777.56,  # PLB Avoid  2350777.91
+            2268594.59,  # Optimized
+            2329541.37,  # emission Optimized 2329542.21
+        ],
+        "after Temp.\n Reduction": [
+            1723795.01,  # No Storage
+            1666798.07,  # PLB Avoid
+            1666063.89,  # emission Optimized
+            1653304.62,  # Optimized
+        ],
+    }
+    data4 = {  # only emissions heat pump 2
+        "Mode": ["No Storage ", "Avoid PLB", "Cost Optimized", "Emission Optimized"],
+        "before Temp.\n Reduction": [
+            4634.58,  # No Storage
+            4504.04,  # PLB Avoid
+            4523.51,  # Optimized
+            4493.98,  # emission Optimized
         ],
         "after Temp.\n Reduction": [
             3365.81,  # No Storage

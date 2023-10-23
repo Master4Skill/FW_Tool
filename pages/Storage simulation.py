@@ -18,6 +18,7 @@ import seaborn as sns
 import matplotlib.patches as mpatches
 import logging
 import math
+import pickle
 
 logging.getLogger("matplotlib.font_manager").disabled = True
 
@@ -824,31 +825,6 @@ def main_pulp(graphtitle):
 
     # Sort DataFrame by 'Zeit'
     df_input = df_input.sort_values(by="Zeit")
-    P_to_dem = [
-        8490.9,
-        8596.7,
-        8649.7,
-        8861.4,
-        8940.8,
-        8993.7,
-        9020.2,
-        9046.7,
-        9073.1,
-        8490.9,
-        7485.1,
-        6585.2,
-        5897.1,
-        5526.5,
-        5447.1,
-        5764.7,
-        6638.1,
-        7114.6,
-        7352.8,
-        7511.6,
-        7696.8,
-        7855.6,
-        8067.4,
-    ]
 
     def read_demand(file_name, start_hour, hours):
         # read csv file into a dataframe
@@ -974,6 +950,9 @@ def main_pulp(graphtitle):
     big_M = 4100
     # Masterarbeit Therese Farber Formel/Prozent für Speicherverluste
 
+    with open("erzeugerpark.pkl", "rb") as file:
+        erzeugerpark = pickle.load(file)
+
     K_p = {}
     if checkbox4 == 0:
         names = names1
@@ -997,7 +976,8 @@ def main_pulp(graphtitle):
 
     # Waermepumpe1
     K_p2 = K_p["heatpump_1"][start_hour:] if "heatpump_1" in names else [0] * 8761
-    PL_p2 = 0.4
+    PL_p2 = 0.4  # erzeugerpark["heatpump_1"].Partload
+
     # Waermepumpe2
     K_p3 = K_p["heatpump_2"][start_hour:] if "heatpump_2" in names else [0] * 8761
     PL_p3 = 0.2
@@ -1360,7 +1340,7 @@ def main_pulp(graphtitle):
 
     # plot_char_values(df_results)
     # plot_storage_data(df_results)
-    plot_preise_flusstemp(strompreise_export, strompreise, gaspreise, Flusstemperatur)
+    # plot_preise_flusstemp(strompreise_export, strompreise, gaspreise, Flusstemperatur)
 
     # plot_actual_production(df_input, df_production_storage, color_FFE, "Test", my_dict, start_hour)
     # plot_sorted_production(df_input, df_production_storage, color_FFE, "Test", my_dict)
@@ -1371,57 +1351,60 @@ def main_pulp(graphtitle):
 start_hour = st.number_input("Enter start hour", min_value=1, value=1)
 hours = st.number_input("Enter hours", min_value=1, value=2000)
 K_s_en = st.number_input("Enter storage size [kWh]", min_value=0, value=4000)
+
+
 checkbox = st.checkbox("Use constant prices")
 checkbox2 = st.checkbox("Use no storage")
 checkbox3 = st.checkbox("Optimimize for minimal emisssions")
 checkbox4 = st.checkbox("Use networktemperatures after temperature reduction")
 if st.button("Submit"):
     st.write(f"You entered {hours} hours.")
-    if checkbox4 == 0:
-        if checkbox3 == 0:
-            main_pulp("Cost Optimized Heat Generation and Storage")
-            checkbox = 1
-            main_pulp("Linear Prioritized Heat Generation and Optimized Storage")
-            checkbox = 0
-            checkbox3 = 1
-            main_pulp("Emission Optimized Heat Generation and Storage")
-            checkbox3 = 0
-            checkbox2 = 1
-            # main_pulp("Cost Optimized Heat Generation")
-            checkbox = 1
-            checkbox2 = 1
-            main_pulp("Linear Prioritized Heat Generation")
+    checkbox4 == 0
+    if checkbox3 == 0:
+        main_pulp("Cost Optimized Heat Generation and Storage")
+        checkbox = 1
+        main_pulp("Linear Prioritized Heat Generation and Optimized Storage")
+        checkbox = 0
+        checkbox3 = 1
+        main_pulp("Emission Optimized Heat Generation and Storage")
+        checkbox3 = 0
+        checkbox2 = 1
+        # main_pulp("Cost Optimized Heat Generation")
+        checkbox = 1
+        checkbox2 = 1
+        main_pulp("Linear Prioritized Heat Generation")
+    elif checkbox3 == 1:
+        main_pulp("Emission Optimized Heat Generation and Storage")
+        checkbox = 1
+        main_pulp("Linear Prioritized Heat Generation and Optimized Storage")
+        checkbox = 0
+        checkbox2 = 1
+        main_pulp("Emission Optimized Heat Generation")
+        checkbox = 1
+        checkbox2 = 1
+        main_pulp("Linear Prioritized Heat Generation")
+    checkbox4 = 1
+    checkbox = 0
+    checkbox2 = 0
+    checkbox3 = 0
+    if checkbox3 == 0:
+        main_pulp("Cost Optimized Heat Generation and Storage at lowered Temperature")
+        checkbox = 1
+        main_pulp(
+            "Linear Prioritized Heat Generation and Optimized Storage at lower Temperature"
+        )
+        checkbox3 = 1
+        checkbox = 0
+        main_pulp("Emission Optimized Heat Generation and Storage at lower Temperature")
+        checkbox3 = 0
+        checkbox2 = 1
 
-        elif checkbox3 == 1:
-            main_pulp("Emission Optimized Heat Generation and Storage")
-            checkbox = 1
-            main_pulp("Linear Prioritized Heat Generation and Optimized Storage")
-            checkbox = 0
-            checkbox2 = 1
-            main_pulp("Emission Optimized Heat Generation")
-            checkbox = 1
-            checkbox2 = 1
-            main_pulp("Linear Prioritized Heat Generation")
-    elif checkbox4 == 1:
-        if checkbox3 == 0:
-            main_pulp("Cost Optimized Heat Generation and Storage at lower Temp.")
-            checkbox = 1
-            main_pulp(
-                "Linear Prioritized Heat Generation and Optimized Storage at lower Temp."
-            )
-            checkbox3 = 1
-            checkbox = 0
-            main_pulp("Emission Optimized Heat Generation and Storage at lower Temp.")
-            checkbox3 = 0
-            checkbox2 = 1
-
-            main_pulp("Cost Optimized Heat Generation at lower Temp.")
-
-        elif checkbox3 == 1:
-            main_pulp("Emission Optimized Heat Generation and Storage at lower Temp.")
-            checkbox = 1
-            main_pulp(
-                "Linear Prioritized Heat Generation and Optimized Storage at lower Temp."
-            )
-            checkbox2 = 1
-            main_pulp("Emission Optimized Heat Generation at lower Temp.")
+        main_pulp("Linear Prioritized Heat Generation at lower Temperature")
+    elif checkbox3 == 1:
+        main_pulp("Emission Optimized Heat Generation and Storage at lower Temperature")
+        checkbox = 1
+        main_pulp(
+            "Linear Prioritized Heat Generation and Optimized Storage at lower Temp."
+        )
+        checkbox2 = 1
+        main_pulp("Emission Optimized Heat Generation at lower Temp.")
