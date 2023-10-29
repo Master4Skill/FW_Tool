@@ -793,7 +793,7 @@ def plot_comparison(df_melted, title, percentage_mode):
 # Continue with your existing data and call the modified function
 
 
-def main_pulp(graphtitle):
+def main_pulp(graphtitle, K_s_en):
     if checkbox4 == 0:
         file_path = "results/COP_vor_df.json"
     elif checkbox4 == 1:
@@ -1077,8 +1077,6 @@ def main_pulp(graphtitle):
 
     if checkbox2 == 1:
         K_s_en = 0
-    else:
-        K_s_en = 4000
 
     big_M = 1.2 * K_s_en
 
@@ -1289,7 +1287,12 @@ def main_pulp(graphtitle):
         )
 
     print(df_results)
+
     st.dataframe(df_results)
+    # print the sum od s_out
+    st.write(f"Der gesamte Storage outflow beträgt {sum(s_out_m.values()):.2f} kWh")
+    # print the sum of P_to_dem
+    st.write(f"Der gesamte Wärmebedarf beträgt {sum(P_to_dem_m.values()):.2f} kWh")
     st.write(Elec_sum)
     st.write(Gas_sum)
 
@@ -1361,50 +1364,60 @@ if st.button("Submit"):
     st.write(f"You entered {hours} hours.")
     checkbox4 == 0
     if checkbox3 == 0:
-        main_pulp("Cost Optimized Heat Generation and Storage")
+        main_pulp("Cost Optimized Heat Generation and Storage", K_s_en)
         checkbox = 1
-        main_pulp("Linear Prioritized Heat Generation and Optimized Storage")
+        main_pulp("Linear Prioritized Heat Generation and Optimized Storage", K_s_en)
         checkbox = 0
         checkbox3 = 1
-        main_pulp("Emission Optimized Heat Generation and Storage")
+        main_pulp("Emission Optimized Heat Generation and Storage", K_s_en)
         checkbox3 = 0
         checkbox2 = 1
         # main_pulp("Cost Optimized Heat Generation")
         checkbox = 1
         checkbox2 = 1
-        main_pulp("Linear Prioritized Heat Generation")
+        main_pulp("Linear Prioritized Heat Generation", K_s_en)
     elif checkbox3 == 1:
-        main_pulp("Emission Optimized Heat Generation and Storage")
+        main_pulp("Emission Optimized Heat Generation and Storage", K_s_en)
         checkbox = 1
-        main_pulp("Linear Prioritized Heat Generation and Optimized Storage")
+        main_pulp("Linear Prioritized Heat Generation and Optimized Storage", K_s_en)
         checkbox = 0
         checkbox2 = 1
-        main_pulp("Emission Optimized Heat Generation")
+        main_pulp("Emission Optimized Heat Generation", K_s_en)
         checkbox = 1
         checkbox2 = 1
-        main_pulp("Linear Prioritized Heat Generation")
+        main_pulp("Linear Prioritized Heat Generation", K_s_en)
     checkbox4 = 1
     checkbox = 0
     checkbox2 = 0
     checkbox3 = 0
     if checkbox3 == 0:
-        main_pulp("Cost Optimized Heat Generation and Storage at lowered Temperature")
+        main_pulp(
+            "Cost Optimized Heat Generation and Storage at lowered Temperature", K_s_en
+        )
         checkbox = 1
         main_pulp(
-            "Linear Prioritized Heat Generation and Optimized Storage at lower Temperature"
+            "Linear Prioritized Heat Generation and Optimized Storage at lower Temperature",
+            K_s_en,
         )
         checkbox3 = 1
         checkbox = 0
-        main_pulp("Emission Optimized Heat Generation and Storage at lower Temperature")
+        main_pulp(
+            "Emission Optimized Heat Generation and Storage at lower Temperature",
+            K_s_en,
+        )
         checkbox3 = 0
         checkbox2 = 1
 
-        main_pulp("Linear Prioritized Heat Generation at lower Temperature")
+        main_pulp("Linear Prioritized Heat Generation at lower Temperature", K_s_en)
     elif checkbox3 == 1:
-        main_pulp("Emission Optimized Heat Generation and Storage at lower Temperature")
+        main_pulp(
+            "Emission Optimized Heat Generation and Storage at lower Temperature",
+            K_s_en,
+        )
         checkbox = 1
         main_pulp(
-            "Linear Prioritized Heat Generation and Optimized Storage at lower Temp."
+            "Linear Prioritized Heat Generation and Optimized Storage at lower Temp.",
+            K_s_en,
         )
         checkbox2 = 1
-        main_pulp("Emission Optimized Heat Generation at lower Temp.")
+        main_pulp("Emission Optimized Heat Generation at lower Temp.", K_s_en)
