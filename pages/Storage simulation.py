@@ -842,6 +842,9 @@ def main_pulp(graphtitle, K_s_en):
         # convert column to a list
         P_to_dem = df["Lastgang"].tolist()
 
+        demand_vor = df_results.loc[hour, "Wärmelast_vor"]
+        demand_nach = df_results.loc[hour, "Wärmelast_nach"]
+
         return P_to_dem
 
     def read_data(file_name, start_hour, hours):
