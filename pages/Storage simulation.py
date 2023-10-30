@@ -49,11 +49,6 @@ Trl_nach = input_data["Trl_nach"]
 # from pages.Erzeugerpark import names, erzeuger_df_vor
 
 
-with open("results/df_results.json", "r") as f:
-    df_results = json.load(f)
-
-# T_vl_vor = df_results["T_vl_vor"]
-T_vl_vor = list(df_results["T_vl_vor"].values())
 # Flusstemperatur = list(df_results["Flusstemperatur"].values())
 
 st.set_page_config(page_title="Plotting Demo2", page_icon="📈")
@@ -827,6 +822,19 @@ def main_pulp(graphtitle, K_s_en):
     df_input = df_input.sort_values(by="Zeit")
 
     def read_demand(file_name, start_hour, hours):
+        # Read the json file into a dataframe
+        df = pd.read_json(
+            file_name
+        )  # I've changed this to use the passed 'file_name' parameter
+        with open("results/df_results.json", "r") as f:
+            df_network = json.load(f)
+
+        # Convert the column to a list
+        P_to_dem = df["Lastgang"].tolist()
+
+        # Select the subset of the list based on start_hour and hours
+        P_to_dem_subset = P_to_dem[start_hour : start_hour + hours]
+
         # read csv file into a dataframe
         df = pd.read_csv(file_name, skiprows=range(1, start_hour), nrows=hours, sep=",")
 
