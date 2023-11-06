@@ -821,39 +821,19 @@ def main_pulp(graphtitle, K_s_en):
     # Sort DataFrame by 'Zeit'
     df_input = df_input.sort_values(by="Zeit")
 
-    def read_demand(file_name, start_hour, hours):
-        # Read the json file into a dataframe
-        df = pd.read_json(
-            file_name
-        )  # I've changed this to use the passed 'file_name' parameter
+    def read_demand(start_hour, hours, column):
+        # Read the results JSON file
         with open("results/df_results.json", "r") as f:
-            df_network = json.load(f)
+            df_results = pd.read_json(f)
 
-        # Convert the column to a list
-        P_to_dem = df["Lastgang"].tolist()
+        # Select the required column from the df_results dataframe
+        if column not in df_results.columns:
+            raise ValueError(f"Column {column} not found in df_results")
 
-        # Select the subset of the list based on start_hour and hours
-        P_to_dem_subset = P_to_dem[start_hour : start_hour + hours]
-
-        # read csv file into a dataframe
-        df = pd.read_csv(file_name, skiprows=range(1, start_hour), nrows=hours, sep=",")
-
-        # Convert strings with comma as decimal separator to float
-        df["Lastgang"] = (
-            df["Lastgang"]
-            .str.replace('"', "")
-            .str.replace(".", "", regex=False)
-            .str.replace(",", ".")
-            .astype(float)
+        demand_values = (
+            df_results[column].iloc[start_hour : start_hour + hours].tolist()
         )
-
-        # convert column to a list
-        P_to_dem = df["Lastgang"].tolist()
-
-        demand_vor = df_results.loc[hour, "Wärmelast_vor"]
-        demand_nach = df_results.loc[hour, "Wärmelast_nach"]
-
-        return P_to_dem
+        return demand_values
 
     def read_data(file_name, start_hour, hours):
         # read csv file into a dataframe
@@ -908,8 +888,10 @@ def main_pulp(graphtitle, K_s_en):
 
     # start_hour = st.number_input("Enter start hour", min_value=1, value=1)
     # hours = st.number_input("Enter hours", min_value=1, value=2000)
-
-    P_to_dem = read_demand(file_name, start_hour, hours)
+    if checkbox4 == 0:
+        P_to_dem = read_demand(start_hour, hours, "Wärmelast_vor")
+    elif checkbox4 == 1:
+        P_to_dem = read_demand(start_hour, hours, "Wärmelast_nach")
 
     file_name = "Zeitreihen/zeitreihen_22.csv"
 

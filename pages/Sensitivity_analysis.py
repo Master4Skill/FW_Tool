@@ -60,7 +60,8 @@ Trl_nach = input_data["Trl_nach"]
 ηVerdichter = input_data["ηVerdichter"]
 T_q_diffmax = input_data["T_q_diffmax"]
 p_network = input_data["p_network"]
-
+T_Wü_delta_f = input_data["T_Wü_delta_f"]
+T_Wü_delta_r = input_data["T_Wü_delta_r"]
 
 st.set_page_config(
     page_title="Sensitivity Analysis",
@@ -198,11 +199,43 @@ def returnreduction(T_rl_range, T_vl):
     )  # figsize needs to be in inches, dpi is usually 80
 
     # Plotting
-    ax.plot(T_rl_range, Netzverluste_list, label="Network Losses", lw=2)
-    ax.plot(T_rl_range, Wärmelast_list, label="Total Heat Load", lw=2)
-    ax.plot(T_rl_range, flowRate_list, label="Flow Rate", lw=2)
-    ax.plot(T_rl_range, flowSpeed_list, label="Flow Speed", linestyle=":", lw=2)
-    ax.plot(T_rl_range, pumpleistung_list, label="Pump Power", lw=2)
+    ax.plot(
+        T_rl_range,
+        Netzverluste_list,
+        label="Network Losses",
+        lw=2,
+        color="#DD2525",  # Bright red color
+    )
+    ax.plot(
+        T_rl_range,
+        Wärmelast_list,
+        label="Total Heat Load",
+        lw=2,
+        color="#EC9302",  # Warm orange color
+    )
+    ax.plot(
+        T_rl_range,
+        flowRate_list,
+        label="Flow Rate",
+        lw=2,
+        color="#92D050",  # Fresh green color
+    )
+    ax.plot(
+        T_rl_range,
+        flowSpeed_list,
+        label="Flow Speed",
+        linestyle="--",
+        dashes=(10, 10),
+        lw=2,
+        color="#3795D5",  # Light blue color
+    )
+    ax.plot(
+        T_rl_range,
+        pumpleistung_list,
+        label="Pump Power",
+        lw=2,
+        color="#515151",  # Dark grey color
+    )
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
@@ -303,11 +336,43 @@ def returnandflowreduction(T_rl_range, T_vl_range):
     )  # figsize needs to be in inches, dpi is usually 80
 
     # Plotting
-    ax.plot(T_vl_range, Netzverluste_list, label="Network Losses", lw=2)
-    ax.plot(T_vl_range, Wärmelast_list, label="Total Heat Load", lw=2)
-    ax.plot(T_vl_range, flowRate_list, label="Flow Rate", lw=2)
-    ax.plot(T_vl_range, flowSpeed_list, label="Flow Speed", linestyle=":", lw=2)
-    ax.plot(T_vl_range, pumpleistung_list, label="Pump Power", lw=2)
+    ax.plot(
+        T_vl_range,
+        Netzverluste_list,
+        label="Network Losses",
+        lw=2,
+        color="#DD2525",  # Red color for losses
+    )
+    ax.plot(
+        T_vl_range,
+        Wärmelast_list,
+        label="Total Heat Load",
+        lw=2,
+        color="#EC9302",  # Orange color for heat
+    )
+    ax.plot(
+        T_vl_range,
+        flowRate_list,
+        label="Flow Rate",
+        lw=2,
+        color="#92D050",  # Gold color for flow
+    )
+    ax.plot(
+        T_vl_range,
+        flowSpeed_list,
+        label="Flow Speed",
+        linestyle="--",
+        dashes=(10, 10),
+        lw=2,
+        color="#3795D5",  # Blue color for speed
+    )
+    ax.plot(
+        T_vl_range,
+        pumpleistung_list,
+        label="Pump Power",
+        lw=2,
+        color="#515151",  # Grey color for mechanical power
+    )
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
@@ -408,11 +473,43 @@ def flowreduction(T_vl_range, T_rl):
     )  # figsize needs to be in inches, dpi is usually 80
 
     # Plotting
-    ax.plot(T_vl_range, Netzverluste_list, label="Network Losses", lw=2)
-    ax.plot(T_vl_range, Wärmelast_list, label="Total Heat Load", lw=2)
-    ax.plot(T_vl_range, flowRate_list, label="Flow Rate", lw=2)
-    ax.plot(T_vl_range, flowSpeed_list, label="Flow Speed", linestyle=":", lw=2)
-    ax.plot(T_vl_range, pumpleistung_list, label="Pump Power", lw=2)
+    ax.plot(
+        T_vl_range,
+        Netzverluste_list,
+        label="Network Losses",
+        lw=2,
+        color="#DD2525",  # Bright Red for Network Losses
+    )
+    ax.plot(
+        T_vl_range,
+        Wärmelast_list,
+        label="Total Heat Load",
+        lw=2,
+        color="#EC9302",  # Warm Orange for Heat Load
+    )
+    ax.plot(
+        T_vl_range,
+        flowRate_list,
+        label="Flow Rate",
+        lw=2,
+        color="#92D050",  # Lively gold for Flow Rate#92D050
+    )
+    ax.plot(
+        T_vl_range,
+        flowSpeed_list,
+        label="Flow Speed",
+        linestyle="--",
+        dashes=(10, 10),
+        lw=2,
+        color="#3795D5",  # Sky Blue for Flow Speed
+    )
+    ax.plot(
+        T_vl_range,
+        pumpleistung_list,
+        label="Pump Power",
+        lw=2,
+        color="#777777",  # Darker Grey for Pump Power
+    )
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
@@ -478,19 +575,6 @@ def flowreduction(T_vl_range, T_rl):
     st.pyplot(fig)
 
     return
-
-
-T_b = 10
-Lastgang = 15000
-T_rl_range = np.arange(65, 40, -5)
-# st.write("T_rl_range:", T_rl_range)
-T_vl = 95
-T_vl_range = np.arange(95, 70, -5)
-# st.write("T_rl_range:", T_rl_range)
-T_rl = 45
-returnreduction(T_rl_range, T_vl)
-flowreduction(T_vl_range, T_rl)
-returnandflowreduction(T_rl_range, T_vl_range)
 
 
 # Extracted style configurations
@@ -604,26 +688,32 @@ def producer_sensitivitywp1(producer, T_range, T_rl, T_vl, current_last, option)
     poweruse_list = [x / poweruse_list[0] for x in poweruse_list]
     flowrate_list = [x / flowrate_list[0] for x in flowrate_list]
     powerout_list = [x / powerout_list[0] for x in powerout_list]
+    # write the last value of poweruse to streamlit
+    st.write("poweruse_list[-1]:", poweruse_list[-1])
+    # powerout
+    st.write("powerout_list[-1]:", powerout_list[-1])
 
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # Plotting
-    ax.plot(T_range, COP_list, label="COP", lw=2)
+    ax.plot(T_range, COP_list, label="COP", lw=2, color="#DD2525")  # red
     ax.plot(
         T_range,
         poweruse_list,
         label="Electrical Power Consumption",
         lw=2,
-        color="purple",
+        color="#1F4E79",  # dark blue
     )
     ax.plot(
         T_range,
         flowrate_list,
         label="Heat from the Source",
         lw=2,
-        color="green",
+        color="#41641A",  # dark green
     )
-    ax.plot(T_range, powerout_list, label="Heat Output", lw=2, color="orange")
+    ax.plot(
+        T_range, powerout_list, label="Heat Output", lw=2, color="#EC9302"
+    )  # orange
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
@@ -767,12 +857,19 @@ def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, T_q, current_last, op
     poweruse_list = [x / poweruse_list[0] for x in poweruse_list]
     flowrate_list = [x / flowrate_list[0] for x in flowrate_list]
 
+    # write the last value of poweruse to streamlit
+    st.write("poweruse_list[-1]:", poweruse_list[-1])
+
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # Plotting
-    ax.plot(T_range, COP_list, label="COP", lw=2)
-    ax.plot(T_range, poweruse_list, label="Power Consumption", lw=2, color="purple")
-    ax.plot(T_range, flowrate_list, label="Flow Rate", lw=2, color="green")
+    ax.plot(T_range, COP_list, label="COP", lw=2, color="#DD2525")  # red
+    ax.plot(
+        T_range, poweruse_list, label="Power Consumption", lw=2, color="#1F4E79"
+    )  # dark blue
+    ax.plot(
+        T_range, flowrate_list, label="Flow Rate", lw=2, color="#92D050"
+    )  # light gold
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
@@ -890,60 +987,110 @@ def producer_sensitivitygeo(producer, T_range, T_rl, T_vl, current_last, option)
         poweruse_list,
         label="Electrical Power Consumption",
         lw=2,
-        color="purple",
+        color="#B77201",  # Purple-like color
     )
     ax.plot(
-        T_range, flowrate_list, label="Flow Rate", lw=2, color="yellow", linestyle="--"
+        T_range,
+        flowrate_list,
+        label="Flow Rate",
+        lw=2,
+        color="#92D050",  # Golden yellow color
+        linestyle="--",
+        dashes=(10, 10),
     )
-    ax.plot(T_range, T_inject_list, label="Injection Temperature", lw=2)
+    ax.plot(
+        T_range,
+        T_inject_list,
+        label="Injection Temperature",
+        lw=2,
+        color="#3795D5",  # Light blue color
+    )
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
     ax.set_ylim(top=1.5)
 
-    # X and Y labels with larger font
+    # X and Y labels with style configuration
     if option == 2:
-        ax.set_xlabel("Return Temperature[°C]", fontsize=14)
+        ax.set_xlabel(
+            "Return Temperature[°C]",
+            fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
+        )
     else:
-        ax.set_xlabel("Flow Temperature[°C]", fontsize=14)
+        ax.set_xlabel(
+            "Flow Temperature[°C]",
+            fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
+        )
+    ax.set_ylabel(
+        "Performance Metrics",
+        fontsize=16,
+        color="#777777",
+        fontfamily="Segoe UI SemiLight",
+    )
 
-    # Setting x-ticks to the values in T_vl_range with larger font
+    # X-axis properties
+    ax.xaxis.label.set_color("#A3A3A3")
+    ax.tick_params(axis="x", colors="#A3A3A3", direction="out", which="both")
+    ax.spines["bottom"].set_edgecolor("#A3A3A3")
+    ax.spines["bottom"].set_linewidth(1)
+
+    # Y-axis properties
+    ax.yaxis.label.set_color("#A3A3A3")
+    ax.tick_params(axis="y", colors="#A3A3A3", direction="out", which="both")
+    ax.spines["left"].set_edgecolor("#A3A3A3")
+    ax.spines["left"].set_linewidth(1)
+
+    # Setting x-ticks with style configuration
     ax.set_xticks(T_range)
-    ax.tick_params(axis="both", which="major", labelsize=12)
+    ax.tick_params(axis="both", which="major", labelsize=16, colors="#777777")
 
-    # Adding horizontal lines for each y-tick
-    for y in ax.get_yticks():
-        ax.axhline(y, color="grey", linestyle="--", linewidth=0.5)
+    # Horizontal grid lines
+    ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
 
-    # Removing the frame (spines)
-    for spine in ["top", "right", "bottom", "left"]:
-        ax.spines[spine].set_visible(False)
-
-    # Title with larger font
+    # Title with style configuration
     if option == 2:
         ax.set_title(
-            r"Sensitivity of The Geothermal Unit for $T_f$ = Constant (95°C) ",
+            r"Sensitivity of The Geothermal Unit for $T_f$ = Constant (95°C)",
             fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
         )
     elif option == 1:
         ax.set_title(
-            r"Sensitivity of The Geothermal Unit for $T_r$ = Constant (45°C) ",
+            r"Sensitivity of The Geothermal Unit for $T_r$ = Constant (45°C)",
             fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
         )
     else:
         ax.set_title(
-            r"Sensitivity of the Geothermal Unit for $\Delta T$ = Constant (30°C) ",
+            r"Sensitivity of The Geothermal Unit for $\Delta T$ = Constant (30°C)",
             fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
         )
 
-    # Legend with larger font
+    # Legend with style configuration
     ax.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.15),
         ncol=3,
         frameon=False,
-        fontsize=12,
+        fontsize=16,
+        facecolor="white",
+        edgecolor="white",
+        title_fontsize="16",
+        labelcolor="#777777",
     )
+
+    # Background and other spines color
+    ax.set_facecolor("white")
+    for spine in ["top", "right"]:
+        ax.spines[spine].set_visible(False)
 
     # Display the plot (assuming you're using Streamlit)
     st.pyplot(fig)
@@ -951,121 +1098,148 @@ def producer_sensitivitygeo(producer, T_range, T_rl, T_vl, current_last, option)
     return
 
 
-def producer_sensitivitysolar(producer, T_range, T_rl, T_vl, current_last, option):
-    T_inject_list = []
-    flowrate_list = []  # assuming this is Volumenstrom
+def producer_sensitivitysolar(
+    producer, T_range, T_rl, T_vl, solar_area, k_s_1, k_s_2, α, τ, option
+):
     poweruse_list = []
+    st.write(f"k_s_1={k_s_1}")
+    st.write(f"k_s_2={k_s_2}")
+    st.write(f"α={α}")
+    st.write(f"τ={τ}")
 
-    def calc_Poweruse(self, hour, Tvl, Trl, current_last):
-        # Placeholder calculation:
-        V = current_last / (self.Tgeo - (Trl + 2) * ρ_water * cp_water)
-        P = V / 3600 * ρ_water * 9.81 * self.h_förder / self.η_geo
-        return P
+    def calc_output(Tvl, Trl):
+        T_u = 20
+        T_m = (Tvl + T_Wü_delta_f + Trl + T_Wü_delta_r) / 2
+        st.write(f"T_m = {T_m}")
+        a = 0.3 * α * τ
+        b = k_s_1 * (T_m - T_u)
+        c = k_s_2 * (T_m - T_u) ** 2
+        st.write(f"a = {a}")
+        st.write(f"b = {b}")
+        st.write(f"c = {c}")
+        st.write(f"prelim = {(a - b - c)}")
+        x = (a - b - c) * solar_area
+        st.write(f"x = {x}")
+        # T_m = 77
+        return [x if x > 0 else 0][0]
 
     if option == 1:
         for T_vl in T_range:
             # Get the values
-            T_inject = T_rl + 2
-            poweruse = producer.calc_Poweruse(None, T_vl, T_rl, current_last)
-            flowrate = current_last / (producer.Tgeo - (T_rl + 2) * ρ_water * cp_water)
-
+            poweruse = calc_output(T_vl, T_rl)
             # Append to lists
             poweruse_list.append(poweruse)
-            flowrate_list.append(flowrate)
-            T_inject_list.append(T_inject)
 
     elif option == 2:
         for T_rl in T_range:
             # Get the values
-            T_inject = T_rl + 2
-            poweruse = producer.calc_Poweruse(None, T_vl, T_rl, current_last)
-            flowrate = current_last / (producer.Tgeo - (T_rl + 2) * ρ_water * cp_water)
-
+            poweruse = calc_output(T_vl, T_rl)
             # Append to lists
             poweruse_list.append(poweruse)
-            flowrate_list.append(flowrate)
-            T_inject_list.append(T_inject)
 
     elif option == 3:
         for T_vl in T_range:
             # Get the values
-            T_inject = T_vl - 30 + 2
-            poweruse = producer.calc_Poweruse(None, T_vl, T_vl - 30, current_last)
-            flowrate = current_last / (
-                producer.Tgeo - (T_vl - 30 + 2) * ρ_water * cp_water
-            )
-
+            poweruse = calc_output(T_vl, T_vl - 30)
             # Append to lists
             poweruse_list.append(poweruse)
-            flowrate_list.append(flowrate)
-            T_inject_list.append(T_inject)
 
     poweruse_list = [x / poweruse_list[0] for x in poweruse_list]
-    flowrate_list = [x / flowrate_list[0] for x in flowrate_list]
-    T_inject_list = [x / T_inject_list[0] for x in T_inject_list]
-
     fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Assuming the setup of the figure and axis (fig, ax) has been done previously
 
     # Plotting
     ax.plot(
         T_range,
         poweruse_list,
-        label="Electrical Power Consumption",
+        label="Heat Output",
         lw=2,
-        color="purple",
+        color="#EC9302",
     )
-    ax.plot(
-        T_range, flowrate_list, label="Flow Rate", lw=2, color="yellow", linestyle="--"
-    )
-    ax.plot(T_range, T_inject_list, label="Injection Temperature", lw=2)
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
     ax.set_ylim(top=1.5)
 
-    # X and Y labels with larger font
+    # X and Y labels with style configuration
     if option == 2:
-        ax.set_xlabel("Return Temperature[°C]", fontsize=14)
+        ax.set_xlabel(
+            "Return Temperature[°C]",
+            fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
+        )
     else:
-        ax.set_xlabel("Flow Temperature[°C]", fontsize=14)
+        ax.set_xlabel(
+            "Flow Temperature[°C]",
+            fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
+        )
+    ax.set_ylabel(
+        "Relative Change", fontsize=16, color="#777777", fontfamily="Segoe UI SemiLight"
+    )
 
-    # Setting x-ticks to the values in T_vl_range with larger font
+    # X-axis properties
+    ax.xaxis.label.set_color("#A3A3A3")
+    ax.tick_params(axis="x", colors="#A3A3A3", direction="out", which="both")
+    ax.spines["bottom"].set_edgecolor("#A3A3A3")
+    ax.spines["bottom"].set_linewidth(1)
+
+    # Y-axis properties
+    ax.yaxis.label.set_color("#A3A3A3")
+    ax.tick_params(axis="y", colors="#A3A3A3", direction="out", which="both")
+    ax.spines["left"].set_edgecolor("#A3A3A3")
+    ax.spines["left"].set_linewidth(1)
+
+    # Setting x-ticks with style configuration
     ax.set_xticks(T_range)
-    ax.tick_params(axis="both", which="major", labelsize=12)
+    ax.tick_params(axis="both", which="major", labelsize=16, colors="#777777")
 
-    # Adding horizontal lines for each y-tick
-    for y in ax.get_yticks():
-        ax.axhline(y, color="grey", linestyle="--", linewidth=0.5)
+    # Horizontal grid lines
+    ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
 
-    # Removing the frame (spines)
-    for spine in ["top", "right", "bottom", "left"]:
-        ax.spines[spine].set_visible(False)
-
-    # Title with larger font
+    # Title with style configuration
     if option == 2:
         ax.set_title(
-            r"Sensitivity of the geothermal unit for $T_f$ = Constant (95°C) ",
+            r"Sensitivity of the Solarthermal Collector for $T_f$ = Constant (95°C)",
             fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
         )
     elif option == 1:
         ax.set_title(
-            r"Sensitivity of the geothermal unit for $T_r$ = Constant (45°C) ",
+            r"Sensitivity of the Solarthermal Collector for $T_r$ = Constant (45°C)",
             fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
         )
     else:
         ax.set_title(
-            r"Sensitivity of the geothermal unit for $\Delta T$ = Constant (30°C) ",
+            r"Sensitivity of the Solarthermal Collector for $\Delta T$ = Constant (30°C)",
             fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
         )
 
-    # Legend with larger font
+    # Legend with style configuration
     ax.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.15),
         ncol=3,
         frameon=False,
-        fontsize=12,
+        fontsize=16,
+        facecolor="white",
+        edgecolor="white",
+        title_fontsize="16",
+        labelcolor="#777777",
     )
+
+    # Background and other spines color
+    ax.set_facecolor("white")
+    for spine in ["top", "right"]:
+        ax.spines[spine].set_visible(False)
 
     # Display the plot (assuming you're using Streamlit)
     st.pyplot(fig)
@@ -1106,61 +1280,114 @@ def producer_sensitivitywh(producer, T_range, T_rl, T_vl, current_last, option):
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # Plotting
-    ax.plot(T_range, powerout_list, label="Heat Output", lw=2, color="orange")
+    ax.plot(
+        T_range, powerout_list, label="Heat Output", lw=2, color="#EB8585"
+    )  # orange color
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)
     ax.set_ylim(top=1.7)
 
-    # X and Y labels with larger font
+    # X and Y labels with style configuration
     if option == 2:
-        ax.set_xlabel("Return Temperature[°C]", fontsize=14)
+        ax.set_xlabel(
+            "Return Temperature[°C]",
+            fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
+        )
     else:
-        ax.set_xlabel("Flow Temperature[°C]", fontsize=14)
+        ax.set_xlabel(
+            "Flow Temperature[°C]",
+            fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
+        )
 
-    # Setting x-ticks to the values in T_vl_range with larger font
+    ax.set_ylabel(
+        "Heat Output [kW]",
+        fontsize=16,
+        color="#777777",
+        fontfamily="Segoe UI SemiLight",
+    )
+
+    # X-axis properties
+    ax.xaxis.label.set_color("#A3A3A3")
+    ax.tick_params(axis="x", colors="#A3A3A3", direction="out", which="both")
+    ax.spines["bottom"].set_edgecolor("#A3A3A3")
+    ax.spines["bottom"].set_linewidth(1)
+
+    # Y-axis properties
+    ax.yaxis.label.set_color("#A3A3A3")
+    ax.tick_params(axis="y", colors="#A3A3A3", direction="out", which="both")
+    ax.spines["left"].set_edgecolor("#A3A3A3")
+    ax.spines["left"].set_linewidth(1)
+
+    # Setting x-ticks with style configuration
     ax.set_xticks(T_range)
-    ax.tick_params(axis="both", which="major", labelsize=12)
+    ax.tick_params(axis="both", which="major", labelsize=16, colors="#777777")
 
-    # Adding horizontal lines for each y-tick
-    for y in ax.get_yticks():
-        ax.axhline(y, color="grey", linestyle="--", linewidth=0.5)
+    # Horizontal grid lines
+    ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
 
-    # Removing the frame (spines)
-    for spine in ["top", "right", "bottom", "left"]:
-        ax.spines[spine].set_visible(False)
-
-    # Title with larger font
+    # Title with style configuration
     if option == 2:
         ax.set_title(
-            r"Sensitivity of the wast heat unit for $T_f$ = Constant (95°C) ",
+            r"Sensitivity of the waste heat unit for $T_f$ = Constant (95°C)",
             fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
         )
     elif option == 1:
         ax.set_title(
-            r"Sensitivity of the waste heat unit for $T_r$ = Constant (45°C) ",
+            r"Sensitivity of the waste heat unit for $T_r$ = Constant (45°C)",
             fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
         )
     else:
         ax.set_title(
-            r"Sensitivity of the waste heat unit for $\Delta T$ = Constant (30°C) ",
+            r"Sensitivity of the waste heat unit for $\Delta T$ = Constant (30°C)",
             fontsize=16,
+            color="#777777",
+            fontfamily="Segoe UI SemiLight",
         )
 
-    # Legend with larger font
+    # Legend with style configuration
     ax.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.15),
         ncol=3,
         frameon=False,
-        fontsize=12,
+        fontsize=16,
+        facecolor="white",
+        edgecolor="white",
+        title_fontsize="16",
+        labelcolor="#777777",
     )
+
+    # Background and other spines color
+    ax.set_facecolor("white")
+    for spine in ["top", "right"]:
+        ax.spines[spine].set_visible(False)
 
     # Display the plot (assuming you're using Streamlit)
     st.pyplot(fig)
 
     return
 
+
+T_b = 10
+Lastgang = 15000
+T_rl_range = np.arange(65, 40, -5)  # (65, 30, -5)
+# st.write("T_rl_range:", T_rl_range)
+T_vl = 95
+T_vl_range = np.arange(95, 70, -5)  # (95, 60, -5)
+# st.write("T_rl_range:", T_rl_range)
+T_rl = 45
+returnreduction(T_rl_range, T_vl)
+flowreduction(T_vl_range, T_rl)
+returnandflowreduction(T_rl_range, T_vl_range)
 
 Volumenstrom_quelle_value = 85
 T_q_value = 25
@@ -1175,7 +1402,7 @@ h_förder = 2000
 T_geo = 100
 η_geo = 0.8
 
-wp1 = ep.heatpump_1(Volumenstrom_quelle_value, T_q_value, Gütegrad_value)
+wp1 = ep.heatpump_1(Volumenstrom_quelle_value, T_q_value, Gütegrad_value, 0.3)
 wp2 = ep.heatpump_2(Leistung_max_value, T_q_value, Gütegrad_value)
 geo = ep.geothermal(
     Leistung_max_value,
@@ -1203,7 +1430,7 @@ producer_sensitivitywh(wh, T_vl_range, T_rl, T_vl, Lastgang, option=1)
 producer_sensitivitywh(wh, T_rl_range, T_rl, T_vl, Lastgang, option=2)
 producer_sensitivitywh(wh, T_vl_range, T_rl, T_vl, Lastgang, option=3)
 
-solar_area = 10000
+solar_area = 5000
 
 k_s_1 = 1.5 / 1000  # Dividing by 1000 to convert to the appropriate unit
 k_s_2 = 0.005 / 1000  # Dividing by 1000 to convert to the appropriate unit
@@ -1220,6 +1447,12 @@ solar = ep.solarthermal(
     color=erzeuger_color,
     co2_emission_factor=0,
 )
-producer_sensitivitysolar(solar, T_vl_range, T_rl, T_vl, Lastgang, option=1)
-producer_sensitivitysolar(solar, T_rl_range, T_rl, T_vl, Lastgang, option=2)
-producer_sensitivitysolar(solar, T_vl_range, T_rl, T_vl, Lastgang, option=3)
+producer_sensitivitysolar(
+    solar, T_vl_range, T_rl, T_vl, solar_area, k_s_1, k_s_2, α, τ, option=1
+)
+producer_sensitivitysolar(
+    solar, T_rl_range, T_rl, T_vl, solar_area, k_s_1, k_s_2, α, τ, option=2
+)
+producer_sensitivitysolar(
+    solar, T_vl_range, T_rl, T_vl, solar_area, k_s_1, k_s_2, α, τ, option=3
+)
