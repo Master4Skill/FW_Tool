@@ -194,6 +194,9 @@ def returnreduction(T_rl_range, T_vl):
     flowSpeed_list = [x / flowSpeed_list[0] for x in flowSpeed_list]
     pumpleistung_list = [x / pumpleistung_list[0] for x in pumpleistung_list]
 
+    st.write("pumpleistung_list[-1]:", 1 - pumpleistung_list[-1])
+    st.write("Netzverluste_list[-1]:", 1 - Netzverluste_list[-1])
+
     fig, ax = plt.subplots(
         figsize=(800 / 80, 600 / 80)
     )  # figsize needs to be in inches, dpi is usually 80
@@ -335,6 +338,9 @@ def returnandflowreduction(T_rl_range, T_vl_range):
         figsize=(800 / 80, 600 / 80)
     )  # figsize needs to be in inches, dpi is usually 80
 
+    st.write("pumpleistung_list[-1]:", 1 - pumpleistung_list[-1])
+    st.write("Netzverluste_list[-1]:", 1 - Netzverluste_list[-1])
+
     # Plotting
     ax.plot(
         T_vl_range,
@@ -467,6 +473,9 @@ def flowreduction(T_vl_range, T_rl):
     flowRate_list = [x / flowRate_list[0] for x in flowRate_list]
     flowSpeed_list = [x / flowSpeed_list[0] for x in flowSpeed_list]
     pumpleistung_list = [x / pumpleistung_list[0] for x in pumpleistung_list]
+
+    st.write("pumpleistung_list[-1]:", 1 - pumpleistung_list[-1])
+    st.write("Netzverluste_list[-1]:", 1 - Netzverluste_list[-1])
 
     fig, ax = plt.subplots(
         figsize=(800 / 80, 600 / 80)
@@ -603,12 +612,16 @@ def style_plot(ax, T_range, option):
     ax.tick_params(axis="both", which="major", labelsize=16, colors="#777777")
     ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
     title_options = {
-        1: r"Sensitivity of the Heat Pump for $T_r$ = Constant (45°C)",
-        2: r"Sensitivity of the Heat Pump for $T_f$ = Constant (95°C)",
-        3: r"Sensitivity of the Heat Pump for $\Delta T$ = Constant (30°C)",
+        1: ["Sensitivity of the Waste Heat Pump", "for $T_r$ = Constant (45°C)"],
+        2: ["Sensitivity of the Waste Heat Pump", "for $T_f$ = Constant (95°C)"],
+        3: ["Sensitivity of the Waste Heat Pump", "for $\Delta T$ = Constant (30°C)"],
     }
+
+    # Join the list with a newline character to create a multiline title
+    title_text = "\n".join(title_options.get(option, ""))
+
     ax.set_title(
-        title_options.get(option, ""),
+        title_text,
         fontsize=16,
         color="#777777",
         fontfamily="Segoe UI SemiLight",
@@ -639,10 +652,11 @@ def producer_sensitivitywp1(producer, T_range, T_rl, T_vl, current_last, option)
     if option == 1:
         for T_vl in T_range:
             # Get the values
+            st.write("T_vl1:", T_vl)
             COP = producer.calc_COP(T_vl, None, None)
+            st.write("COP:", COP)
             poweruse = producer.calc_Poweruse(None, T_vl, T_rl, current_last)
-            # Here, I'm assuming that the flow rate for the Waermepumpe1 is Constant and given by Volumenstrom_quelle.
-            # If it's not Constant, you'd need a method in your class to compute it.
+
             flowrate = producer.Volumenstrom_quelle
             powerout = producer.calc_output(None, T_vl, T_rl)
 
@@ -671,7 +685,9 @@ def producer_sensitivitywp1(producer, T_range, T_rl, T_vl, current_last, option)
     elif option == 3:
         for T_vl in T_range:
             # Get the values
+            st.write("T_vl:", T_vl)
             COP = producer.calc_COP(T_vl, None, None)
+            st.write("COP:", COP)
             poweruse = producer.calc_Poweruse(None, T_vl, T_vl - 30, current_last)
             # Here, I'm assuming that the flow rate for the Waermepumpe1 is Constant and given by Volumenstrom_quelle.
             # If it's not Constant, you'd need a method in your class to compute it.
@@ -689,9 +705,9 @@ def producer_sensitivitywp1(producer, T_range, T_rl, T_vl, current_last, option)
     flowrate_list = [x / flowrate_list[0] for x in flowrate_list]
     powerout_list = [x / powerout_list[0] for x in powerout_list]
     # write the last value of poweruse to streamlit
-    st.write("poweruse_list[-1]:", poweruse_list[-1])
+    st.write("poweruse_list[-1]:", (1 - poweruse_list[-1]) * 100)
     # powerout
-    st.write("powerout_list[-1]:", powerout_list[-1])
+    st.write("powerout_list[-1]:", (1 - powerout_list[-1]) * 100)
 
     fig, ax = plt.subplots(figsize=(10, 6))
 
@@ -858,7 +874,8 @@ def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, T_q, current_last, op
     flowrate_list = [x / flowrate_list[0] for x in flowrate_list]
 
     # write the last value of poweruse to streamlit
-    st.write("poweruse_list[-1]:", poweruse_list[-1])
+    st.write("cop_list[-1]:", (1 - COP_list[-1]) * 100)
+    st.write("powerout_list[-1]:", 0)
 
     fig, ax = plt.subplots(figsize=(10, 6))
 
@@ -903,10 +920,17 @@ def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, T_q, current_last, op
     ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
 
     # Title with style configuration
+    title_options = {
+        1: ["Sensitivity of the Ambient Heat Pump", "for $T_r$ = Constant (45°C)"],
+        2: ["Sensitivity of the Ambient Heat Pump", "for $T_f$ = Constant (95°C)"],
+        3: ["Sensitivity of the Ambient Heat Pump", "for $\Delta T$ = Constant (30°C)"],
+    }
+
+    # Join the list with a newline character to create a multiline title
+    title_text = "\n".join(title_options.get(option, ""))
+
     ax.set_title(
-        f"Sensitivity of the Ambient Heat Pump{' 2' if 'wp2' in globals()['__name__'] else ''} for "
-        f"${'T_f' if option == 2 else 'T_r' if option == 1 else 'Delta T'}$ = Constant "
-        f"({95 if option == 2 else 45 if option == 1 else 30}°C) ",
+        title_text,
         fontsize=16,
         color="#777777",
         fontfamily="Segoe UI SemiLight",
@@ -924,12 +948,21 @@ def producer_sensitivitywp2(producer, T_range, T_rl, T_vl, T_q, current_last, op
         title_fontsize="16",
         labelcolor="#777777",
     )
+    # Background and other spines color
+    ax.set_facecolor("white")
+    for spine in ["top", "right"]:
+        ax.spines[spine].set_visible(False)
+
+    # Display the plot (assuming you're using Streamlit)
+    st.pyplot(fig)
+    return
 
 
 def producer_sensitivitygeo(producer, T_range, T_rl, T_vl, current_last, option):
     T_inject_list = []
     flowrate_list = []  # assuming this is Volumenstrom
     poweruse_list = []
+    cop_list = []
 
     def calc_Poweruse(self, hour, Tvl, Trl, current_last):
         # Placeholder calculation:
@@ -943,11 +976,13 @@ def producer_sensitivitygeo(producer, T_range, T_rl, T_vl, current_last, option)
             T_inject = T_rl + 2
             poweruse = producer.calc_Poweruse(None, T_vl, T_rl, current_last)
             flowrate = current_last / (producer.Tgeo - (T_rl + 2) * ρ_water * cp_water)
+            cop = producer.calc_COP(None, T_rl, None)
 
             # Append to lists
             poweruse_list.append(poweruse)
             flowrate_list.append(flowrate)
             T_inject_list.append(T_inject)
+            cop_list.append(cop)
 
     elif option == 2:
         for T_rl in T_range:
@@ -955,11 +990,13 @@ def producer_sensitivitygeo(producer, T_range, T_rl, T_vl, current_last, option)
             T_inject = T_rl + 2
             poweruse = producer.calc_Poweruse(None, T_vl, T_rl, current_last)
             flowrate = current_last / (producer.Tgeo - (T_rl + 2) * ρ_water * cp_water)
+            cop = producer.calc_COP(None, T_rl, None)
 
             # Append to lists
             poweruse_list.append(poweruse)
             flowrate_list.append(flowrate)
             T_inject_list.append(T_inject)
+            cop_list.append(cop)
 
     elif option == 3:
         for T_vl in T_range:
@@ -969,15 +1006,23 @@ def producer_sensitivitygeo(producer, T_range, T_rl, T_vl, current_last, option)
             flowrate = current_last / (
                 producer.Tgeo - (T_vl - 30 + 2) * ρ_water * cp_water
             )
+            cop = producer.calc_COP(None, T_vl - 30, None)
 
             # Append to lists
             poweruse_list.append(poweruse)
             flowrate_list.append(flowrate)
             T_inject_list.append(T_inject)
+            cop_list.append(cop)
 
     poweruse_list = [x / poweruse_list[0] for x in poweruse_list]
     flowrate_list = [x / flowrate_list[0] for x in flowrate_list]
     T_inject_list = [x / T_inject_list[0] for x in T_inject_list]
+    cop_list = [x / cop_list[0] for x in cop_list]
+
+    # write the last value of poweruse to streamlit
+    st.write("cop_list[-1]:", (1 - cop_list[-1]) * 100)
+    # powerout
+    st.write("powerout_list[-1]:", 0)
 
     fig, ax = plt.subplots(figsize=(10, 6))
 
@@ -1101,7 +1146,8 @@ def producer_sensitivitygeo(producer, T_range, T_rl, T_vl, current_last, option)
 def producer_sensitivitysolar(
     producer, T_range, T_rl, T_vl, solar_area, k_s_1, k_s_2, α, τ, option
 ):
-    poweruse_list = []
+    powerout_list = []
+    T_m_list = []
     st.write(f"k_s_1={k_s_1}")
     st.write(f"k_s_2={k_s_2}")
     st.write(f"α={α}")
@@ -1123,39 +1169,61 @@ def producer_sensitivitysolar(
         # T_m = 77
         return [x if x > 0 else 0][0]
 
+    def calc_T_m(Tvl, Trl):
+        T_m = (Tvl + T_Wü_delta_f + Trl + T_Wü_delta_r) / 2
+        return T_m
+
     if option == 1:
         for T_vl in T_range:
             # Get the values
             poweruse = calc_output(T_vl, T_rl)
+            T_m = calc_T_m(T_vl, T_rl)
             # Append to lists
-            poweruse_list.append(poweruse)
+            powerout_list.append(poweruse)
+            T_m_list.append(T_m)
 
     elif option == 2:
         for T_rl in T_range:
             # Get the values
             poweruse = calc_output(T_vl, T_rl)
+            T_m = calc_T_m(T_vl, T_rl)
             # Append to lists
-            poweruse_list.append(poweruse)
+            powerout_list.append(poweruse)
+            T_m_list.append(T_m)
 
     elif option == 3:
         for T_vl in T_range:
             # Get the values
             poweruse = calc_output(T_vl, T_vl - 30)
+            T_m = calc_T_m(T_vl, T_vl - 30)
             # Append to lists
-            poweruse_list.append(poweruse)
+            powerout_list.append(poweruse)
+            T_m_list.append(T_m)
 
-    poweruse_list = [x / poweruse_list[0] for x in poweruse_list]
+    powerout_list = [x / powerout_list[0] for x in powerout_list]
     fig, ax = plt.subplots(figsize=(10, 6))
+
+    # write the last value of poweruse to streamlit
+    st.write("powerout_list[-1]:", (1 - powerout_list[-1]) * 100)
+    # powerout
+    # st.write("powerout_list[-1]:", (1 - power_list[-1])*100)
 
     # Assuming the setup of the figure and axis (fig, ax) has been done previously
 
     # Plotting
     ax.plot(
         T_range,
-        poweruse_list,
+        powerout_list,
         label="Heat Output",
         lw=2,
         color="#EC9302",
+    )
+    ax.plot(
+        T_range,
+        powerout_list,
+        label="Average Glykol-Water Temperature",
+        lw=2,
+        color="#3795D5",
     )
 
     ax.invert_xaxis()
@@ -1277,6 +1345,8 @@ def producer_sensitivitywh(producer, T_range, T_rl, T_vl, current_last, option):
 
     powerout_list = [x / powerout_list[0] for x in powerout_list]
 
+    st.write("powerout_list[-1]:", (1 - powerout_list[-1]) * 100)
+
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # Plotting
@@ -1385,9 +1455,10 @@ T_vl = 95
 T_vl_range = np.arange(95, 70, -5)  # (95, 60, -5)
 # st.write("T_rl_range:", T_rl_range)
 T_rl = 45
-returnreduction(T_rl_range, T_vl)
-flowreduction(T_vl_range, T_rl)
 returnandflowreduction(T_rl_range, T_vl_range)
+flowreduction(T_vl_range, T_rl)
+returnreduction(T_rl_range, T_vl)
+
 
 Volumenstrom_quelle_value = 85
 T_q_value = 25
@@ -1413,22 +1484,22 @@ geo = ep.geothermal(
 
 wh = ep.waste_heat(10, 120)
 
+producer_sensitivitywp1(wp1, T_vl_range, T_rl, T_vl, Lastgang, option=3)
 producer_sensitivitywp1(wp1, T_vl_range, T_rl, T_vl, Lastgang, option=1)
 producer_sensitivitywp1(wp1, T_rl_range, T_rl, T_vl, Lastgang, option=2)
-producer_sensitivitywp1(wp1, T_vl_range, T_rl, T_vl, Lastgang, option=3)
 
+producer_sensitivitywp2(wp2, T_vl_range, T_rl, T_vl, 25, Lastgang, option=3)
 producer_sensitivitywp2(wp2, T_vl_range, T_rl, T_vl, 25, Lastgang, option=1)
 producer_sensitivitywp2(wp2, T_rl_range, T_rl, T_vl, 25, Lastgang, option=2)
-producer_sensitivitywp2(wp2, T_vl_range, T_rl, T_vl, 25, Lastgang, option=3)
 
+producer_sensitivitygeo(geo, T_vl_range, T_rl, T_vl, Lastgang, option=3)
 producer_sensitivitygeo(geo, T_vl_range, T_rl, T_vl, Lastgang, option=1)
 producer_sensitivitygeo(geo, T_rl_range, T_rl, T_vl, Lastgang, option=2)
-producer_sensitivitygeo(geo, T_vl_range, T_rl, T_vl, Lastgang, option=3)
 
 Lastgang = 800
+producer_sensitivitywh(wh, T_vl_range, T_rl, T_vl, Lastgang, option=3)
 producer_sensitivitywh(wh, T_vl_range, T_rl, T_vl, Lastgang, option=1)
 producer_sensitivitywh(wh, T_rl_range, T_rl, T_vl, Lastgang, option=2)
-producer_sensitivitywh(wh, T_vl_range, T_rl, T_vl, Lastgang, option=3)
 
 solar_area = 5000
 
@@ -1448,11 +1519,11 @@ solar = ep.solarthermal(
     co2_emission_factor=0,
 )
 producer_sensitivitysolar(
-    solar, T_vl_range, T_rl, T_vl, solar_area, k_s_1, k_s_2, α, τ, option=1
-)
-producer_sensitivitysolar(
-    solar, T_rl_range, T_rl, T_vl, solar_area, k_s_1, k_s_2, α, τ, option=2
-)
-producer_sensitivitysolar(
     solar, T_vl_range, T_rl, T_vl, solar_area, k_s_1, k_s_2, α, τ, option=3
+)
+producer_sensitivitysolar(
+    solar, T_rl_range, T_rl, T_vl, solar_area, k_s_1, k_s_2, α, τ, option=1
+)
+producer_sensitivitysolar(
+    solar, T_vl_range, T_rl, T_vl, solar_area, k_s_1, k_s_2, α, τ, option=2
 )

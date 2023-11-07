@@ -19,13 +19,17 @@ with open("results/data.json", "r") as f:
     input_data = json.load(f)
 
 # Using Streamlit's number_input function to let user input the constants
-input_data["λD"] = st.number_input("Insulation Thickness (m)", value=0.034)
-input_data["λB"] = st.number_input("Soil Thermal Conductivity (W/m·K)", value=1.2)
+input_data["λD"] = st.number_input(
+    "Pipe Isolation Thermal Conductivity (W/m·K)", value=0.034
+)
+input_data["λB"] = st.number_input("Soil Thermal Conductivity (W/m·K)", value=1.5)
 input_data["rM"] = st.number_input("Pipe Outer Diameter (m)", value=0.26)
 input_data["rR"] = st.number_input("Pipe Inner Diameter (m)", value=0.22)
-input_data["a"] = st.number_input("Laying Depth (m)", value=1.0)
+input_data["a"] = st.number_input(
+    "Spacing between flow and return pipes (m)", value=0.3
+)
 input_data["ζ"] = st.number_input(
-    "Sum of Individual Resistances in the Network", value=150
+    "Network resistance coefficient", value=150
 )  # Units needed
 input_data["l_Netz"] = st.number_input("Network Length in Meters (m)", value=5000)
 input_data["ηPump"] = st.number_input(
@@ -48,9 +52,10 @@ with expander:
         st.number_input("Specific Heat Capacity of Water (J/kg·K)", value=4184)
         / 3600000
     )
-    input_data["ρ_glycol_water"] = st.number_input(
-        "Densitiy Glykol-Water Mixture in solarthermal units (kg/m³)", value=1025
-    )
+    # only relevant for solarthermal electricity consumption
+    # input_data["ρ_glycol_water"] = st.number_input(
+    #    "Densitiy Glykol-Water Mixture in solarthermal units (kg/m³)", value=1025
+    # )
 
     input_data["ηWüHüs"] = st.number_input(
         "Efficiency of Heat Exchanger at Home Transfer Station (%)", value=0.95
@@ -59,7 +64,7 @@ with expander:
         "Efficiency of Heat Exchanger at Power Plant-Network (%)", value=0.95
     )
     input_data["ηVerdichter"] = st.number_input(
-        "Efficiency of Compressor Heat Pumps (%)", value=0.85
+        "Efficiency of Compressor(%)", value=0.85
     )
     input_data["T_q_diffmax"] = st.number_input(
         "Heat pump: maximum Temperature Difference of the Heat Source(°K)", value=5
@@ -71,8 +76,8 @@ with expander:
     input_data["T_Wü_delta_f"] = st.number_input(
         "minimal Temperature delta at flow side of heat Exchanger (°K)", value=5
     )
-    input_data["p_WP_loss"] = st.number_input(
-        "Pressure Losses Heat Pump (%)", value=0.95
+    input_data["p_WP_loss"] = 1 - st.number_input(
+        "Pressure Losses Heat Pump (%)", value=0.05
     )
     input_data["ηSpitzenkessel"] = st.number_input(
         "Peak Load Boiler Efficiency (%)", value=0.92

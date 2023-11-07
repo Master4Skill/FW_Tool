@@ -441,9 +441,9 @@ def plot_preise_flusstemp(strompreise_export, strompreise, gaspreise, flusstempe
 
     # Second Plot
     fig2, ax2 = plt.subplots(figsize=(10, 6))
-    ax2.plot(gaspreise, label="Gaspreise", linewidth=1, color="red")
-    ax2.set_ylabel("Gas Prices [€/MWh]", **font_properties)
-    ax2.set_title("Gaspreise", **title_properties)
+    ax2.plot(gaspreise, label="Gas Price", linewidth=1, color="red")
+    ax2.set_ylabel("Gas Price [€/MWh]", **font_properties)
+    ax2.set_title("Gas Price", **title_properties)
     ax2.legend(**legend_properties)
     configure_style(ax2)
     st.pyplot(fig2)
@@ -969,7 +969,7 @@ def main_pulp(graphtitle, K_s_en):
 
     # Waermepumpe1
     K_p2 = K_p["heatpump_1"][start_hour:] if "heatpump_1" in names else [0] * 8761
-    PL_p2 = 0.4  # erzeugerpark["heatpump_1"].Partload
+    PL_p2 = 0.4  # erzeugerpark["heatpump_1"]load
 
     # Waermepumpe2
     K_p3 = K_p["heatpump_2"][start_hour:] if "heatpump_2" in names else [0] * 8761
@@ -1127,6 +1127,8 @@ def main_pulp(graphtitle, K_s_en):
             A_p2_in = 0
             A_p3_in = 0
             A_p4_in = 0
+
+        st.write(i, A_p3_in)
 
         # 0.45 * (T_vl_vor[i] + 273.15) / (T_vl_vor[i] - Flusstemperatur[i]) #compare to ε = self.Gütegrad * ((Tvl + 273.15) / (Tvl - self.T_q))
         # A_p3_in = 0.45 * (60 + 273.15) / (60 - Flusstemperatur[i]) #        ε = self.Gütegrad * (Tvl + 273.15) / (Tvl - self.T_q)
@@ -1336,7 +1338,7 @@ def main_pulp(graphtitle, K_s_en):
 
     # plot_char_values(df_results)
     # plot_storage_data(df_results)
-    # plot_preise_flusstemp(strompreise_export, strompreise, gaspreise, Flusstemperatur)
+    plot_preise_flusstemp(strompreise_export, strompreise, gaspreise, Flusstemperatur)
 
     # plot_actual_production(df_input, df_production_storage, color_FFE, "Test", my_dict, start_hour)
     # plot_sorted_production(df_input, df_production_storage, color_FFE, "Test", my_dict)
@@ -1359,7 +1361,7 @@ if st.button("Submit"):
     if checkbox3 == 0:
         main_pulp("Cost Optimized Heat Generation and Storage", K_s_en)
         checkbox = 1
-        main_pulp("Linear Prioritized Heat Generation and Optimized Storage", K_s_en)
+        main_pulp("Linear Prioritized Heat Generation and Storage", K_s_en)
         checkbox = 0
         checkbox3 = 1
         main_pulp("Emission Optimized Heat Generation and Storage", K_s_en)

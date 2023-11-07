@@ -127,7 +127,7 @@ for i in range(anzahl_erzeuger):
 
     if "waste heat" in erzeuger_type:
         Volumenstrom_quelle = st.number_input(
-            "Please enter the volume flow rate of the source (m³/h)",
+            "Please enter the volume flow rate of the source ( )",
             value=10,
             key=f"Volumenstrom_quelle{i}",
         )

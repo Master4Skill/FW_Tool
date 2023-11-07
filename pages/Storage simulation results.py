@@ -948,6 +948,7 @@ if st.button("Submit"):
             1653304.62,  # Optimized
         ],
     }
+
     data4 = {  # only emissions heat pump 2
         "Mode": ["No Storage ", "Avoid PLB", "Cost Optimized", "Emission Optimized"],
         "before Temp.\n Reduction": [

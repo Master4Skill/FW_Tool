@@ -26,7 +26,7 @@ T_q_diffmax = input_data["T_q_diffmax"]
 ηBHKW_therm = input_data["ηBHKW_therm"]
 T_Wü_delta_r = input_data["T_Wü_delta_r"]
 T_Wü_delta_f = input_data["T_Wü_delta_f"]
-ρ_glycol_water = input_data["ρ_glycol_water"]
+# ρ_glycol_water = input_data["ρ_glycol_water"]
 
 
 Tvl_max_vor = input_data["Tvl_max_vor"]
