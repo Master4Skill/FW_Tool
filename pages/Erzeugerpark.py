@@ -161,9 +161,12 @@ for i in range(anzahl_erzeuger):
         )
         Partload = st.number_input(
             "Please enter the partload of the waste heat pump",
-            value=0.5,
+            value=0.4,
             key=f"Partload{i}",
         )
+        erzeugerpark_dict[f"heatpump_1{i}"] = {
+            "Partload": Partload,
+        }
 
         erzeuger = ep.heatpump_1(
             Volumenstrom_quelle,
@@ -183,6 +186,14 @@ for i in range(anzahl_erzeuger):
             value=0.45,
             key=f"Gütegrad{i}",
         )
+        Partload = st.number_input(
+            "Please enter the partload of the ambient heat pump",
+            value=0.2,
+            key=f"Partload{i}",
+        )
+        erzeugerpark_dict[f"heatpump_1{i}"] = {
+            "Partload": Partload,
+        }
         erzeuger = ep.heatpump_2(
             Leistung_max, Gütegrad, color=erzeuger_color, co2_emission_factor=0.468
         )
@@ -202,6 +213,14 @@ for i in range(anzahl_erzeuger):
             value=0.8,
             key=f"η_geo{i}",
         )
+        Partload = st.number_input(
+            "Please enter the partload of the geothermal heat unit",
+            value=0,
+            key=f"Partload{i}",
+        )
+        erzeugerpark_dict[f"geothermal{i}"] = {
+            "Partload": Partload,
+        }
         erzeuger = ep.geothermal(
             Leistung_max,
             Tgeo,
@@ -217,7 +236,14 @@ for i in range(anzahl_erzeuger):
             value=10000,
             key=f"solar_area{i}",
         )
-
+        Partload = st.number_input(
+            "Please enter the partload of the solarthermal collector",
+            value=0,
+            key=f"Partload{i}",
+        )
+        erzeugerpark_dict[f"solarthermal{i}"] = {
+            "Partload": Partload,
+        }
         expander = st.expander("Additional Solar Parameters")
         with expander:
             k_s_1 = st.number_input(
@@ -259,6 +285,14 @@ for i in range(anzahl_erzeuger):
         Leistung_max = st.number_input(
             "Please enter the maximum power (kW)", value=10000, key=f"Leistung_max{i}"
         )
+        Partload = st.number_input(
+            "Please enter the partload of the Peak Load Boiler",
+            value=0,
+            key=f"Partload{i}",
+        )
+        erzeugerpark_dict[f"PLB{i}"] = {
+            "Partload": Partload,
+        }
         erzeuger = ep.PLB(Leistung_max, color=erzeuger_color, co2_emission_factor=0.201)
 
     elif "CHP" in erzeuger_type:
@@ -267,6 +301,16 @@ for i in range(anzahl_erzeuger):
             value=5000,
             key=f"Leistung_max{i}",
         )
+
+        Partload = st.number_input(
+            "Please enter the partload of the CHP",
+            value=0.4,
+            key=f"Partload{i}",
+        )
+
+        erzeugerpark_dict[f"CHP{i}"] = {
+            "Partload": Partload,
+        }
         erzeuger = ep.CHP(Leistung_max, color=erzeuger_color, co2_emission_factor=0.201)
     else:
         st.write("Please select a valid generator type")
@@ -274,7 +318,7 @@ for i in range(anzahl_erzeuger):
     erzeugerpark.append(erzeuger)
 
 with open("erzeugerpark.pkl", "wb") as file:
-    pickle.dump(erzeugerpark, file)
+    pickle.dump(erzeugerpark_dict, file)
 
 
 names2 = [obj.__class__.__name__ for obj in erzeugerpark]

@@ -1,4 +1,83 @@
 """
+
+    data = {  # high temp, heat pump2, with emission mode
+        "Category": [
+            "Waste Heat",
+            "Heat Pump",
+            "Geothermal",
+            "Solar Thermal",
+            "PLB",
+            "Waste Heat",
+            "Heat Pump",
+            "Geothermal",
+            "Solar Thermal",
+            "PLB",
+            "Waste Heat",
+            "Heat Pump",
+            "Geothermal",
+            "Solar Thermal",
+            "PLB",
+            "Waste Heat",
+            "Heat Pump",
+            "Geothermal",
+            "Solar Thermal",
+            "PLB",
+        ],
+        "Value": [
+            5680334.8929,
+            10404008.4005,
+            11033953.0234,
+            2542281.6065,
+            4041472.4766,
+            5769388.4565,
+            10109952.1803,
+            11293256.5945,
+            3048652.0883,
+            3644837.609,
+            5807737.4171,
+            6799374.2404,
+            11295159.8072,
+            3031289.3835,
+            6945737.5658,
+            5769388.4565,
+            10109952.1803,
+            11293256.5945,
+            3048652.0883,
+            3644837.609,
+        ],
+        "Mode": [
+            "No storage",
+            "No storage",
+            "No storage",
+            "No storage",
+            "No storage",
+            "Avoid PLB",
+            "Avoid PLB",
+            "Avoid PLB",
+            "Avoid PLB",
+            "Avoid PLB",
+            "Optimized",
+            "Optimized",
+            "Optimized",
+            "Optimized",
+            "Optimized",
+            "Emission",
+            "Emission",
+            "Emission",
+            "Emission",
+            "Emission",
+        ],
+    }
+
+    df_results = pd.DataFrame(data)
+    # Call the function
+    plot_char_values_comparison(
+        df_results, "Heat Generation before the Temperature Reduction"
+    )
+    # Additional code for plotting (use as per your requirement)
+
+
+
 # Create a list of dictionaries for each instance of WP1
 # Define parameters for each instance
 p2_params = [{'K': 1000, 'PL': 0.2, 'name': 'WP1_1'}, {'K': 900, 'PL': 0.25, 'name': 'WP1_2'}, {'K': 800, 'PL': 0.3, 'name': 'WP1_3'}]
@@ -96,7 +175,7 @@ You might want to consider creating a more systematic way of generating these li
         lambda row: water_viscosity_CoolProp(row["T_vl_nach"], p_network), axis=1
     )
 
-    """
+"""
 
 import pandas as pd
 import matplotlib.pyplot as plt

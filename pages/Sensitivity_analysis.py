@@ -1218,13 +1218,6 @@ def producer_sensitivitysolar(
         lw=2,
         color="#EC9302",
     )
-    ax.plot(
-        T_range,
-        powerout_list,
-        label="Average Glykol-Water Temperature",
-        lw=2,
-        color="#3795D5",
-    )
 
     ax.invert_xaxis()
     ax.set_ylim(bottom=0)

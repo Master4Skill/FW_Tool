@@ -404,79 +404,8 @@ def plot_comparison2(df_melted, title, percentage_mode):
 
 
 if st.button("Submit"):
-    data = {
+    data = {  # high temp, heat pump2, without emission mode
         "Category": [
-            # "Stored Energy",
-            # "Stored Energy",
-            # "Stored Energy",
-            "Waste Heat",
-            "Waste Heat",
-            "Waste Heat",
-            "Heat Pump",
-            "Heat Pump",
-            "Heat Pump",
-            "Geothermal",
-            "Geothermal",
-            "Geothermal",
-            "Solar Thermal",
-            "Solar Thermal",
-            "Solar Thermal",
-            "PLB",
-            "PLB",
-            "PLB",
-        ],
-        "Value": [
-            # 0,
-            #  8362774,
-            #  8639260,
-            5680000,
-            5742986,
-            5806461,
-            8589566,
-            8446942,
-            6512327,
-            11049200,
-            11289913,
-            11260068,
-            2538100,
-            3067500,
-            3029031,
-            5845000,
-            5322816,
-            7266945,
-        ],
-        "Mode": [
-            #  "No storage",
-            # "Avoid PLB",
-            # "Optimized",
-            "No storage",
-            "Avoid PLB",
-            "Optimized",
-            "No storage",
-            "Avoid PLB",
-            "Optimized",
-            "No storage",
-            "Avoid PLB",
-            "Optimized",
-            "No storage",
-            "Avoid PLB",
-            "Optimized",
-            "No storage",
-            "Avoid PLB",
-            "Optimized",
-        ],
-    }
-    df_results = pd.DataFrame(data)
-    # Call the function
-    # plot_char_values_comparison(df_results, "Heat Generation before the Temperature Reduction Cost Optimized")
-
-    data = {  # high temp, heat pump2, with emission mode
-        "Category": [
-            "Waste Heat",
-            "Heat Pump",
-            "Geothermal",
-            "Solar Thermal",
-            "PLB",
             "Waste Heat",
             "Heat Pump",
             "Geothermal",
@@ -494,26 +423,23 @@ if st.button("Submit"):
             "PLB",
         ],
         "Value": [
-            5680334.8929,
-            10404008.4005,
-            11033953.0234,
-            2542281.6065,
-            4041472.4766,
-            5769388.4565,
-            10109952.1803,
-            11293256.5945,
-            3048652.0883,
-            3644837.609,
-            5807737.4171,
-            6799374.2404,
-            11295159.8072,
-            3031289.3835,
-            6945737.5658,
-            5769388.4565,
-            10109952.1803,
-            11293256.5945,
-            3048652.0883,
-            3644837.609,
+            4963599.2947,
+            12413761.7175,
+            12329891.6835,
+            3774551.9972,
+            8252491.5149,
+            ##
+            5871072.9971,
+            12048478.6253,
+            12671293.6309,
+            5142874.9064,
+            6899136.1919,
+            ##
+            5875842.379,
+            7568331.941,
+            12615419.0339,
+            5150420.9785,
+            11231372.2946,
         ],
         "Mode": [
             "No storage",
@@ -531,20 +457,13 @@ if st.button("Submit"):
             "Optimized",
             "Optimized",
             "Optimized",
-            "Emission",
-            "Emission",
-            "Emission",
-            "Emission",
-            "Emission",
         ],
     }
-
     df_results = pd.DataFrame(data)
     # Call the function
     plot_char_values_comparison(
         df_results, "Heat Generation before the Temperature Reduction"
     )
-    # Additional code for plotting (use as per your requirement)
 
     data = {  # high temp, heat pump2, without emission mode
         "Category": [
@@ -565,21 +484,23 @@ if st.button("Submit"):
             "PLB",
         ],
         "Value": [
-            5680334.8929,
-            10404008.4005,
-            11033953.0234,
-            2542281.6065,
-            4041472.4766,
-            5769388.4565,
-            10109952.1803,
-            11293256.5945,
-            3048652.0883,
-            3644837.609,
-            5807737.4171,
-            6799374.2404,
-            11295159.8072,
-            3031289.3835,
-            6945737.5658,
+            7677750.8197,
+            10428000.917,
+            11220187.8331,
+            3049222.7196,
+            7914887.3317,
+            #
+            7763151.1286,
+            10905040.7905,
+            12166872.1073,
+            4869593.1039,
+            5428433.161,
+            #
+            7771542.651,
+            9277068.643,
+            12153896.7949,
+            4872591.8097,
+            6929277.723,
         ],
         "Mode": [
             "No storage",
@@ -600,333 +521,12 @@ if st.button("Submit"):
         ],
     }
 
-    df_results = pd.DataFrame(data)
-
-    # Call the function
-    plot_char_values_comparison(
-        df_results, "Heat Generation before the Temperature Reduction"
-    )
-
-    # Example DataFrame
-    data = {
-        "Category": [
-            "Waste Heat",
-            "Heat Pump",
-            "Geothermal",
-            "Solar Thermal",
-            "PLB",
-            "Waste Heat",
-            "Heat Pump",
-            "Geothermal",
-            "Solar Thermal",
-            "PLB",
-            "Waste Heat",
-            "Heat Pump",
-            "Geothermal",
-            "Solar Thermal",
-            "PLB",
-        ],
-        "Value": [
-            6978120.3423,
-            8627075.946,
-            10811127.0739,
-            2909733.5161,
-            4375993.5217,
-            7240996.1054,
-            9297714.2773,
-            11005738.3309,
-            3283257.2996,
-            3024014.9014,
-            7247829.2837,
-            8275386.1462,
-            11010023.5804,
-            3275001.9973,
-            4047421.9206,
-        ],
-        "Mode": [
-            "No storage",
-            "No storage",
-            "No storage",
-            "No storage",
-            "No storage",
-            "Avoid PLB",
-            "Avoid PLB",
-            "Avoid PLB",
-            "Avoid PLB",
-            "Avoid PLB",
-            "Optimized",
-            "Optimized",
-            "Optimized",
-            "Optimized",
-            "Optimized",
-        ],
-    }
     df_results = pd.DataFrame(data)
 
     # Call the function
     plot_char_values_comparison(
         df_results, "Heat Generation after the Temperature Reduction"
     )
-    # Example DataFrame
-    data = {
-        "Category": [
-            "Waste Heat",
-            "Heat Pump",
-            "Geothermal",
-            "Solar Thermal",
-            "PLB",
-            "Waste Heat",
-            "Heat Pump",
-            "Geothermal",
-            "Solar Thermal",
-            "PLB",
-            "Waste Heat",
-            "Heat Pump",
-            "Geothermal",
-            "Solar Thermal",
-            "PLB",
-            "Waste Heat",
-            "Heat Pump",
-            "Geothermal",
-            "Solar Thermal",
-            "PLB",
-        ],
-        "Value": [
-            6978120.3423,
-            8627075.946,
-            10811127.0739,
-            2909733.5161,
-            4375993.5217,
-            7240996.1054,
-            9297714.2773,
-            11005738.3309,
-            3283257.2996,
-            3024014.9014,
-            7247829.2837,
-            8275386.1462,
-            11010023.5804,
-            3275001.9973,
-            4047421.9206,
-            7221179.5228,
-            9264088.2893,
-            11007367.8469,
-            3302641.2544,
-            3048631.0693,
-        ],
-        "Mode": [
-            "No storage",
-            "No storage",
-            "No storage",
-            "No storage",
-            "No storage",
-            "Avoid PLB",
-            "Avoid PLB",
-            "Avoid PLB",
-            "Avoid PLB",
-            "Avoid PLB",
-            "Optimized",
-            "Optimized",
-            "Optimized",
-            "Optimized",
-            "Optimized",
-            "Emission",
-            "Emission",
-            "Emission",
-            "Emission",
-            "Emission",
-        ],
-    }
-    df_results = pd.DataFrame(data)
-
-    # Call the function
-    plot_char_values_comparison(
-        df_results, "Heat Generation after the Temperature Reduction"
-    )
-
-    import pandas as pd
-
-    # Example data from "before Temperature reduction" table
-    data_before = {
-        "Category": [
-            "Stored Energy",
-            "Waste Heat",
-            "Heat Pump",
-            "Geothermal",
-            "Solar Thermal",
-            "Peak Load Boiler",
-        ]
-        * 3,  # Each category repeated 3 times for 3 modes
-        "Value": [
-            0,
-            5680334,
-            8532500,
-            11079560,
-            2544056,
-            5865598,
-            8327406,
-            5787330,
-            8430616,
-            11289658,
-            3026637,
-            5334356,
-            8327406,
-            5787330,
-            8430616,
-            11289658,
-            3026637,
-            5334356,
-        ],
-        "Mode": [
-            "No Storage",
-            "No Storage",
-            "No Storage",
-            "No Storage",
-            "No Storage",
-            "No Storage",
-            "PLB avoid",
-            "PLB avoid",
-            "PLB avoid",
-            "PLB avoid",
-            "PLB avoid",
-            "PLB avoid",
-            "Optimized",
-            "Optimized",
-            "Optimized",
-            "Optimized",
-            "Optimized",
-            "Optimized",
-        ],
-    }
-
-    # Convert to DataFrame
-    df_before = pd.DataFrame(data_before)
-
-    # Example data from "after Temperature reduction" table
-    data_after = {
-        "Category": [
-            "Stored Energy",
-            "Waste Heat",
-            "Heat Pump",
-            "Geothermal",
-            "Solar Thermal",
-            "Peak Load Boiler",
-        ]
-        * 3,
-        "Value": [
-            0,
-            5680334,
-            8535240,
-            11099680,
-            2528924,
-            5857871,
-            8504208,
-            5787330,
-            8438501,
-            11300393,
-            3021597,
-            5324312,
-            8504208,
-            5787330,
-            8438501,
-            11300393,
-            3021597,
-            5324312,
-        ],
-        "Mode": [
-            "No Storage",
-            "No Storage",
-            "No Storage",
-            "No Storage",
-            "No Storage",
-            "No Storage",
-            "PLB avoid",
-            "PLB avoid",
-            "PLB avoid",
-            "PLB avoid",
-            "PLB avoid",
-            "PLB avoid",
-            "Optimized",
-            "Optimized",
-            "Optimized",
-            "Optimized",
-            "Optimized",
-            "Optimized",
-        ],
-    }
-
-    # Convert to DataFrame
-    df_after = pd.DataFrame(data_after)
-
-    # Assuming plot_char_values_comparison is defined somewhere, you would call:
-    # plot_char_values_comparison(df_before, "Heat Generation before the Temperature Reduction Emission Optimized")
-    # plot_char_values_comparison(df_after, "Heat Generation after the Temperature Reduction Emission Optimized")
-
-    data5 = {  # only costs heat pump 1
-        "Mode": ["No Storage ", "Avoid PLB", "Cost Optimized", "Emission Optimized"],
-        "before Temp.\n Reduction": [
-            19570562.35,  # No Storage
-            19072972.41,  # PLB Avoid
-            18734300.17,  # Optimized
-            19068023.35,  # emission Optimized
-        ],
-        "after Temp.\n Reduction": [
-            15137308.55,  # No Storage
-            14608701.64,  # PLB Avoid
-            14554351.63,  # 13837200.18,  # Optimized
-            14608442.16,  # emission Optimized
-        ],
-    }
-    data4 = {  # only emissions heat pump 1
-        "Mode": ["No Storage ", "Avoid PLB", "Cost Optimized", "Emission Optimized"],
-        "before Temp.\n Reduction": [
-            4263213,  # No Storage
-            4136768,  # PLB Avoid
-            4518870,  # Optimized
-            4136339,  # emission Optimized
-        ],
-        "after Temp.\n Reduction": [
-            3323432,  # No Storage
-            3193394,  # PLB Avoid
-            3465210,  # Optimized
-            3193247,  # emission Optimized
-        ],
-    }
-
-    data51 = {  # only costs heat pump 2
-        "Mode": [
-            "No Storage ",
-            "Avoid PLB",
-            "Emission Optimized",
-            "Cost Optimized",
-        ],
-        "before Temp.\n Reduction": [
-            2412533.79,  # No Storage
-            2350658.56,  # PLB Avoid  2350777.91
-            2329541.37,  # emission Optimized 2329542.21
-            2268594.59,  # Optimized
-        ],
-        "after Temp.\n Reduction": [
-            1723795.01,  # No Storage
-            1666798.07,  # PLB Avoid
-            1666063.89,  # emission Optimized
-            1653304.62,  # Optimized
-        ],
-    }
-    data41 = {  # only emissions heat pump 2
-        "Mode": ["No Storage ", "Avoid PLB", "Cost Optimized", "Emission Optimized"],
-        "before Temp.\n Reduction": [
-            4634.58,  # No Storage
-            4504.04,  # PLB Avoid
-            4523.51,  # Optimized
-            4494.04,  # emission Optimized
-        ],
-        "after Temp.\n Reduction": [
-            3365.81,  # No Storage
-            3188.82,  # PLB Avoid
-            3238.38,  # Optimized
-            3188.33,  # emission Optimized
-        ],
-    }
 
     data5 = {  # only costs heat pump 2
         "Mode": [
@@ -936,32 +536,32 @@ if st.button("Submit"):
             "Emission Optimized",
         ],
         "before Temp.\n Reduction": [
-            2412533.79,  # No Storage
-            2350777.56,  # PLB Avoid  2350777.91
-            2268594.59,  # Optimized
-            2329541.37,  # emission Optimized 2329542.21
+            3257902.14,  # No Storage
+            3070790.48,  # PLB Avoid
+            2973137.75,  # Optimized
+            3074885.77,  # emission Optimized
         ],
         "after Temp.\n Reduction": [
-            1723795.01,  # No Storage
-            1666798.07,  # PLB Avoid
-            1666063.89,  # emission Optimized
-            1653304.62,  # Optimized
+            2353617.88,  # No Storage
+            2186570.10,  # PLB Avoid
+            2160435.67,  # Optimized
+            2176467.23,  # emission Optimized
         ],
     }
 
     data4 = {  # only emissions heat pump 2
         "Mode": ["No Storage ", "Avoid PLB", "Cost Optimized", "Emission Optimized"],
         "before Temp.\n Reduction": [
-            4634.58,  # No Storage
-            4504.04,  # PLB Avoid
-            4523.51,  # Optimized
-            4493.98,  # emission Optimized
+            6278.38,  # No Storage
+            5854.03,  # PLB Avoid
+            5911.05,  # Optimized
+            5870.00,  # emission Optimized
         ],
         "after Temp.\n Reduction": [
-            3365.81,  # No Storage
-            3188.82,  # PLB Avoid
-            3238.38,  # Optimized
-            3188.33,  # emission Optimized
+            4593.68,  # No Storage
+            4163.98,  # PLB Avoid
+            4214.61,  # Optimized
+            4150.94,  # emission Optimized
         ],
     }
 
@@ -989,18 +589,158 @@ if st.button("Submit"):
         df_melted4, "Heat Generation Emissions", "Emissions [t CO₂]", "global", 1
     )
 
-    st.write("## old results")
-    plot_comparison(
-        df_melted5,
-        "Heat Generation Costs",
-        "Costs [tsd. €]",
-        "global",
-        1000,
+    data = {  # high temp, heat pump2, without emission mode
+        "Category": [
+            "Waste Heat",
+            "Heat Pump",
+            "Geothermal",
+            "Solar Thermal",
+            "PLB",
+            "Waste Heat",
+            "Heat Pump",
+            "Geothermal",
+            "Solar Thermal",
+            "PLB",
+            "Waste Heat",
+            "Heat Pump",
+            "Geothermal",
+            "Solar Thermal",
+            "PLB",
+            "Waste Heat",
+            "Heat Pump",
+            "Geothermal",
+            "Solar Thermal",
+            "PLB",
+        ],
+        "Value": [
+            4963599.2947,
+            12413761.7175,
+            12329891.6835,
+            3774551.9972,
+            8252491.5149,
+            ##
+            5871072.9971,
+            12048478.6253,
+            12671293.6309,
+            5142874.9064,
+            6899136.1919,
+            ##
+            5875842.379,
+            7568331.941,
+            12615419.0339,
+            5150420.9785,
+            11231372.2946,
+            #
+            5641471.5735,
+            9291432.3406,
+            12670368.5984,
+            5393401.8838,
+            9424985.8021,
+        ],
+        "Mode": [
+            "No storage",
+            "No storage",
+            "No storage",
+            "No storage",
+            "No storage",
+            "Avoid PLB",
+            "Avoid PLB",
+            "Avoid PLB",
+            "Avoid PLB",
+            "Avoid PLB",
+            "Optimized",
+            "Optimized",
+            "Optimized",
+            "Optimized",
+            "Optimized",
+            "Emission Optimized",
+            "Emission Optimized",
+            "Emission Optimized",
+            "Emission Optimized",
+            "Emission Optimized",
+        ],
+    }
+    df_results = pd.DataFrame(data)
+    # Call the function
+    plot_char_values_comparison(
+        df_results, "Heat Generation before the Temperature Reduction"
     )
-    plot_comparison(
-        df_melted4,
-        "Heat Generation Emissions",
-        "Emissions [t CO₂]",
-        "global",
-        1,
+
+    data = {  # high temp, heat pump2, without emission mode
+        "Category": [
+            "Waste Heat",
+            "Heat Pump",
+            "Geothermal",
+            "Solar Thermal",
+            "PLB",
+            "Waste Heat",
+            "Heat Pump",
+            "Geothermal",
+            "Solar Thermal",
+            "PLB",
+            "Waste Heat",
+            "Heat Pump",
+            "Geothermal",
+            "Solar Thermal",
+            "PLB",
+            "Waste Heat",
+            "Heat Pump",
+            "Geothermal",
+            "Solar Thermal",
+            "PLB",
+        ],
+        "Value": [
+            7677750.8197,
+            10428000.917,
+            11220187.8331,
+            3049222.7196,
+            7914887.3317,
+            #
+            7763151.1286,
+            10905040.7905,
+            12166872.1073,
+            4869593.1039,
+            5428433.161,
+            #
+            7771542.651,
+            9277068.643,
+            12153896.7949,
+            4872591.8097,
+            6929277.723,
+            #
+            7367567.8796,
+            10585221.699,
+            12166441.309,
+            5274663.5298,
+            5618558.8653,
+        ],
+        "Mode": [
+            "No storage",
+            "No storage",
+            "No storage",
+            "No storage",
+            "No storage",
+            "Avoid PLB",
+            "Avoid PLB",
+            "Avoid PLB",
+            "Avoid PLB",
+            "Avoid PLB",
+            "Optimized",
+            "Optimized",
+            "Optimized",
+            "Optimized",
+            "Optimized",
+            "Emission Optimized",
+            "Emission Optimized",
+            "Emission Optimized",
+            "Emission Optimized",
+            "Emission Optimized",
+        ],
+    }
+
+    df_results = pd.DataFrame(data)
+
+    # Call the function
+    plot_char_values_comparison(
+        df_results, "Heat Generation after the Temperature Reduction"
     )

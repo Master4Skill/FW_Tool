@@ -80,7 +80,7 @@ with expander:
         "Pressure Losses Heat Pump (%)", value=0.05
     )
     input_data["ηSpitzenkessel"] = st.number_input(
-        "Peak Load Boiler Efficiency (%)", value=0.92
+        "Peak Load Boiler Efficiency (%)", value=0.8
     )
     input_data["ηBHKW_el"] = st.number_input(
         "Electrical Efficiency CHP (%)", value=0.35
