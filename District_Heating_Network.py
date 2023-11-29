@@ -12,12 +12,7 @@ from scipy.interpolate import interp1d
 import logging
 
 
-# Load the data from the json file
-with open("results/data.json", "r") as f:
-    input_data = json.load(f)
-
-
-st.set_page_config(page_title="Verteilnetz", page_icon=":house:")
+st.set_page_config(page_title="District Heating Network", page_icon=":house:")
 
 st.markdown("# Distributed Heating Network Simulation")
 
@@ -39,11 +34,16 @@ with Image.open("Logo-dunkelblau-1000-px.webp") as img:
 # Now use this resized image as the logo
 add_logo("resized_image.png")
 
-# Load the CSV data
+
+# Load the variables from the json file
+with open("results/variables.json", "r") as f:
+    input_data = json.load(f)
+
+# Load the Netz-CSV data, includes, ground and ambient temperature and the hourly consumer load
 df_input = pd.read_csv("Input_Netz.csv", delimiter=",", decimal=",")
 df_input.columns = df_input.columns.str.strip()
-# st.write(df_input.columns)
-# Convert 'Zeit' to numeric (just to be safe)
+
+# Convert 'Zeit' to numeric
 df_input["Zeit"] = pd.to_numeric(df_input["Zeit"], errors="coerce")
 
 df_input["Lastgang"] = (
@@ -79,16 +79,16 @@ input_data["Trl_nach"] = st.number_input(
 )
 
 
-with open("results/data.json", "w") as f:
+with open("results/variables.json", "w") as f:
     json.dump(input_data, f)
 
 if st.button("Save"):
-    with open("results/data.json", "w") as f:
+    with open("results/variables.json", "w") as f:
         json.dump(input_data, f)
     st.sidebar.success("Data saved successfully.")
 
 
-# Assuming these constants already exist, can easily become Userinputs
+# Loading the variables, previously imported as variables.json into the file
 λD = input_data["λD"]
 λB = input_data["λB"]
 rM = input_data["rM"]
@@ -132,7 +132,7 @@ else:
     # Calculate the 24-hour moving average of 'Lufttemp' and add it to df_results
     df_results["Air_average"] = df_input["Lufttemp"].rolling(window=24).mean()
 
-    st.dataframe(df_results)
+    # st.dataframe(df_results)
 
     def calculate_T_vl_vor(air_average):
         if air_average < 0:
@@ -166,7 +166,7 @@ else:
         calculate_T_vl_nach
     )
     # df_results["T_vl_nach"] = df_results["Air_average"].apply(calculate_T_vl_nach)
-    st.dataframe(df_results)
+    # st.dataframe(df_results)
 
     # Calculate Netzverluste
     def calc_verlust(T_vl, T_b, T_rl):
@@ -306,7 +306,7 @@ else:
     mpl.rcParams["font.size"] = 14
 
     # display the result dataframe (for development puposes)
-    st.dataframe(df_results)
+    # st.dataframe(df_results)
     df_results.to_json("results/df_results.json")
 
     # Create the plot of the different Temperatures
@@ -514,9 +514,10 @@ else:
         "Pump Performance before and after Temperature Reduction",
     )
 
-    st.dataframe(df_results)
+    # st.dataframe(df_results)
 
     def print_stats(x):
+        # Funktion do print the stats of a column, mainly for development and troubleshooting purposes
         flowrate = df_results[x].min()
         st.write(f"min:{x, flowrate}")
         flowrate = df_results[x].max()
@@ -527,14 +528,14 @@ else:
         st.write(f"median:{x, flowrate}")
         return
 
-    print_stats("Volumenstrom_vor")
-    print_stats("Volumenstrom_nach")
+    # print_stats("Volumenstrom_vor")
+    # print_stats("Volumenstrom_nach")
 
-    print_stats("Strömungsgeschwindigkeit_vor")
-    print_stats("Strömungsgeschwindigkeit_nach")
+    # print_stats("Strömungsgeschwindigkeit_vor")
+    # print_stats("Strömungsgeschwindigkeit_nach")
 
-    print_stats("Pumpleistung_vor")
-    print_stats("Pumpleistung_nach")
+    # print_stats("Pumpleistung_vor")
+    # print_stats("Pumpleistung_nach")
 
     ##Bargraph to show the part of the Wärmelast that is due to losses in the Netz
     # Calculate the sums
@@ -562,7 +563,7 @@ else:
         }
     )
 
-    st.dataframe(df_sum)
+    # st.dataframe(df_sum)
 
     # Create the bar plot
     fig, ax = plt.subplots()
@@ -660,4 +661,4 @@ else:
     st.pyplot(fig)
 
     placeholder.write("Calculation finished")
-    st.sidebar.success("Simulation erfolgreich")
+    st.sidebar.success("Simulation successfull")

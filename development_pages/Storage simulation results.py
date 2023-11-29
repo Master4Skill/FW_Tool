@@ -21,7 +21,7 @@ import math
 logging.getLogger("matplotlib.font_manager").disabled = True
 
 
-with open("results/data.json", "r") as f:
+with open("results/variables.json", "r") as f:
     input_data = json.load(f)
 
 

@@ -19,13 +19,13 @@ from plotting_functions import (
 
 add_logo("resized_image.png")
 
-st.header("Finale Ergebnisse")
+st.header("Final Results")
 
-st.info("  Please run the simulations first", icon="⚠️")
+st.info("  Please run the individual simulations first", icon="⚠️")
 
 if st.button("Show the Results"):
     # Load the data from the json file
-    with open("results/data.json", "r") as f:
+    with open("results/variables.json", "r") as f:
         input_data = json.load(f)
 
     # Assuming these constants already exist, can easily become Userinputs
@@ -324,15 +324,29 @@ if st.button("Show the Results"):
     for col in sorted_df.columns:
         sorted_df[col] = sorted_df[col].sort_values(ascending=False).values
 
+    # my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names)}
+
     with st.container():
-        st.header("Erzeugungsgang")
-        st.subheader("vor")
+        st.header("Generation load profile")
+        st.subheader("Before Temperature Reduction")
         sorted_df_vor = plot_actual_production(
-            df_input, actual_production_df_vor, color_FFE, "Erzeugungsgang vor"
+            df_results,
+            "Wärmelast_vor",
+            actual_production_df_vor,
+            color_FFE,
+            "Generation load curve berfore",
+            None,
+            0,
         )
-        st.subheader("nach")
+        st.subheader("After Temperature Reduction")
         sorted_df_nach = plot_actual_production(
-            df_input, actual_production_df_nach, color_FFE, "Erzeugungsgang nach"
+            df_results,
+            "Wärmelast_nach",
+            actual_production_df_nach,
+            color_FFE,
+            "Generation load curve after",
+            None,
+            0,
         )
 
     # Create the second container

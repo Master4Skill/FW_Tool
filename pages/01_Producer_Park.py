@@ -16,12 +16,10 @@ from plotting_functions import (
 from streamlit_extras.stoggle import stoggle
 import pickle
 
-with open("results/data.json", "r") as f:
+with open("results/variables.json", "r") as f:
     input_data = json.load(f)
 
-
 df_results = pd.read_json("results/df_results.json")
-
 
 λD = input_data["λD"]
 λB = input_data["λB"]
@@ -67,16 +65,16 @@ color_dict = {
 
 
 st.set_page_config(
-    page_title="Erzeugerpark",
+    page_title="Producer Park",
     page_icon="🏭",
 )
 add_logo("resized_image.png")
 
-st.sidebar.header("Temperature Reduction in the Heat Generation Park")
+st.sidebar.header("Temperature Reduction in the Producer Park")
 
-st.sidebar.info("Select the desired generators and their parameters")
+st.sidebar.info("Select the producers and their parameters")
 
-st.markdown("# Heat Generation Park Simulation")
+st.markdown("# Producer Park Simulation")
 
 df_input = pd.read_csv("Input_Netz.csv", delimiter=",", decimal=",")
 df_input.columns = df_input.columns.str.strip()
@@ -125,7 +123,7 @@ for i in range(anzahl_erzeuger):
 
     erzeuger_color = color_dict[erzeuger_type]
 
-    if "waste heat" in erzeuger_type:
+    if "♨️ waste heat" in erzeuger_type:
         Volumenstrom_quelle = st.number_input(
             "Please enter the volume flow rate of the source ( )",
             value=10,
@@ -136,9 +134,15 @@ for i in range(anzahl_erzeuger):
             value=120,
             key=f"Quelltemperatur{i}",
         )
+        Partload = st.number_input(
+            "Please enter the partload of the waste heat unit",
+            value=0,
+            key=f"Partload{i}",
+        )
         erzeuger = ep.waste_heat(
             Volumenstrom_quelle,
             Abwärmetemperatur,
+            Partload,
             color=erzeuger_color,
             co2_emission_factor=0,
         )
@@ -164,9 +168,6 @@ for i in range(anzahl_erzeuger):
             value=0.4,
             key=f"Partload{i}",
         )
-        erzeugerpark_dict[f"heatpump_1{i}"] = {
-            "Partload": Partload,
-        }
 
         erzeuger = ep.heatpump_1(
             Volumenstrom_quelle,
@@ -191,11 +192,13 @@ for i in range(anzahl_erzeuger):
             value=0.2,
             key=f"Partload{i}",
         )
-        erzeugerpark_dict[f"heatpump_1{i}"] = {
-            "Partload": Partload,
-        }
+
         erzeuger = ep.heatpump_2(
-            Leistung_max, Gütegrad, color=erzeuger_color, co2_emission_factor=0.468
+            Leistung_max,
+            Gütegrad,
+            Partload,
+            color=erzeuger_color,
+            co2_emission_factor=0.468,
         )
 
     elif "geothermal" in erzeuger_type:
@@ -215,17 +218,15 @@ for i in range(anzahl_erzeuger):
         )
         Partload = st.number_input(
             "Please enter the partload of the geothermal heat unit",
-            value=0,
+            value=0.3,
             key=f"Partload{i}",
         )
-        erzeugerpark_dict[f"geothermal{i}"] = {
-            "Partload": Partload,
-        }
         erzeuger = ep.geothermal(
             Leistung_max,
             Tgeo,
             h_förder,
             η_geo,
+            Partload,
             color=erzeuger_color,
             co2_emission_factor=0.468,
         )
@@ -241,9 +242,7 @@ for i in range(anzahl_erzeuger):
             value=0,
             key=f"Partload{i}",
         )
-        erzeugerpark_dict[f"solarthermal{i}"] = {
-            "Partload": Partload,
-        }
+
         expander = st.expander("Additional Solar Parameters")
         with expander:
             k_s_1 = st.number_input(
@@ -277,6 +276,7 @@ for i in range(anzahl_erzeuger):
             k_s_2 / 1000,
             α,
             τ,
+            Partload,
             color=erzeuger_color,
             co2_emission_factor=0,
         )
@@ -287,13 +287,13 @@ for i in range(anzahl_erzeuger):
         )
         Partload = st.number_input(
             "Please enter the partload of the Peak Load Boiler",
-            value=0,
+            value=0.0001,
             key=f"Partload{i}",
         )
-        erzeugerpark_dict[f"PLB{i}"] = {
-            "Partload": Partload,
-        }
-        erzeuger = ep.PLB(Leistung_max, color=erzeuger_color, co2_emission_factor=0.201)
+
+        erzeuger = ep.PLB(
+            Leistung_max, Partload, color=erzeuger_color, co2_emission_factor=0.201
+        )
 
     elif "CHP" in erzeuger_type:
         Leistung_max = st.number_input(
@@ -304,14 +304,13 @@ for i in range(anzahl_erzeuger):
 
         Partload = st.number_input(
             "Please enter the partload of the CHP",
-            value=0.4,
+            value=0.001,
             key=f"Partload{i}",
         )
 
-        erzeugerpark_dict[f"CHP{i}"] = {
-            "Partload": Partload,
-        }
-        erzeuger = ep.CHP(Leistung_max, color=erzeuger_color, co2_emission_factor=0.201)
+        erzeuger = ep.CHP(
+            Leistung_max, Partload, color=erzeuger_color, co2_emission_factor=0.201
+        )
     else:
         st.write("Please select a valid generator type")
 
@@ -322,6 +321,9 @@ with open("erzeugerpark.pkl", "wb") as file:
 
 
 names2 = [obj.__class__.__name__ for obj in erzeugerpark]
+teillasten = [obj.Partload for obj in erzeugerpark if hasattr(obj, "Partload")]
+st.write(teillasten)
+
 
 # my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names2)}
 
@@ -513,8 +515,8 @@ if st.button("Calculate"):
 
     data = {
         "Metric": [
-            "Total Heat Production before Temperature Reduction",
-            "Total Heat Production after Temperature Reduction",
+            "Total Heat Generation before Temperature Reduction",
+            "Total Heat Generation after Temperature Reduction",
             "Total Power Consumption before Temperature Reduction",
             "Total Power Consumption after Temperature Reduction",
             "Total CO2 Emission before Temperature Reduction",
@@ -585,11 +587,14 @@ if st.button("Calculate"):
     for col in sorted_df.columns:
         sorted_df[col] = sorted_df[col].sort_values(ascending=False).values
 
+    st.write(my_dict)
+
     with st.container():
         st.header("Generation load profile")
         st.subheader("Before Temperature Reduction")
         sorted_df_vor = plot_actual_production(
-            df_input,
+            df_results,
+            "Wärmelast_vor",
             actual_production_df_vor,
             color_FFE,
             "Generation load curve berfore",
@@ -598,7 +603,8 @@ if st.button("Calculate"):
         )
         st.subheader("After Temperature Reduction")
         sorted_df_nach = plot_actual_production(
-            df_input,
+            df_results,
+            "Wärmelast_nach",
             actual_production_df_nach,
             color_FFE,
             "Generation load curve after",
@@ -611,7 +617,8 @@ if st.button("Calculate"):
         st.header("Annual duration line")
         st.subheader("Before Temperature Reduction")
         plot_df_vor = plot_sorted_production(
-            df_input,
+            df_results,
+            "Wärmelast_vor",
             sorted_df_vor,
             actual_production_df_vor,
             color_FFE,
@@ -620,7 +627,8 @@ if st.button("Calculate"):
         )
         st.subheader("After Temperature Reduction")
         plot_df_nach = plot_sorted_production(
-            df_input,
+            df_results,
+            "Wärmelast_nach",
             sorted_df_nach,
             actual_production_df_nach,
             color_FFE,
@@ -628,7 +636,7 @@ if st.button("Calculate"):
             my_dict,
         )
 
-    plot_power_usage(Power_df_vor, Power_df_nach, color_FFE)
+    plot_power_usage(Power_df_vor, Power_df_nach, my_dict, color_FFE)
 
     plot_total_change(
         actual_production_df_vor,
@@ -680,8 +688,21 @@ if st.button("Calculate"):
     erzeuger_df_vor_json = erzeuger_df_vor.to_json()
     erzeuger_df_nach.fillna(0, inplace=True)
     erzeuger_df_nach_json = erzeuger_df_nach.to_json()
-    data1 = {"names": names2, "erzeuger_df_vor": erzeuger_df_vor_json}
-    data2 = {"names": names2, "erzeuger_df_nach": erzeuger_df_nach_json}
+
+    # Assuming partloads is a dictionary with producer names as keys and partload numbers as values
+    # Example: partloads = {"Erzeuger_1_vor": 100, "Erzeuger_2_vor": 200, ...}
+
+    data1 = {
+        "names": names2,
+        "partloads": teillasten,  # Moved partloads here
+        "erzeuger_df_vor": erzeuger_df_vor_json,
+    }
+
+    data2 = {
+        "names": names2,
+        "partloads": teillasten,  # Moved partloads here
+        "erzeuger_df_nach": erzeuger_df_nach_json,
+    }
 
     with open("erzeuger_df_vor.json", "w") as f:
         json.dump(data1, f)

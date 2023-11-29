@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 
-with open("results/data.json", "r") as f:
+with open("results/variables.json", "r") as f:
     input_data = json.load(f)
 
 
@@ -77,6 +77,7 @@ class waste_heat(Erzeuger):
         self,
         Volumenstrom_quelle,
         Abwärmetemperatur,
+        Partload,
         color="#639729",
         co2_emission_factor=0,
     ):  # Color for Waermepumpe1
@@ -84,6 +85,7 @@ class waste_heat(Erzeuger):
         self.Volumenstrom_quelle = Volumenstrom_quelle
         self.Abwärmetemperatur = Abwärmetemperatur
         self.co2_emission_factor = co2_emission_factor
+        self.Partload = Partload
 
     def calc_output(self, hour, Tvl, Trl):
         return (
@@ -113,6 +115,7 @@ class heatpump_1(Erzeuger):
         self.T_q = T_q
         self.Gütegrad = Gütegrad
         self.co2_emission_factor = co2_emission_factor
+        self.Partload = Partload
 
     def calc_output(self, hour, Tvl, Trl):
         Q_wp_q = (
@@ -135,12 +138,18 @@ class heatpump_1(Erzeuger):
 
 class heatpump_2(Erzeuger):
     def __init__(
-        self, Leistung_max, Gütegrad, color="#F7D507", co2_emission_factor=0.468
+        self,
+        Leistung_max,
+        Gütegrad,
+        Partload,
+        color="#F7D507",
+        co2_emission_factor=0.468,
     ):  # Color for Waermepumpe2
         super().__init__(color)
         self.Leistung_max = Leistung_max
         self.Gütegrad = Gütegrad
         self.co2_emission_factor = co2_emission_factor
+        self.Partload = Partload
 
     def calc_output(self, hour, Tvl, Trl):
         return self.Leistung_max
@@ -166,6 +175,7 @@ class geothermal(Erzeuger):
         Tgeo,
         h_förder,
         η_geo,
+        Partload,
         color="#DD2525",
         co2_emission_factor=0.468,
     ):  # Color for Geothermie
@@ -175,6 +185,7 @@ class geothermal(Erzeuger):
         self.h_förder = h_förder
         self.η_geo = η_geo
         self.co2_emission_factor = co2_emission_factor
+        self.Partload = Partload
 
     def calc_COP(self, Tvl, Trl, T_q):
         V = 1 / (self.Tgeo - (Trl + T_Wü_delta_r) * ρ_water * cp_water)
@@ -201,12 +212,14 @@ class solarthermal(Erzeuger):
         k_s_2,
         α,
         τ,
+        Partload,
         color="#F7D507",
         co2_emission_factor=0.468,
     ):  # Color for Solarthermie
         super().__init__(color)
         self.solar_area = solar_area
         self.co2_emission_factor = 0
+        self.Partload = Partload
         self.k_s_1 = k_s_1
         self.k_s_2 = k_s_2
         self.α = α
@@ -234,10 +247,11 @@ class solarthermal(Erzeuger):
 
 class PLB(Erzeuger):
     def __init__(
-        self, Leistung_max, color="#EC9302", co2_emission_factor=0.201
+        self, Leistung_max, Partload, color="#EC9302", co2_emission_factor=0.201
     ):  # Color for Spitzenlastkessel
         super().__init__(color)
         self.Leistung_max = Leistung_max
+        self.Partload = Partload
         self.co2_emission_factor = co2_emission_factor
 
     def calc_output(self, hour, Tvl, Trl):
@@ -250,10 +264,11 @@ class PLB(Erzeuger):
 
 class CHP(Erzeuger):
     def __init__(
-        self, Leistung_max, color="#639729", co2_emission_factor=0.201
+        self, Leistung_max, Partload, color="#639729", co2_emission_factor=0.201
     ):  # Color for BHKW
         super().__init__(color)
         self.Leistung_max = Leistung_max
+        self.Partload = Partload
         self.co2_emission_factor = co2_emission_factor
 
     def calc_output(self, hour, Tvl, Trl):

@@ -24,7 +24,7 @@ import pickle
 logging.getLogger("matplotlib.font_manager").disabled = True
 
 
-with open("results/data.json", "r") as f:
+with open("results/variables.json", "r") as f:
     input_data = json.load(f)
 
 
@@ -800,8 +800,8 @@ def main_pulp(graphtitle, K_s_en):
     COP_df_imported.fillna(COP_df_imported.mean(), inplace=True)
 
     # print the average values of each column in the dataframe to streamlit
-    st.write("Average values of each column in the dataframe:")
-    st.write(COP_df_imported.mean())
+    # st.write("Average values of each column in the dataframe:")
+    # st.write(COP_df_imported.mean())
 
     # st.dataframe(COP_df_imported.iloc[start_hour : start_hour + hours, :])
 
@@ -922,6 +922,8 @@ def main_pulp(graphtitle, K_s_en):
 
     names1 = data1["names"]
     names2 = data2["names"]
+    partloads1 = data1["partloads"]
+    partloads2 = data2["partloads"]
     erzeuger_df_vor = pd.read_json(data1["erzeuger_df_vor"])
     erzeuger_df_nach = pd.read_json(data2["erzeuger_df_nach"])
     Tiefentemperatur = 120
@@ -939,68 +941,57 @@ def main_pulp(graphtitle, K_s_en):
     # storage
     K_s_pow_in = 3000  # kW
     K_s_pow_out = 3000
-    # K_s_en = 5000
     Y_s_self = 0.02
-    big_M = 4100
+    big_M = 1.2 * K_s_en
+
     # Masterarbeit Therese Farber Formel/Prozent für Speicherverluste
 
-    with open("erzeugerpark.pkl", "rb") as file:
-        erzeugerpark_dict = pickle.load(file)
-
-    # Access a specific generator's data
-    chp_data = erzeugerpark_dict.get("CHP1")  # Replace "CHP1" with the correct key
-    if chp_data:
-        partload = chp_data["Partload"]
-        st.write(erzeugerpark)
-
-        K_p = {}
-        if checkbox4 == 0:
-            names = names1
-            for i, name in enumerate(names):
-                K_p[name] = [
-                    0 if v is None else v
-                    for v in erzeuger_df_vor[f"Erzeuger_{i+1}_vor"].tolist()
-                ]
-        elif checkbox4 == 1:
-            names = names2
-            for i, name in enumerate(names):
-                K_p[name] = [
-                    0 if v is None else v
-                    for v in erzeuger_df_nach[f"Erzeuger_{i+1}_nach"].tolist()
-                ]
+    K_p = {}
+    if checkbox4 == 0:
+        names = names1
+        for i, name in enumerate(names):
+            K_p[name] = [
+                0 if v is None else v
+                for v in erzeuger_df_vor[f"Erzeuger_{i+1}_vor"].tolist()
+            ]
+        partload_map = dict(zip(names, partloads1))
+    elif checkbox4 == 1:
+        names = names2
+        for i, name in enumerate(names):
+            K_p[name] = [
+                0 if v is None else v
+                for v in erzeuger_df_nach[f"Erzeuger_{i+1}_nach"].tolist()
+            ]
+        partload_map = dict(zip(names, partloads2))
 
     # st.dataframe(erzeuger_df_vor)
 
     # Abwärme
     K_p1 = K_p["waste_heat"][start_hour:] if "waste_heat" in names else [0] * 8761
-
+    PL_p1 = partload_map.get("waste_heat", 0)
     # Waermepumpe1
     K_p2 = K_p["heatpump_1"][start_hour:] if "heatpump_1" in names else [0] * 8761
-    # PL_p2 = erzeugerpark["heatpump_1"]Partoad
+    PL_p2 = partload_map.get("heatpump_1", 0)
 
     # Waermepumpe2
     K_p3 = K_p["heatpump_2"][start_hour:] if "heatpump_2" in names else [0] * 8761
-    PL_p3 = 0.2
+    PL_p3 = partload_map.get("heatpump_2", 0)
 
     # Geothermie
     K_p4 = K_p["geothermal"][start_hour:] if "geothermal" in names else [0] * 8761
-    PL_p4 = 0.3
+    PL_p4 = partload_map.get("geothermal", 0)
 
     # Solar
     K_p5 = K_p["solarthermal"][start_hour:] if "solarthermal" in names else [0] * 8761
-    PL_p5 = 0
+    PL_p5 = partload_map.get("solarthermal", 0)
 
     # Spitzenlastkessel
     K_p6 = K_p["PLB"][start_hour:] if "PLB" in names else [0] * 8761
-    PL_p6 = 0.01
+    PL_p6 = partload_map.get("PLB", 0)
 
     # BHKW
     K_p7 = K_p["CHP"][start_hour:] if "CHP" in names else [0] * 8761
-    PL_p7 = 0.1
-
-    for erzeuger in erzeugerpark:
-        if isinstance(erzeuger, ep.heatpump_1):
-            PL_p2 = erzeuger.Partload
+    PL_p7 = partload_map.get("CHP", 0)
 
     # st.write(K_p)
     ###decision variables
@@ -1082,8 +1073,6 @@ def main_pulp(graphtitle, K_s_en):
     if checkbox2 == 1:
         K_s_en = 0
 
-    big_M = 1.2 * K_s_en
-
     ###Constraints
     if checkbox3 == 0:
         m += E_tot
@@ -1139,7 +1128,7 @@ def main_pulp(graphtitle, K_s_en):
             A_p3_in = 0
             A_p4_in = 0
 
-        st.write(i, A_p3_in)
+        # st.write(i, A_p3_in)
 
         # 0.45 * (T_vl_vor[i] + 273.15) / (T_vl_vor[i] - Flusstemperatur[i]) #compare to ε = self.Gütegrad * ((Tvl + 273.15) / (Tvl - self.T_q))
         # A_p3_in = 0.45 * (60 + 273.15) / (60 - Flusstemperatur[i]) #        ε = self.Gütegrad * (Tvl + 273.15) / (Tvl - self.T_q)
@@ -1361,15 +1350,50 @@ start_hour = st.number_input("Enter start hour", min_value=1, value=1)
 hours = st.number_input("Enter hours", min_value=1, max_value=8760, value=2000)
 if hours == 8760:
     hours = 8759
-K_s_en = st.number_input("Enter storage size [kWh]", min_value=0, value=4000)
+
+expander = st.expander("Storage Parameters")
+with expander:
+    K_s_en = st.number_input("Enter storage size [kWh]", min_value=0, value=4000)
+    K_s_pow_in = st.number_input(
+        "Enter the storage inflow capacity [kW]", min_value=0, value=3000
+    )
+    K_s_pow_out = st.number_input(
+        "Enter storage outflow capacity [kW]", min_value=0, value=3000
+    )
+    Y_s_self = (
+        st.number_input(
+            "Enter the Percentage of stored energy lost at every time step [%]",
+            min_value=0,
+            value=2,
+        )
+        / 100
+    )
 
 
-checkbox = st.checkbox("Use constant prices")  # Linear prioritization
-checkbox2 = st.checkbox("Use no storage")  # No storage usage
-checkbox3 = st.checkbox("Optimize for minimal emissions")  # Emission optimization
-checkbox4 = st.checkbox(
-    "Use network temperatures after temperature reduction"
-)  # Lower temperature
+st.markdown("## Selection Options")
+st.markdown("Please select your preferences:")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    checkbox = st.checkbox(
+        "Use linear prioritization",
+        help="Opt for linear prioritization by applying constant prices and prioritizing renewables.",
+    )
+    checkbox2 = st.checkbox(
+        "Use no storage", help="Select this to avoid using any storage solutions."
+    )
+
+with col2:
+    checkbox3 = st.checkbox(
+        "Minimize emissions instead of costs",
+        help="Focus on minimizing operational emissions instead of operational costsin the optimization process.",
+    )
+    checkbox4 = st.checkbox(
+        "Use reduced network temperatures",
+        help="Apply lower temperature values in network calculations and storage simulation.",
+    )
+
 
 if st.button("Submit"):
     st.write(f"You entered {hours} hours.")

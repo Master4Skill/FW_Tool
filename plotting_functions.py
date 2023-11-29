@@ -9,11 +9,11 @@ from contextlib import contextmanager
 
 
 def plot_actual_production(
-    df_input, actual_production_df, color_FFE, title, my_dict, start_hour
+    df_input, lastkey, actual_production_df, color_FFE, title, my_dict, start_hour
 ):
     fig, ax = plt.subplots(figsize=(12, 6))
 
-    lastgang_plot = df_input["Lastgang"].plot.area(
+    lastgang_plot = df_input[lastkey].plot.area(
         ax=ax, color="#E0E0E0", linewidth=0, zorder=1, alpha=0.5, label="Load Profile"
     )
     actual_production_df.index = range(
@@ -91,13 +91,15 @@ def plot_actual_production(
 
 
 def plot_sorted_production(
-    df_input, sorted_df, actual_production_df, color_FFE, title, my_dict
+    df_input, lastkey, sorted_df, actual_production_df, color_FFE, title, my_dict
 ):
     fig, ax = plt.subplots(figsize=(12, 6))
 
     # Your existing plot commands
     lastgang_plot = (
-        df_input["Lastgang"]
+        df_input[lastkey]
+        #        demand_vor = df_results.loc[hour, "Wärmelast_vor"]
+        # df_input,
         .sort_values(ascending=False)
         .reset_index(drop=True)
         .plot.area(
@@ -172,7 +174,7 @@ def plot_sorted_production(
     st.pyplot(fig)
 
     plot_df = actual_production_df.copy()
-    plot_df["Lastgang"] = df_input["Lastgang"]
+    plot_df["Lastgang"] = df_input[lastkey]
 
     return plot_df
 
@@ -199,42 +201,7 @@ def lighten_color(color, amount=0.5):
     return colorsys.hls_to_rgb(c[0], 1 - amount * (1 - c[1]), c[2])
 
 
-def plot_power_usage2(Power_df_vor, Power_df_nach, color_FFE):
-    num_of_erzeuger = len(color_FFE)
-
-    for i in range(num_of_erzeuger):
-        # Check if all entries in the respective columns are zero
-        if (
-            Power_df_vor[f"Erzeuger_{i+1}_vor"].sum() == 0
-            and Power_df_nach[f"Erzeuger_{i+1}_nach"].sum() == 0
-        ):
-            continue
-
-        plt.figure(figsize=(12, 6))
-
-        plt.plot(
-            Power_df_vor.index,
-            Power_df_vor[f"Erzeuger_{i+1}_vor"],
-            color=color_FFE[i],
-            label="before",
-        )
-        plt.plot(
-            Power_df_nach.index,
-            Power_df_nach[f"Erzeuger_{i+1}_nach"],
-            color=lighten_color(color_FFE[i]),
-            label="after",
-        )
-
-        plt.title(f"Erzeuger {i+1} Power Consumption")
-        plt.xlabel("Time")
-        plt.ylabel("Power Consumption [kW]")
-        plt.grid(True)
-        plt.legend()
-
-        st.pyplot(plt.gcf())
-
-
-def plot_power_usage(Power_df_vor, Power_df_nach, color_FFE):
+def plot_power_usage(Power_df_vor, Power_df_nach, my_dict, color_FFE):
     num_of_erzeuger = len(color_FFE)
 
     for i in range(num_of_erzeuger):
@@ -291,8 +258,11 @@ def plot_power_usage(Power_df_vor, Power_df_nach, color_FFE):
 
         ax.yaxis.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
 
+        generator_key = f"Erzeuger_{i+1}"
+        generator_name = my_dict.get(generator_key, f"Generator {i+1}")
+
         ax.set_title(
-            f"Generator {i+1} Power Consumption",
+            f"{generator_name} Power Consumption",
             fontsize=16,
             color="#777777",
             fontfamily="Segoe UI SemiLight",

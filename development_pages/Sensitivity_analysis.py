@@ -31,7 +31,7 @@ from pandas.plotting import parallel_coordinates
 from CoolProp.CoolProp import PropsSI
 import ErzeugerparkClasses as ep
 
-with open("results/data.json", "r") as f:
+with open("results/variables.json", "r") as f:
     input_data = json.load(f)
 
 

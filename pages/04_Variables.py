@@ -15,7 +15,8 @@ st.sidebar.info("Adjust the simulation parameters")
 
 st.markdown("# Parameters")
 
-with open("results/data.json", "r") as f:
+
+with open("results/variables.json", "r") as f:
     input_data = json.load(f)
 
 # Using Streamlit's number_input function to let user input the constants
@@ -89,11 +90,13 @@ with expander:
         "Thermal Efficiency CHP (%)", value=0.55
     )
 
-# Saving the input data to a json file
-# with open("results/data.json", "w") as f:
-#    json.dump(input_data, f)
-
 if st.button("Save"):
-    with open("results/data.json", "w") as f:
+    with open("results/variables.json", "w") as f:
         json.dump(input_data, f)
     st.sidebar.success("Data saved successfully.")
+
+st.image(
+    "variables.png",
+    use_column_width=True,
+    caption="Variables for the Pipe Dimensioning",
+)
