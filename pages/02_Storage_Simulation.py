@@ -47,8 +47,11 @@ Trl_vor = input_data["Trl_vor"]
 Tvl_max_nach = input_data["Tvl_max_nach"]
 Tvl_min_nach = input_data["Tvl_min_nach"]
 Trl_nach = input_data["Trl_nach"]
-# from pages.Erzeugerpark import names, erzeuger_df_vor
+ηSpitzenkessel = input_data["ηSpitzenkessel"]
+ηBHKW_el = input_data["ηBHKW_el"]
+ηBHKW_therm = input_data["ηBHKW_therm"]
 
+# from pages.Erzeugerpark import names, erzeuger_df_vor
 
 # Flusstemperatur = list(df_results["Flusstemperatur"].values())
 
@@ -86,7 +89,7 @@ def plot_data3(df, title):
 
     names_map = {
         "g1": "Waste Heat",
-        "g2": "Heat Pump",
+        "g2": "Waste\nHeat Pump",
         "g3": "Ambient\nHeat Pump",
         "g4": "Geothermal",
         "g5": "Solar Thermal",
@@ -94,25 +97,30 @@ def plot_data3(df, title):
         "g71": "CHP",
     }
 
-    cumulative = np.zeros_like(df.index, dtype=np.float64)
-    colors = [
-        "#639729",
-        "#1F4E79",
-        "#DD2525",
-        "#92D050",
-        "#EC9302",
-        "#EC9302",
-    ]
+    # Updated color mapping
+    color_dict = {
+        "Waste Heat": "#639729",
+        "Waste\nHeat Pump": "#1F4E79",
+        "Ambient\nHeat Pump": "#DD2525",
+        "Geothermal": "#92D050",
+        "Solar Thermal": "#EC9302",
+        "Peak Load Boiler": "#EC9302",
+        "CHP": "#F7D507",  # Assuming the same color for CHP, update if different
+    }
 
-    previous_cumulative = 0
-    patches = []  # For shaded areas in legend
+    # Define the columns to check
     columns_to_check = ["g1", "g4", "g3", "g2", "g5", "g6", "g71"]
     non_zero_columns = [col for col in columns_to_check if df[col].sum() != 0]
 
     cumulative = 0
+    previous_cumulative = 0
+    patches = []  # For shaded areas in legend
 
     for i, column in enumerate(non_zero_columns):
         label = names_map.get(column, column)
+        color = color_dict.get(
+            label, "#000000"
+        )  # Fallback color, if not found in color_dict
 
         cumulative += df[column]
 
@@ -128,12 +136,13 @@ def plot_data3(df, title):
             df.index,
             previous_cumulative,
             cumulative,
-            color=colors[i],
+            color=color,
             alpha=0.7,
         )
-        patches.append(mpatches.Patch(color=colors[i], label=label, alpha=0.7))
+        patches.append(mpatches.Patch(color=color, label=label, alpha=0.7))
         previous_cumulative = cumulative.copy()
 
+    # Plotting P_to_dem
     axs.plot(
         df.index,
         df["P_to_dem"],
@@ -142,6 +151,8 @@ def plot_data3(df, title):
         linewidth=1,
         alpha=1,
     )
+
+    # Handling E_stored
     df["E_stored"].fillna(0, inplace=True)
 
     # Create a second y-axis for the stored energy
@@ -636,38 +647,50 @@ def plot_single_values(df_results, mode):
     names_map = {
         "E_stored": "Stored Energy",
         "g1": "Waste Heat",
-        "g2": "Heat Pump",
-        "g3": "Heat Pump",
+        "g2": "Waste\nHeat Pump",
+        "g3": "Ambient\nHeat Pump",
         "g4": "Geothermal",
         "g5": "Solar Thermal",
         "g6": "Peak Load Boiler",
-        "g7": "CHP",
+        "g71": "CHP",
     }
+
     if mode == 0:
         # Calculating the sums for each category
-        sums = df_results[["E_stored", "g1", "g3", "g4", "g5", "g6"]].sum()
-
+        sums = df_results[["E_stored", "g1", "g3", "g4", "g5", "g6", "g71"]].sum()
     elif mode == 1:
-        names_map = {
-            "E_stored": "Stored Energy",
-            "f1": "Waste Heat",
-            # "f2": "Heat Pump",
-            "f3": "Heat Pump",
-            "f4": "Geothermal",
-            "f5": "Solar Thermal",
-            "f6": "Peak Load Boiler",
-            "f7": "CHP",
-        }
-        sums = df_results[["f3", "f4", "f5", "f6"]].sum()
+        sums = df_results[["f1", "f2", "f3", "f4", "f5", "f6", "f7"]].sum()
+
+    # Remove categories with zero sum
+    sums = sums[sums > 0]
 
     # Creating a new DataFrame to hold the sums
     sum_df = pd.DataFrame({"Category": sums.index, "Sum": sums.values})
     sum_df["Category"] = sum_df["Category"].replace(names_map)
     st.dataframe(sum_df)
 
+    # Color mapping - ensure all categories in sum_df are included here
+    color_dict = {
+        "Stored Energy": "#777777",  # Example color, change as needed
+        "Waste Heat": "#639729",
+        "Waste\nHeat Pump": "#1F4E79",
+        "Ambient\nHeat Pump": "#F7D507",
+        "Geothermal": "#DD2525",
+        "Solar Thermal": "#92D050",
+        "Peak Load Boiler": "#EC9302",
+        "CHP": "#F7D507",
+        # Add other categories if needed
+    }
+
+    # Assign colors to each category, using a default color if not found in color_dict
+    default_color = "#777777"  # Default color, change as needed
+    colors = [
+        color_dict.get(category, default_color) for category in sum_df["Category"]
+    ]
+
     # Creating the bar plot
     plt.figure(figsize=(10, 6))
-    bar_plot = sns.barplot(x="Category", y="Sum", data=sum_df, palette="coolwarm")
+    bar_plot = sns.barplot(x="Category", y="Sum", data=sum_df, palette=colors)
 
     # Defining custom styles
     font_color = "#777777"
@@ -1137,10 +1160,10 @@ def main_pulp(graphtitle, K_s_en):
         # P = V / 3600 * ρ_water * 9.81 * self.h_förder / self.η_geo
         # return P / 1000
         A_p5_in = 100  # Very high COP for solar thermal, since it is only used to prioritize WH over Solarthermalheat, as none of them is actually considered in the prices as they are modelled without electrical input
-        A_p6_in = 0.8  # PLB
+        A_p6_in = ηSpitzenkessel  # PLB
         A_p7_in = 1
-        A_p7_out_heat = 0.5  # BHKW heat
-        A_p7_out_elec = 0.3  # BHKW elec
+        A_p7_out_heat = ηBHKW_therm  # BHKW heat
+        A_p7_out_elec = ηBHKW_el  # BHKW elec
 
         # Storage
         if i == 0:  # for the first period, E_stored_prev is 0
@@ -1174,6 +1197,7 @@ def main_pulp(graphtitle, K_s_en):
 
         # m += g2[i] <= K_p2[i]
         # m += g2[i] - K_p2[i] * PL_p2 >= -(1 - x2[i]) * K_p2[i]
+
         # p3 WP2
         m += g3[i] == f3[i] * A_p3_in
         m += g3[i] >= x3[i] * K_p3[i] * PL_p3
@@ -1192,8 +1216,8 @@ def main_pulp(graphtitle, K_s_en):
         # p7
         m += g71[i] == f7[i] * A_p7_out_heat
         m += g72[i] == f7[i] * A_p7_out_elec
-        m += g71[i] + g72[i] >= x7[i] * K_p7[i] * PL_p7
-        m += g71[i] + g72[i] <= x7[i] * K_p7[i]
+        m += g71[i] >= x7[i] * K_p7[i] * PL_p7
+        m += g71[i] <= x7[i] * K_p7[i]
 
         # Commodities
         # heat
@@ -1285,11 +1309,11 @@ def main_pulp(graphtitle, K_s_en):
 
     st.dataframe(df_results)
     # print the sum od s_out
-    st.write(f"Der gesamte Storage outflow beträgt {sum(s_out_m.values()):.2f} kWh")
+    # st.write(f"Der gesamte Storage outflow beträgt {sum(s_out_m.values()):.2f} kWh")
     # print the sum of P_to_dem
-    st.write(f"Der gesamte Wärmebedarf beträgt {sum(P_to_dem_m.values()):.2f} kWh")
-    st.write(Elec_sum)
-    st.write(Gas_sum)
+    # st.write(f"Der gesamte Wärmebedarf beträgt {sum(P_to_dem_m.values()):.2f} kWh")
+    # st.write(Elec_sum)
+    # st.write(Gas_sum)
 
     # Creating a dictionary to map the old column names to the new column names
     column_mapping = {

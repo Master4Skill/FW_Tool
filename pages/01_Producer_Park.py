@@ -60,7 +60,7 @@ color_dict = {
     "⛰️ geothermal  - maximum power (kW)": "#DD2525",
     "☀️ solarthermal - solar radiation (kW/m²)": "#92D050",
     "🔥 PLB - maximum power (kW)": "#EC9302",
-    "🏭 CHP - maximum power (kW)": "#EC9302",
+    "🏭 CHP - maximum power (kW)": "#F7D507",
 }
 
 
@@ -134,10 +134,13 @@ for i in range(anzahl_erzeuger):
             value=120,
             key=f"Quelltemperatur{i}",
         )
-        Partload = st.number_input(
-            "Please enter the partload of the waste heat unit",
-            value=0,
-            key=f"Partload{i}",
+        Partload = (
+            st.number_input(
+                "Please enter the partload of the waste heat unit (%)",
+                value=0,
+                key=f"Partload{i}",
+            )
+            / 100
         )
         erzeuger = ep.waste_heat(
             Volumenstrom_quelle,
@@ -163,10 +166,13 @@ for i in range(anzahl_erzeuger):
             value=0.45,
             key=f"Gütegrad{i}",
         )
-        Partload = st.number_input(
-            "Please enter the partload of the waste heat pump",
-            value=0.4,
-            key=f"Partload{i}",
+        Partload = (
+            st.number_input(
+                "Please enter the partload of the waste heat pump (%)",
+                value=40,
+                key=f"Partload{i}",
+            )
+            / 100
         )
 
         erzeuger = ep.heatpump_1(
@@ -187,10 +193,13 @@ for i in range(anzahl_erzeuger):
             value=0.45,
             key=f"Gütegrad{i}",
         )
-        Partload = st.number_input(
-            "Please enter the partload of the ambient heat pump",
-            value=0.2,
-            key=f"Partload{i}",
+        Partload = (
+            st.number_input(
+                "Please enter the partload of the ambient heat pump (%)",
+                value=20,
+                key=f"Partload{i}",
+            )
+            / 100
         )
 
         erzeuger = ep.heatpump_2(
@@ -216,10 +225,13 @@ for i in range(anzahl_erzeuger):
             value=0.8,
             key=f"η_geo{i}",
         )
-        Partload = st.number_input(
-            "Please enter the partload of the geothermal heat unit",
-            value=0.3,
-            key=f"Partload{i}",
+        Partload = (
+            st.number_input(
+                "Please enter the partload of the geothermal heat unit (%)",
+                value=30,
+                key=f"Partload{i}",
+            )
+            / 100
         )
         erzeuger = ep.geothermal(
             Leistung_max,
@@ -237,10 +249,13 @@ for i in range(anzahl_erzeuger):
             value=10000,
             key=f"solar_area{i}",
         )
-        Partload = st.number_input(
-            "Please enter the partload of the solarthermal collector",
-            value=0,
-            key=f"Partload{i}",
+        Partload = (
+            st.number_input(
+                "Please enter the partload of the solarthermal collector (%)",
+                value=0,
+                key=f"Partload{i}",
+            )
+            / 100
         )
 
         expander = st.expander("Additional Solar Parameters")
@@ -285,10 +300,13 @@ for i in range(anzahl_erzeuger):
         Leistung_max = st.number_input(
             "Please enter the maximum power (kW)", value=10000, key=f"Leistung_max{i}"
         )
-        Partload = st.number_input(
-            "Please enter the partload of the Peak Load Boiler",
-            value=0.0001,
-            key=f"Partload{i}",
+        Partload = (
+            st.number_input(
+                "Please enter the partload of the Peak Load Boiler (%)",
+                value=0.1,
+                key=f"Partload{i}",
+            )
+            / 100
         )
 
         erzeuger = ep.PLB(
@@ -302,10 +320,13 @@ for i in range(anzahl_erzeuger):
             key=f"Leistung_max{i}",
         )
 
-        Partload = st.number_input(
-            "Please enter the partload of the CHP",
-            value=0.001,
-            key=f"Partload{i}",
+        Partload = (
+            st.number_input(
+                "Please enter the partload of the CHP (%)",
+                value=0.1,
+                key=f"Partload{i}",
+            )
+            / 100
         )
 
         erzeuger = ep.CHP(
@@ -322,7 +343,7 @@ with open("erzeugerpark.pkl", "wb") as file:
 
 names2 = [obj.__class__.__name__ for obj in erzeugerpark]
 teillasten = [obj.Partload for obj in erzeugerpark if hasattr(obj, "Partload")]
-st.write(teillasten)
+# st.write(teillasten)
 
 
 # my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names2)}
@@ -509,8 +530,8 @@ if st.button("Calculate"):
     CO2_df_vor.to_json("results/CO2_df_vor.json", orient="columns")
     CO2_df_nach.to_json("results/CO2_df_nach.json", orient="columns")
 
-    st.dataframe(actual_production_df_vor)
-    st.dataframe(actual_production_df_nach)
+    # st.dataframe(actual_production_df_vor)
+    # st.dataframe(actual_production_df_nach)
     st.subheader("Numerical Results")
 
     data = {
@@ -587,7 +608,7 @@ if st.button("Calculate"):
     for col in sorted_df.columns:
         sorted_df[col] = sorted_df[col].sort_values(ascending=False).values
 
-    st.write(my_dict)
+    # st.write(my_dict)
 
     with st.container():
         st.header("Generation load profile")
