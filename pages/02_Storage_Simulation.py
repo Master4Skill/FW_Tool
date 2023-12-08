@@ -102,9 +102,9 @@ def plot_data3(df, title):
     color_dict = {
         "Waste Heat": "#639729",
         "Waste\nHeat Pump": "#1F4E79",
-        "Ambient\nHeat Pump": "#DD2525",
-        "Geothermal": "#92D050",
-        "Solar Thermal": "#EC9302",
+        "Ambient\nHeat Pump": "#F7D507",
+        "Geothermal": "#DD2525",
+        "Solar Thermal": "#92D050",
         "Peak Load Boiler": "#EC9302",
         "CHP": "#F7D507",  # Assuming the same color for CHP, update if different
     }
