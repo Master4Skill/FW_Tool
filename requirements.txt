@@ -1,0 +1,11 @@
+pandas
+matplotlib
+streamlit
+numpy
+CoolProp
+Pillow
+seaborn
+gurobipy
+pulp
+scipy
+streamlit_extras
