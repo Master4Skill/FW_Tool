@@ -20,6 +20,7 @@ import matplotlib.patches as mpatches
 import logging
 import math
 import pickle
+from pulp import PULP_CBC_CMD
 
 logging.getLogger("matplotlib.font_manager").disabled = True
 
@@ -1235,12 +1236,15 @@ def main_pulp(graphtitle, K_s_en):
         # gas
         m += g_imp[i] == f6[i] + f7[i]
 
-    solver = GUROBI_CMD(options=[("MIPGap", 0.05)])
-    solver = GUROBI_CMD(options=[("TimeLimit", 100)])  # 5 minutes time limit
-    solver = GUROBI_CMD(options=[("LogFile", "gurobi.log")])
+    # solver = GUROBI_CMD(options=[("MIPGap", 0.05)])
+    # solver = GUROBI_CMD(options=[("TimeLimit", 100)])  # 5 minutes time limit
+    # solver = GUROBI_CMD(options=[("LogFile", "gurobi.log")])
 
     # solver = GUROBI_CMD()
 
+    # m.solve(solver)
+    # With the following CBC solver code:
+    solver = PULP_CBC_CMD(msg=True, timeLimit=100, fracGap=0.05)  # CBC with options
     m.solve(solver)
 
     # Extract solution
