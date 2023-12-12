@@ -324,6 +324,12 @@ if st.button("Show the Results"):
     for col in sorted_df.columns:
         sorted_df[col] = sorted_df[col].sort_values(ascending=False).values
 
+    names = [
+        name_mapping.get(obj.__class__.__name__, obj.__class__.__name__)
+        for obj in erzeugerpark
+    ]
+    
+    
     my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names)}
 
     with st.container():
