@@ -324,7 +324,7 @@ if st.button("Show the Results"):
     for col in sorted_df.columns:
         sorted_df[col] = sorted_df[col].sort_values(ascending=False).values
 
-    # my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names)}
+    my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names)}
 
     with st.container():
         st.header("Generation load profile")
@@ -335,7 +335,7 @@ if st.button("Show the Results"):
             actual_production_df_vor,
             color_FFE,
             "Generation load curve berfore",
-            None,
+            my_dict,
             0,
         )
         st.subheader("After Temperature Reduction")
@@ -345,7 +345,7 @@ if st.button("Show the Results"):
             actual_production_df_nach,
             color_FFE,
             "Generation load curve after",
-            None,
+            my_dict,
             0,
         )
 
