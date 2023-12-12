@@ -327,10 +327,10 @@ if st.button("Show the Results"):
     #names = [name_mapping.get(obj.__class__.__name__, obj.__class__.__name__)for obj in erzeugerpark]
 
     with open("erzeuger_df_vor.json") as f:
-        data2 = json.load(f)
+        data = json.load(f)
 
-    names = data1["names"]
-    #names2 = data2["names"]
+    names = data["names"]
+
     
     my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names)}
 
