@@ -140,7 +140,7 @@ for i in range(anzahl_erzeuger):
                 value=0,
                 key=f"Partload{i}",
             )
-            / 100
+            
         )
         erzeuger = ep.waste_heat(
             Volumenstrom_quelle,
@@ -169,10 +169,10 @@ for i in range(anzahl_erzeuger):
         Partload = (
             st.number_input(
                 "Please enter the partload of the waste heat pump (%)",
-                value=40,
+                value=0.40,
                 key=f"Partload{i}",
             )
-            / 100
+        
         )
 
         erzeuger = ep.heatpump_1(
@@ -196,10 +196,10 @@ for i in range(anzahl_erzeuger):
         Partload = (
             st.number_input(
                 "Please enter the partload of the ambient heat pump (%)",
-                value=20,
+                value=0.20,
                 key=f"Partload{i}",
             )
-            / 100
+
         )
 
         erzeuger = ep.heatpump_2(
@@ -228,10 +228,10 @@ for i in range(anzahl_erzeuger):
         Partload = (
             st.number_input(
                 "Please enter the partload of the geothermal heat unit (%)",
-                value=30,
+                value=0.30,
                 key=f"Partload{i}",
             )
-            / 100
+        
         )
         erzeuger = ep.geothermal(
             Leistung_max,
@@ -255,7 +255,7 @@ for i in range(anzahl_erzeuger):
                 value=0,
                 key=f"Partload{i}",
             )
-            / 100
+        
         )
 
         expander = st.expander("Additional Solar Parameters")
@@ -303,10 +303,10 @@ for i in range(anzahl_erzeuger):
         Partload = (
             st.number_input(
                 "Please enter the partload of the Peak Load Boiler (%)",
-                value=0.1,
+                value=0.01,
                 key=f"Partload{i}",
             )
-            / 100
+        
         )
 
         erzeuger = ep.PLB(
@@ -323,10 +323,10 @@ for i in range(anzahl_erzeuger):
         Partload = (
             st.number_input(
                 "Please enter the partload of the CHP (%)",
-                value=0.1,
+                value=0.01,
                 key=f"Partload{i}",
             )
-            / 100
+        
         )
 
         erzeuger = ep.CHP(
