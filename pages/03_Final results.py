@@ -324,11 +324,13 @@ if st.button("Show the Results"):
     for col in sorted_df.columns:
         sorted_df[col] = sorted_df[col].sort_values(ascending=False).values
 
-    names = [
-        name_mapping.get(obj.__class__.__name__, obj.__class__.__name__)
-        for obj in erzeugerpark
-    ]
-    
+    #names = [name_mapping.get(obj.__class__.__name__, obj.__class__.__name__)for obj in erzeugerpark]
+
+    with open("erzeuger_df_vor.json") as f:
+        data2 = json.load(f)
+
+    names = data1["names"]
+    #names2 = data2["names"]
     
     my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names)}
 
