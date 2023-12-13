@@ -17,7 +17,7 @@ from plotting_functions import (
     plot_total_emissions,
 )
 
-with open("color_FFE.json", "r") as file:
+with open("results/color_FFE.json", "r") as file:
     # Load the contents of the file into a Python object
     color_FFE = json.load(file)
 add_logo("resized_image.png")
