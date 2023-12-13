@@ -17,6 +17,9 @@ from plotting_functions import (
     plot_total_emissions,
 )
 
+with open("color_FFE.json", "r") as file:
+    # Load the contents of the file into a Python object
+    color_FFE = json.load(file)
 add_logo("resized_image.png")
 
 st.header("Final Results")
@@ -381,42 +384,51 @@ if st.button("Show the Results"):
             my_dict,
         )
 
-    plot_power_usage(Power_df_vor, Power_df_nach, color_FFE)
+    plot_power_usage(Power_df_vor, Power_df_nach, my_dict, color_FFE)
 
     plot_total_change(
         actual_production_df_vor,
         actual_production_df_nach,
         color_FFE,
-        "vor",
-        "nach",
+        "before Temp. Reduction",
+        "after Temp. Reduction",
         "Erzeuger",
-        "Change in Production",
-        "Erzeuger",
-        "Total Production [kWh]",
-    )
-
-    plot_total_change(
-        Power_df_vor,
-        Power_df_nach,
-        color_FFE,
-        "vor",
-        "nach",
-        "Erzeuger",
-        "Change in Power Usage",
-        "Erzeuger",
-        "Total Usage [kWh]",
+        "Change in Heat Generation",
+        "",
+        "Total Production [GWh]",
+        my_dict,
+        0.7,
+        0.8,
     )
 
     plot_total_change(
         CO2_df_vor,
         CO2_df_nach,
         color_FFE,
-        "vor",
-        "nach",
+        "before Temp. Reduction",
+        "after Temp. Reduction",
         "Erzeuger",
         "Change in CO2 Emissions",
+        "",
+        "Total Emissions [kt CO2]",
+        my_dict,
+        0.7,
+        0.8,
+    )
+
+    plot_total_change(
+        Power_df_vor,
+        Power_df_nach,
+        color_FFE,
+        "before Temp. Reduction",
+        "after Temp. Reduction",
         "Erzeuger",
-        "Total Emissions [kg CO2]",
+        "Change in Power Consumption",
+        "",
+        "Total Usage [GWh]",
+        my_dict,
+        0.4,
+        0.8,
     )
 
     st.sidebar.success("Simulation erfolgreich")
