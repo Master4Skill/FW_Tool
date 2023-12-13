@@ -359,22 +359,26 @@ if st.button("Show the Results"):
 
     # Create the second container
     with st.container():
-        st.header("Jahresdauerlinie")
-        st.subheader("vor")
+        st.header("Annual duration line")
+        st.subheader("Before Temperature Reduction")
         plot_df_vor = plot_sorted_production(
-            df_input,
+            df_results,
+            "Wärmelast_vor",
             sorted_df_vor,
             actual_production_df_vor,
             color_FFE,
-            "Jahresdauerlinie vor",
+            "Annual duration line before",
+            my_dict,
         )
-        st.subheader("nach")
+        st.subheader("After Temperature Reduction")
         plot_df_nach = plot_sorted_production(
-            df_input,
+            df_results,
+            "Wärmelast_nach",
             sorted_df_nach,
             actual_production_df_nach,
             color_FFE,
-            "Jahresdauerlinie nach",
+            "Annual duration line after",
+            my_dict,
         )
 
     plot_power_usage(Power_df_vor, Power_df_nach, color_FFE)
