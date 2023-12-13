@@ -124,7 +124,6 @@ if st.button("Show the Results"):
         label="Flow Temperature after Temp. Reduction",
     )
 
-    logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
 
     # Adding labels and title with specified font style
     plt.xlabel("Time [h]", fontsize=16, color="#777777", fontfamily="Segoe UI")
