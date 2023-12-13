@@ -77,12 +77,14 @@ if st.button("Show the Results"):
 
     # Create the plot of the different Temperatures
     plt.figure(figsize=(12, 6))
+
+    # Plotting the data
     plt.plot(
         df_results["hours"],
         np.full(df_results["hours"].shape, Trl_nach),
         "--",
         linewidth=2,
-        label="RL-Temperatur nach T-Absenkung",
+        label="Return Temperature after Temp. Reduction",
         color="#EC9302",
     )
     plt.plot(
@@ -90,7 +92,7 @@ if st.button("Show the Results"):
         np.full(df_results["hours"].shape, Trl_vor),
         "--",
         linewidth=2,
-        label="RL-Temperatur vor T-Absenkung",
+        label="Return Temperature before Temp. Reduction",
         color="#3795D5",
     )
     plt.plot(
@@ -98,208 +100,328 @@ if st.button("Show the Results"):
         df_input["Lufttemp"],
         color="#356CA5",
         linewidth=2,
-        label="Lufttemperatur",
+        label="Air Temperature",
     )
     plt.plot(
         df_input["Zeit"],
         df_input["Bodentemp"],
         color="#BFA405",
         linewidth=2,
-        label="Bodentemperatur",
+        label="Ground Temperature",
     )
     plt.plot(
         df_results["hours"],
         df_results["T_vl_vor"],
         color="#F7D507",
         linewidth=2,
-        label="VL-Temperatur vor T-Absenkung",
+        label="Flow Temperature before Temp. Reduction",
     )
     plt.plot(
         df_results["hours"],
         df_results["T_vl_nach"],
         color="#7A1C1C",
         linewidth=2,
-        label="VL-Temperatur nach T-Absenkung",
+        label="Flow Temperature after Temp. Reduction",
     )
 
-    plt.xlabel("Zeit")
-    plt.ylabel("Temperature")
-    plt.title("Temperature vs Zeit")
-    plt.legend()
-    plt.grid(True)
+    logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
 
-    # Show the plot in Streamlit
+    # Adding labels and title with specified font style
+    plt.xlabel("Time [h]", fontsize=16, color="#777777", fontfamily="Segoe UI")
+    plt.ylabel(
+        "Temperature [°C]",
+        fontsize=16,
+        color="#777777",
+        fontfamily="Segoe UI",
+    )
+    plt.title(
+        "Course of Network Temperatures before and after Temperature Reduction",
+        fontsize=16,
+        color="#777777",
+        fontfamily="Segoe UI",
+    )
+
+    # Setting the legend style
+    plt.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.15),
+        ncol=2,
+        frameon=False,
+        fontsize=16,
+        title_fontsize="16",
+        labelcolor="#777777",
+    )
+
+    # Setting the tick parameters
+    plt.tick_params(
+        axis="x", colors="#777777", direction="out", which="both", labelsize=16
+    )
+    plt.tick_params(
+        axis="y", colors="#777777", direction="out", which="both", labelsize=16
+    )
+
+    # Setting grid style
+    plt.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
+
+    # Setting the spines style
+    plt.gca().spines["bottom"].set_edgecolor("#A3A3A3")
+    plt.gca().spines["bottom"].set_linewidth(1)
+    plt.gca().spines["left"].set_edgecolor("#A3A3A3")
+    plt.gca().spines["left"].set_linewidth(1)
+
+    # Setting the background color and hiding the top and right spines
+    plt.gca().set_facecolor("white")
+    for spine in ["top", "right"]:
+        plt.gca().spines[spine].set_visible(False)
+
+    # Display the plot in Streamlit
     st.pyplot(plt)
 
-    # Create the plot of the Netzverluste
-    plt.figure(figsize=(12, 6))
-    plt.plot(
+    def styled_plot(x, y1, y2, color1, color2, label1, label2, xlabel, ylabel, title):
+        plt.figure(figsize=(12, 6))
+        plt.plot(x, y1, color=color1, linewidth=2, label=label1)
+        plt.plot(x, y2, color=color2, linewidth=2, label=label2)
+
+        # Styling
+        plt.xlabel(xlabel, fontsize=16, color="#777777", fontfamily="Segoe UI")
+        plt.ylabel(ylabel, fontsize=16, color="#777777", fontfamily="Segoe UI")
+        plt.title(title, fontsize=16, color="#777777", fontfamily="Segoe UI")
+
+        plt.legend(
+            loc="upper center",
+            bbox_to_anchor=(0.5, -0.15),
+            ncol=2,
+            frameon=False,
+            fontsize=16,
+            title_fontsize="16",
+            labelcolor="#777777",
+        )
+
+        plt.tick_params(
+            axis="x", colors="#777777", direction="out", which="both", labelsize=16
+        )
+        plt.tick_params(
+            axis="y", colors="#777777", direction="out", which="both", labelsize=16
+        )
+
+        plt.grid(color="#C4C4C4", linestyle="--", linewidth=0.5)
+
+        plt.gca().spines["bottom"].set_edgecolor("#A3A3A3")
+        plt.gca().spines["bottom"].set_linewidth(1)
+        plt.gca().spines["left"].set_edgecolor("#A3A3A3")
+        plt.gca().spines["left"].set_linewidth(1)
+        plt.gca().set_facecolor("white")
+        for spine in ["top", "right"]:
+            plt.gca().spines[spine].set_visible(False)
+
+        # Display
+        st.pyplot(plt)
+
+    # Applying the function for each plot
+    styled_plot(
         df_results["hours"],
         df_results["Netzverluste_vor"],
-        color="#1F4E79",
-        linewidth=2,
-        label="Netzverluste vor T-Absenkung",
-    )
-    plt.plot(
-        df_results["hours"],
         df_results["Netzverluste_nach"],
-        color="#3795D5",
-        linewidth=2,
-        label="Netzverluste nach T-Absenkung",
+        "#1F4E79",
+        "#3795D5",
+        "Network Losses before Temp. Reduction",
+        "Network Losses after Temp. Reduction",
+        "Time [h]",
+        "Losses [kW]",
+        "Network Losses before and after Temperature Reduction",
     )
-    plt.xlabel("Zeit")
-    plt.ylabel("Verluste")
-    plt.title("Netzverluste vs Zeit")
-    plt.legend()
-    plt.grid(True)
 
-    # Show the plot in Streamlit
-    st.pyplot(plt)
-
-    # Create the plot of VerlustProzentual (meint den prozentualen anteil der Verluste an der Gesamtwärmelast)
-    plt.figure(figsize=(12, 6))
-    plt.plot(
+    styled_plot(
         df_results["hours"],
         df_results["VerlustProzentual_nach"],
-        color="#BFA405",
-        linewidth=2,
-        label="Prozentualer Verlust vor T-Absenkung",
-    )
-    plt.plot(
-        df_results["hours"],
         df_results["VerlustProzentual_vor"],
-        color="#F7D507",
-        linewidth=2,
-        label="Prozentualer Verlust nach T-Absenkung",
-        alpha=0.5,
+        "#BFA405",
+        "#F7D507",
+        "Percentage Loss before Temp. Reduction",
+        "Percentage Loss after Temp. Reduction",
+        "Time [h]",
+        "%",
+        "Notwork Losses Percentage of Total Heat Load before and after Temperature Reduction",
     )
-
-    plt.xlabel("Zeit")
-    plt.ylabel("%")
-    plt.title("Prozentualer Verlust vs Zeit")
-    plt.legend()
-    plt.grid(True)
-
-    # Show the plot in Streamlit
-    st.pyplot(plt)
-
-    # Create the plot of Volumenstrom
-    plt.figure(figsize=(12, 6))
-    plt.plot(
+    styled_plot(
         df_results["hours"],
         df_results["Volumenstrom_vor"],
-        color="#AB2626",
-        linewidth=2,
-        label="Volumenstrom vor T-Absenkung",
-    )
-    plt.plot(
-        df_results["hours"],
         df_results["Volumenstrom_nach"],
-        color="#DD2525",
-        linewidth=2,
-        label="Volumenstrom nach T-Absenkung",
-        alpha=0.7,
+        "#AB2626",
+        "#DD2525",
+        "Flow Rate before Temp. Reduction",
+        "Flow Rate after Temp. Reduction",
+        "Time [h]",
+        "Flow Rate per Hour [m³/h]",
+        "Flow Rate per Hour before and after Temperature Reduction",
     )
-
-    plt.xlabel("Zeit")
-    plt.ylabel("Volumenstrom pro Stunde")
-    plt.title("Volumenstrom pro Stunde vs Zeit")
-    plt.legend()
-    plt.grid(True)
-
-    # Show the plot in Streamlit
-    st.pyplot(plt)
-
-    # Create the plot of Strömungsgeschwindigkeit
-    plt.figure(figsize=(12, 6))
-    plt.plot(
+    styled_plot(
         df_results["hours"],
         df_results["Strömungsgeschwindigkeit_vor"],
-        color="#B77201",
-        linewidth=2,
-        label="Strömungsgeschwindigkeit vor T-Absenkung",
-    )
-    plt.plot(
-        df_results["hours"],
         df_results["Strömungsgeschwindigkeit_nach"],
-        color="#EC9302",
-        linewidth=2,
-        label="Strömungsgeschwindigkeit nach T-Absenkung",
-        alpha=0.5,
+        "#B77201",
+        "#EC9302",
+        "Flow Velocity before Temp. Reduction",
+        "Flow Velocity after Temp. Reduction",
+        "Time [h]",
+        "Flow Velocity per Second [m/s]",
+        "Flow Velocity per Second before and after Temperature Reduction",
     )
-
-    plt.xlabel("Zeit")
-    plt.ylabel("Strömungsgeschwindigkeit pro sekunde")
-    plt.title("Strömungsgeschwindigkeit pro sekunde vs Zeit")
-    plt.legend()
-    plt.grid(True)
-
-    # Show the plot in Streamlit
-    # st.pyplot(plt)
-
-    # Create the plot of Pumpleistung
-    plt.figure(figsize=(12, 6))
-    plt.plot(
+    styled_plot(
         df_results["hours"],
         df_results["Pumpleistung_vor"],
-        color="#639729",
-        linewidth=2,
-        label="Pumpleistung vor T-Absenkung",
-    )
-    plt.plot(
-        df_results["hours"],
         df_results["Pumpleistung_nach"],
-        color="#92D050",
-        linewidth=2,
-        label="Pumpleistung nach T-Absenkung",
-        alpha=0.5,
+        "#639729",
+        "#92D050",
+        "Pump Performance before Temp. Reduction",
+        "Pump Performance after Temp. Reduction",
+        "Time [h]",
+        "Pump Performance [kW]",
+        "Pump Performance before and after Temperature Reduction",
     )
 
-    plt.xlabel("Zeit")
-    plt.ylabel("Pumpleistung [kW]")
-    plt.title("Pumpleistung vs Zeit")
-    plt.legend()
-    plt.grid(True)
+    # st.dataframe(df_results)
 
-    # Show the plot in Streamlit
-    st.pyplot(plt)
+    def print_stats(x):
+        # Funktion do print the stats of a column, mainly for development and troubleshooting purposes
+        flowrate = df_results[x].min()
+        st.write(f"min:{x, flowrate}")
+        flowrate = df_results[x].max()
+        st.write(f"max:{x, flowrate}")
+        flowrate = df_results[x].mean()
+        st.write(f"mean:{x, flowrate}")
+        flowrate = df_results[x].median()
+        st.write(f"median:{x, flowrate}")
+        return
+
+    # print_stats("Volumenstrom_vor")
+    # print_stats("Volumenstrom_nach")
+
+    # print_stats("Strömungsgeschwindigkeit_vor")
+    # print_stats("Strömungsgeschwindigkeit_nach")
+
+    # print_stats("Pumpleistung_vor")
+    # print_stats("Pumpleistung_nach")
 
     ##Bargraph to show the part of the Wärmelast that is due to losses in the Netz
     # Calculate the sums
-    sum_warmelast_vor = df_results["Wärmelast_vor"].sum()
-    sum_warmelast_nach = df_results["Wärmelast_nach"].sum()
+    sum_consumerload = df_input["Lastgang"].sum()
 
     sum_netzverluste_vor = df_results["Netzverluste_vor"].sum()
     sum_netzverluste_nach = df_results["Netzverluste_nach"].sum()
 
+    sum_HE_losses_vor = (
+        df_results["Wärmelast_vor"].sum() - sum_consumerload - sum_netzverluste_vor
+    )
+    sum_HE_losses_nach = (
+        df_results["Wärmelast_nach"].sum() - sum_consumerload - sum_netzverluste_nach
+    )
     # Create a DataFrame from the sums
     df_sum = pd.DataFrame(
         {
-            "Warmelast": ["vor", "nach"],
-            "Wärmelast": [sum_warmelast_vor, sum_warmelast_nach],
-            "Netzverluste": [sum_netzverluste_vor, sum_netzverluste_nach],
+            "Warmelast": ["before", "after"],
+            "Wärmelast": [sum_consumerload / 1000000, sum_consumerload / 1000000],
+            "Netzverluste": [
+                sum_netzverluste_vor / 1000000,
+                sum_netzverluste_nach / 1000000,
+            ],
+            "HE_losses": [sum_HE_losses_vor / 1000000, sum_HE_losses_nach / 1000000],
         }
     )
+
+    # st.dataframe(df_sum)
 
     # Create the bar plot
     fig, ax = plt.subplots()
 
     # Create the 'Wärmelast' bars
-    ax.bar(df_sum["Warmelast"], df_sum["Wärmelast"], color="#515151", label="Wärmelast")
+    bars1 = ax.bar(
+        df_sum["Warmelast"], df_sum["Wärmelast"], color="#356CA5", label="Heat Load"
+    )
 
     # Add 'Netzverluste' on top
-    ax.bar(
+    bars2 = ax.bar(
         df_sum["Warmelast"],
         df_sum["Netzverluste"],
         bottom=df_sum["Wärmelast"],
-        color="#A3A3A3",
-        label="Netzverluste",
+        color="#3795D5",
+        label="Network Losses",
     )
 
-    ax.set_xlabel("Warmelast")
-    ax.set_ylabel("Sum")
-    ax.set_title("Sum of Wärmelast and Netzverluste vor vs nach")
-    ax.legend()
+    # Add 'HE_losses' on top
+    bars3 = ax.bar(
+        df_sum["Warmelast"],
+        df_sum["HE_losses"],
+        bottom=df_sum["Wärmelast"] + df_sum["Netzverluste"],
+        color="#D7E6F5",
+        label="Heat Exchanger Losses",
+    )
+
+    # Label and title configurations
+    ax.set_ylabel(
+        "Total Heat Load [GWh]",
+        fontsize=16,
+        color="#777777",
+        fontfamily="Segoe UI",
+    )
+    ax.set_title(
+        "Sum of Heat Load and Network Losses before vs after Temp. reduction",
+        fontsize=16,
+        color="#777777",
+        fontfamily="Segoe UI",
+    )
+
+    # Legend with style configuration
+    ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.15),
+        ncol=3,
+        frameon=False,
+        fontsize=16,
+        labelcolor="#777777",
+    )
+
+    # X-axis properties
+    ax.xaxis.label.set_color("#A3A3A3")
+    ax.tick_params(axis="x", colors="#A3A3A3", direction="out", which="both")
+    ax.spines["bottom"].set_edgecolor("#A3A3A3")
+    ax.spines["bottom"].set_linewidth(1)
+
+    # Y-axis properties
+    ax.yaxis.label.set_color("#A3A3A3")
+    ax.tick_params(axis="y", colors="#A3A3A3", direction="out", which="both")
+    ax.spines["left"].set_edgecolor("#A3A3A3")
+    ax.spines["left"].set_linewidth(1)
+
+    # Setting x-ticks with style configuration
+    ax.tick_params(axis="both", which="major", labelsize=16, colors="#777777")
+
+    # Background and other spines color
+    ax.set_facecolor("white")
+    for spine in ["top", "right"]:
+        ax.spines[spine].set_visible(False)
+
+    # Function to add labels/numbers in the middle of the bars
+    def add_labels(bars, prev_bars_heights):
+        for bar, prev_bar_height in zip(bars, prev_bars_heights):
+            height = bar.get_height()
+            middle = prev_bar_height + height / 2
+            ax.annotate(
+                f"{height:.2f}",
+                xy=(bar.get_x() + bar.get_width() / 2, middle),
+                ha="center",
+                va="center",
+            )
+
+    # Empty array to store the previous bars' heights
+    prev_bars_heights = [0] * len(df_sum["Warmelast"])
+
+    # Add labels to each bar
+    add_labels(bars1, prev_bars_heights)
+    prev_bars_heights = df_sum["Wärmelast"]
+    add_labels(bars2, prev_bars_heights)
+    prev_bars_heights += df_sum["Netzverluste"]
+    add_labels(bars3, prev_bars_heights)
 
     # Show the plot in Streamlit
     st.pyplot(fig)
