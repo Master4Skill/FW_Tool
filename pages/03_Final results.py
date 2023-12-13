@@ -465,10 +465,10 @@ if st.button("Show the Results"):
     "CHP": "CHP",
     }
 
-    names = [name_mapping.get(name, name) for name in names]
+    names_mapped = [name_mapping.get(name, name) for name in names]
 
     
-    my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names)}
+    my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names_mapped)}
 
     with st.container():
         st.header("Generation load profile")
