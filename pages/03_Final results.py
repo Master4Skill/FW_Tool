@@ -455,6 +455,18 @@ if st.button("Show the Results"):
 
     names = data["names"]
 
+        name_mapping = {
+    "waste_heat": "Waste Heat",
+    "heatpump_1": "Waste Heat Pump",
+    "heatpump_2": "Ambient\nHeat Pump",
+    "solarthermal": "Solar Thermal",
+    "geothermal": "Geothermal",
+    "PLB": "Peak Load Boiler",
+    "CHP": "CHP",
+    }
+
+    names = [name_mapping.get(name, name) for name in names]
+
     
     my_dict = {f"Erzeuger_{i+1}": name for i, name in enumerate(names)}
 
