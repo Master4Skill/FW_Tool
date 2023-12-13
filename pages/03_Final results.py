@@ -455,15 +455,15 @@ if st.button("Show the Results"):
 
     names = data["names"]
 
-        name_mapping = {
-    "waste_heat": "Waste Heat",
-    "heatpump_1": "Waste Heat Pump",
-    "heatpump_2": "Ambient\nHeat Pump",
-    "solarthermal": "Solar Thermal",
-    "geothermal": "Geothermal",
-    "PLB": "Peak Load Boiler",
-    "CHP": "CHP",
-    }
+    name_mapping = {
+        "waste_heat": "Waste Heat",
+        "heatpump_1": "Waste Heat Pump",
+        "heatpump_2": "Ambient\nHeat Pump",
+        "solarthermal": "Solar Thermal",
+        "geothermal": "Geothermal",
+        "PLB": "Peak Load Boiler",
+        "CHP": "CHP",
+        }
 
     names_mapped = [name_mapping.get(name, name) for name in names]
 
