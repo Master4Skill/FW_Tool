@@ -463,7 +463,7 @@ if st.button("Show the Results"):
         "geothermal": "Geothermal",
         "PLB": "Peak Load Boiler",
         "CHP": "CHP",
-        }
+    }
 
     names_mapped = [name_mapping.get(name, name) for name in names]
 
