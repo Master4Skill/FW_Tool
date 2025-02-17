@@ -31,9 +31,25 @@ with Image.open("Logo-dunkelblau-1000-px.webp") as img:
     # Save it back to the file
     img.save("resized_image.png")
 
-# Now use this resized image as the logo
-add_logo("resized_image.png")
 
+# Inject custom CSS to move the Streamlit logo to the top
+st.markdown("""
+    <style>
+        [data-testid="stSidebarNav"]::before {
+            content: "";
+            display: block;
+            margin: 20px auto;
+            height: 50px;
+            width: 20px;
+            background-image: url('resized_image.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+add_logo("resized_image.png")
 
 # Load the variables from the json file
 with open("results/variables.json", "r") as f:

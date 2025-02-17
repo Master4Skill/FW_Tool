@@ -57,6 +57,23 @@ Trl_nach = input_data["Trl_nach"]
 # Flusstemperatur = list(df_results["Flusstemperatur"].values())
 
 st.set_page_config(page_title="Plotting Demo2", page_icon="📈")
+# Inject custom CSS to move the Streamlit logo to the top
+st.markdown("""
+    <style>
+        [data-testid="stSidebarNav"]::before {
+            content: "";
+            display: block;
+            margin: 20px auto;
+            height: 50px;
+            width: 20px;
+            background-image: url('resized_image.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
 add_logo("resized_image.png")
 st.markdown("# Storage Simulation")
 st.sidebar.header("Storage Simulation")

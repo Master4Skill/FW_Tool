@@ -20,6 +20,23 @@ from plotting_functions import (
 with open("results/color_FFE.json", "r") as file:
     # Load the contents of the file into a Python object
     color_FFE = json.load(file)
+# Inject custom CSS to move the Streamlit logo to the top
+st.markdown("""
+    <style>
+        [data-testid="stSidebarNav"]::before {
+            content: "";
+            display: block;
+            margin: 20px auto;
+            height: 50px;
+            width: 20px;
+            background-image: url('resized_image.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
 add_logo("resized_image.png")
 
 st.header("Final Results")

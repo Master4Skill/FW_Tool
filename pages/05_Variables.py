@@ -7,6 +7,23 @@ st.set_page_config(
     page_title="Variable Settings",
     page_icon="⚙️",
 )
+# Inject custom CSS to move the Streamlit logo to the top
+st.markdown("""
+    <style>
+        [data-testid="stSidebarNav"]::before {
+            content: "";
+            display: block;
+            margin: 20px auto;
+            height: 50px;
+            width: 20px;
+            background-image: url('resized_image.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
 add_logo("resized_image.png")
 
 st.sidebar.header("Variable Settings")
