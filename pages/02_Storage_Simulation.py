@@ -1244,7 +1244,7 @@ def main_pulp(graphtitle, K_s_en):
 
     # m.solve(solver)
     # With the following CBC solver code:
-    solver = PULP_CBC_CMD(msg=True, timeLimit=100, fracGap=0.05)  # CBC with options
+    solver = PULP_CBC_CMD(msg=True, timeLimit=100, gapRel=0.05)  # CBC with options
     m.solve(solver)
 
     # Extract solution
